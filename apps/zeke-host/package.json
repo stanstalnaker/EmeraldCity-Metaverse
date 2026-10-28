@@ -1,0 +1,34 @@
+{
+  "name": "@emerald-city/zeke-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Zeke in Emerald City: in-world host and help desk for people and agents (presence), plus a LiveKit voice concierge. Zeke's brain stays in hub-culture/zeke-ai-server.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "voice:dev": "tsx src/voice.ts dev",
+    "voice:start": "tsx src/voice.ts start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@emerald-city/agents": "workspace:*",
+    "@emerald-city/core": "workspace:*",
+    "@emerald-city/hubid-client": "workspace:*",
+    "@emerald-city/zeke-client": "workspace:*",
+    "@livekit/agents": "^1.9.4",
+    "@livekit/agents-plugin-anthropic": "^1.9.4",
+    "@livekit/agents-plugin-cartesia": "^1.9.4",
+    "@livekit/agents-plugin-deepgram": "^1.9.4",
+    "@livekit/agents-plugin-silero": "^1.9.4",
+    "@livekit/rtc-node": "^1.2.1",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@emerald-city/presence": "workspace:*",
+    "@types/ws": "^8.18.2",
+    "tsx": "^4.19.0",
+    "ws": "^8.22.0"
+  }
+}

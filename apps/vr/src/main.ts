@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import type { LngLat, ServerMessage } from "@emerald-city/core";
 import { toLocal } from "./projection";
+import { SpatialAudio } from "./spatial-audio";
 
 const hud = document.getElementById("hud")!;
 
@@ -73,8 +74,18 @@ function connectPresence(origin: () => LngLat | null) {
   if (!url || !token) return;
   const ws = new WebSocket(url, ["hubid", token]);
   ws.onopen = () => ws.send(JSON.stringify({ t: "join", room: "map" }));
+  let audio: SpatialAudio | null = null;
   ws.onmessage = (e) => {
     const m = JSON.parse(e.data as string) as ServerMessage;
+    if (m.t === "roster") ws.send(JSON.stringify({ t: "media", room: m.room }));
+    if (m.t === "media" && !audio) {
+      audio = new SpatialAudio({ listener: camera, positionOf: (id) => avatars.get(id)?.position });
+      spatial = audio;
+      audio.connect(m.url, m.token).then(
+        () => showVoiceButton(audio!),
+        (err) => console.warn("voice unavailable", err),
+      );
+    }
     const place = (hubId: number, kind: "human" | "agent", geo?: LngLat) => {
       let a = avatars.get(hubId);
       if (!a) {
@@ -108,6 +119,20 @@ function connectPresence(origin: () => LngLat | null) {
   };
 }
 
+let spatial: SpatialAudio | null = null;
+
+function showVoiceButton(audio: SpatialAudio) {
+  const b = document.createElement("button");
+  b.textContent = "🎙 Join voice";
+  b.style.cssText = "position:fixed;bottom:20px;left:20px;padding:10px 14px;border-radius:8px;border:0;background:#1fa37a;color:#fff;font-size:14px";
+  b.onclick = () =>
+    audio.enableMic().then(
+      () => (b.textContent = "🎙 Voice on"),
+      () => (b.textContent = "Mic blocked"),
+    );
+  document.body.appendChild(b);
+}
+
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -116,6 +141,7 @@ window.addEventListener("resize", () => {
 
 renderer.setAnimationLoop(() => {
   controls.update();
+  spatial?.update();
   renderer.render(scene, camera);
 });
 

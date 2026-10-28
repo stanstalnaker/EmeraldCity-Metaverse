@@ -14,7 +14,11 @@
         └──────▲───────────▲───────┘          └──▲──────────▲─────────┘
                │           │ GeoJSON             │ ws       │ ws
           browsers      apps/vr (three/WebXR) ───┘   packages/agents (CityAgent)
+                              │ WebRTC                           │ ask("zeke")
+                        LiveKit (voice/video) ◄── zeke-concierge  apps/zeke-host ──► zeke-ai-server /chat
 ```
+
+See [ZEKE.md](ZEKE.md) and [VOICE.md](VOICE.md).
 
 ## Key decisions
 
@@ -34,7 +38,8 @@
 | Google Maps pin drop in launch-properties | `gaia-map` with MapLibre and OpenFreeMap (no API key) |
 | `vr-hubculture-city` Babylon scene, hardcoded building positions | `apps/vr`: parcels placed from HubID lat/lng |
 | Photon `joinRandomRoom`, self-asserted identity | `apps/presence` |
-| Jitsi/Zoom conferences | Not yet ported (keep the legacy routes running) |
+| Jitsi in the VR scene | LiveKit proximity voice (`apps/vr/src/spatial-audio.ts`) |
+| Jitsi/Zoom conference pages | Keep for now; stage mode on LiveKit later |
 | `emerald-city-web` (WordPress) | Retire |
 | `gaia` (Unity 2018 OSM tutorial) | Replaced by `packages/gaia-map` |
 

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@emerald-city/core": "workspace:*",
+    "livekit-client": "^2.23.0",
     "three": "^0.170.0"
   },
   "devDependencies": {

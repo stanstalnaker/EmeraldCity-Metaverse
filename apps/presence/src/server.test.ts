@@ -1,14 +1,23 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 import type { ServerMessage } from "@emerald-city/core";
+import { decodeJwt } from "jose";
 import { devResolver } from "./identity";
+import { liveKitIssuer } from "./media";
 import { startPresenceServer } from "./server";
 
 const PORT = 18787;
 let wss: ReturnType<typeof startPresenceServer>;
 
 beforeAll(() => {
-  wss = startPresenceServer({ port: PORT, resolveIdentity: devResolver(), moveIntervalMs: 0 });
+  wss = startPresenceServer({
+    port: PORT,
+    resolveIdentity: devResolver(),
+    moveIntervalMs: 0,
+    media: liveKitIssuer({ url: "wss://lk.test", apiKey: "devkey", apiSecret: "devsecret-devsecret-devsecret-0123" }),
+    services: { zeke: 39 },
+    requestsPerMinute: 5,
+  });
 });
 afterAll(() => new Promise<void>((r) => wss.close(() => r())));
 
@@ -67,6 +76,73 @@ describe("presence server", () => {
     await c.next((m) => m.t === "welcome");
     c.send({ t: "join", room: "admin" });
     expect(await c.next((m) => m.t === "error")).toMatchObject({ code: "bad_room" });
+    c.ws.close();
+  });
+
+  it("issues LiveKit tokens only for joined rooms, with HubID identity and actor kind", async () => {
+    const c = connect("agent:901:1:Guide");
+    await c.next((m) => m.t === "welcome");
+    c.send({ t: "media", room: "property:5" });
+    expect(await c.next((m) => m.t === "error")).toMatchObject({ code: "not_in_room" });
+
+    c.send({ t: "join", room: "property:5" });
+    await c.next((m) => m.t === "roster");
+    c.send({ t: "media", room: "property:5" });
+    const media = await c.next((m) => m.t === "media");
+    if (media.t !== "media") throw new Error("expected media");
+    expect(media.url).toBe("wss://lk.test");
+    const claims = decodeJwt(media.token) as Record<string, any>;
+    expect(claims.sub).toBe("hub:901");
+    expect(claims.video).toMatchObject({ roomJoin: true, room: "property:5", canPublishData: false });
+    expect(claims.attributes).toMatchObject({ kind: "agent", ownerHubId: "1" });
+    c.ws.close();
+  });
+
+  it("routes requests to Zeke by service name and replies back to the asker", async () => {
+    const zeke = connect("agent:39:1:Zeke");
+    await zeke.next((m) => m.t === "welcome");
+    const guide = connect("agent:902:7:Guide");
+    await guide.next((m) => m.t === "welcome");
+
+    guide.send({ t: "request", to: "zeke", id: "q1", body: { text: "Where is City Hall?", intent: "directions" } });
+    const req = await zeke.next((m) => m.t === "request");
+    expect(req).toMatchObject({ id: "q1", from: { hubId: 902, kind: "agent", ownerHubId: 7 }, body: { intent: "directions" } });
+
+    zeke.send({ t: "reply", to: 902, id: "q1", body: { text: "North side of the plaza." } });
+    expect(await guide.next((m) => m.t === "reply")).toMatchObject({ id: "q1", from: { hubId: 39 }, body: { text: "North side of the plaza." } });
+
+    guide.send({ t: "request", to: "oracle", id: "q2", body: { text: "?" } });
+    expect(await guide.next((m) => m.t === "error")).toMatchObject({ code: "unknown_service", id: "q2" });
+    zeke.ws.close();
+    guide.ws.close();
+  });
+
+  it("stops agents from opening requests to humans, and humans from replying", async () => {
+    const human = connect("human:3:Ana");
+    await human.next((m) => m.t === "welcome");
+    const agent = connect("agent:903:1:Bot");
+    await agent.next((m) => m.t === "welcome");
+
+    agent.send({ t: "request", to: 3, id: "a1", body: { text: "hello" } });
+    expect(await agent.next((m) => m.t === "error")).toMatchObject({ code: "bad_target" });
+    human.send({ t: "reply", to: 903, id: "a1", body: { text: "spoofed" } });
+    expect(await human.next((m) => m.t === "error")).toMatchObject({ code: "forbidden" });
+
+    // Humans may ask agents directly.
+    human.send({ t: "request", to: 903, id: "h1", body: { text: "what can you do?" } });
+    expect(await agent.next((m) => m.t === "request")).toMatchObject({ from: { kind: "human", hubId: 3 } });
+    human.ws.close();
+    agent.ws.close();
+  });
+
+  it("rate-limits direct requests", async () => {
+    const zeke = connect("agent:39:1:Zeke");
+    await zeke.next((m) => m.t === "welcome");
+    const c = connect("human:4:Rapid");
+    await c.next((m) => m.t === "welcome");
+    for (let i = 0; i < 6; i++) c.send({ t: "request", to: "zeke", id: `r${i}`, body: { text: "hi" } });
+    expect(await c.next((m) => m.t === "error")).toMatchObject({ code: "rate_limited", id: "r5" });
+    zeke.ws.close();
     c.ws.close();
   });
 });

@@ -29,6 +29,8 @@ The beta adds these to the Mandala scope registry:
 | `city:move` | join rooms and move around the map and property scenes |
 | `property:read` | read property details and zones, including private ones the owner can see |
 | `property:manage` | act as a property admin (only for properties the owner administers) |
+| `media:join` | get a LiveKit token for a joined room (voice/video) |
+| `agents:request` | send requests to other agents, including Zeke |
 
 `messages:send` already exists. In the city it must also pass the recipient's interaction policy.
 
@@ -58,6 +60,13 @@ const agent = new CityAgent({ presenceUrl, token });
 agent.on("ready", () => agent.enterProperty(209));
 agent.on("joined", (room, who) => who.kind === "human" && agent.say(room, `Hi ${who.displayName}`));
 agent.connect();
+```
+
+Ask Zeke (or any agent) for help, and answer requests yourself:
+
+```ts
+const { body } = await agent.ask("zeke", { text: "What's on at City Hall tonight?", room: "property:209", intent: "events" });
+agent.onRequest(async (from, req) => ({ text: `I'm the shop agent; we open at 9.` }));
 ```
 
 `CityAgent` refuses to run on a human token. Agents need their own sub-profile, so their actions are never attributed to the person who owns them.

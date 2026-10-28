@@ -1,13 +1,35 @@
 import { EventEmitter } from "node:events";
 import WebSocket from "ws";
+import { randomUUID } from "node:crypto";
 import {
   rooms,
   type Actor,
   type AgentActor,
+  type AgentReplyBody,
+  type AgentRequestBody,
   type ClientMessage,
   type Position,
+  type RequestTarget,
   type ServerMessage,
 } from "@emerald-city/core";
+
+export type RequestHandler = (from: Actor, body: AgentRequestBody) => Promise<AgentReplyBody> | AgentReplyBody;
+
+export class AgentRequestError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "AgentRequestError";
+  }
+}
+
+interface Pending {
+  resolve: (r: { from: Actor; body: AgentReplyBody }) => void;
+  reject: (e: Error) => void;
+  timer: NodeJS.Timeout;
+}
 
 export interface AgentOptions {
   /** Presence server URL, e.g. ws://localhost:8787 */
@@ -37,6 +59,9 @@ export class CityAgent extends EventEmitter<AgentEvents> {
   private readonly members = new Map<string, Map<number, Actor>>();
   private readonly wanted = new Set<string>();
   private closed = false;
+  private readonly pending = new Map<string, Pending>();
+  private readonly pendingMedia = new Map<string, Array<(m: { url: string; token: string; expiresAt: number }) => void>>();
+  private requestHandler?: RequestHandler;
 
   constructor(private readonly opts: AgentOptions) {
     super();
@@ -53,6 +78,11 @@ export class CityAgent extends EventEmitter<AgentEvents> {
     ws.on("message", (d) => this.onMessage(JSON.parse(d.toString()) as ServerMessage));
     ws.on("close", () => {
       this.members.clear();
+      for (const [id, p] of this.pending) {
+        clearTimeout(p.timer);
+        p.reject(new AgentRequestError("disconnected", "connection closed"));
+        this.pending.delete(id);
+      }
       const delay = this.opts.reconnectMs ?? 3_000;
       if (!this.closed && delay > 0) setTimeout(() => this.connect(), delay);
     });
@@ -88,6 +118,38 @@ export class CityAgent extends EventEmitter<AgentEvents> {
     this.send({ t: "say", room, text });
   }
 
+  /**
+   * Ask another agent (or a named service such as "zeke") for help.
+   * Resolves with the reply; rejects on error, refusal by the server, or timeout.
+   */
+  ask(to: RequestTarget, body: AgentRequestBody, timeoutMs = 45_000): Promise<{ from: Actor; body: AgentReplyBody }> {
+    const id = randomUUID();
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new AgentRequestError("timeout", `no reply from ${to}`));
+      }, timeoutMs);
+      this.pending.set(id, { resolve, reject, timer });
+      this.send({ t: "request", to, id, body });
+    });
+  }
+
+  /** Handle requests sent to this agent. Errors become a declined reply. */
+  onRequest(handler: RequestHandler): this {
+    this.requestHandler = handler;
+    return this;
+  }
+
+  /** LiveKit URL + token for a room this agent has joined (needs media:join). */
+  requestMedia(room: string): Promise<{ url: string; token: string; expiresAt: number }> {
+    return new Promise((resolve) => {
+      const waiters = this.pendingMedia.get(room) ?? [];
+      waiters.push(resolve);
+      this.pendingMedia.set(room, waiters);
+      this.send({ t: "media", room });
+    });
+  }
+
   /** Actors currently in a room, excluding this agent. */
   membersOf(room: string): Actor[] {
     return [...(this.members.get(room)?.values() ?? [])];
@@ -121,9 +183,44 @@ export class CityAgent extends EventEmitter<AgentEvents> {
       case "said":
         if (m.hubId === this.self?.hubId) return;
         return void this.emit("said", m.room, this.members.get(m.room)?.get(m.hubId), m.text);
-      case "error":
+      case "media": {
+        const waiters = this.pendingMedia.get(m.room) ?? [];
+        this.pendingMedia.delete(m.room);
+        return waiters.forEach((w) => w(m));
+      }
+      case "request":
+        return void this.handleRequest(m.from, m.id, m.body);
+      case "reply": {
+        const p = this.pending.get(m.id);
+        if (!p) return;
+        clearTimeout(p.timer);
+        this.pending.delete(m.id);
+        return p.resolve({ from: m.from, body: m.body });
+      }
+      case "error": {
+        const p = m.id ? this.pending.get(m.id) : undefined;
+        if (p && m.id) {
+          clearTimeout(p.timer);
+          this.pending.delete(m.id);
+          return p.reject(new AgentRequestError(m.code, m.message));
+        }
         return void this.emit("error", m.code, m.message);
+      }
     }
+  }
+
+  private async handleRequest(from: Actor, id: string, body: AgentRequestBody): Promise<void> {
+    let reply: AgentReplyBody;
+    if (!this.requestHandler) reply = { text: "This agent does not take requests.", declined: true };
+    else {
+      try {
+        reply = await this.requestHandler(from, body);
+      } catch (err) {
+        reply = { text: "Sorry, I couldn't help with that right now.", declined: true };
+        this.emit("error", "handler", err instanceof Error ? err.message : String(err));
+      }
+    }
+    this.send({ t: "reply", to: from.hubId, id, body: { ...reply, text: reply.text.slice(0, 2_000) } });
   }
 
   private roomMap(room: string): Map<number, Actor> {

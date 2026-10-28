@@ -2,6 +2,16 @@ import { jwtVerify } from "jose";
 import type { Actor, AgentScope } from "@emerald-city/core";
 import type { HubIdClient } from "@emerald-city/hubid-client";
 
+/** Applied until HubID issues scoped agent tokens (docs/AGENTS.md). */
+export const DEFAULT_AGENT_SCOPES: AgentScope[] = [
+  "identity:read",
+  "presence:write",
+  "city:move",
+  "property:read",
+  "media:join",
+  "agents:request",
+];
+
 /** Turns a bearer token into a verified Actor, or throws. */
 export type IdentityResolver = (token: string) => Promise<Actor>;
 
@@ -46,7 +56,7 @@ export function hubIdResolver(opts: { jwtSecret: string; hubid: HubIdClient; age
         ownerHubId: Number(p.parent_user_id),
         variant: p.profile_variant ?? "ai__bot",
         // TODO: read granted scopes from the token once HubID issues scoped agent tokens (docs/AGENTS.md).
-        scopes: opts.agentScopes ?? ["identity:read", "presence:write", "city:move", "property:read"],
+        scopes: opts.agentScopes ?? DEFAULT_AGENT_SCOPES,
       };
     }
     return { kind: "human", hubId: sub, displayName, avatarUrl };
@@ -70,7 +80,7 @@ export function devResolver(): IdentityResolver {
         displayName: b ?? `Agent ${id}`,
         avatarUrl: null,
         variant: "ai__ai",
-        scopes: ["identity:read", "presence:write", "city:move", "property:read"],
+        scopes: DEFAULT_AGENT_SCOPES,
       };
     throw new Error("bad dev token");
   };

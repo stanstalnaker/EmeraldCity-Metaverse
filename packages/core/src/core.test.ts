@@ -70,6 +70,20 @@ describe("parseClientMessage", () => {
     expect(parseClientMessage('{"t":"join","room":"map"}')).toEqual({ t: "join", room: "map" });
     expect(parseClientMessage('{"t":"move","room":"map","pos":{"geo":{"lat":1,"lng":2}}}')).not.toBeNull();
   });
+  it("parses media, request and reply", () => {
+    expect(parseClientMessage('{"t":"media","room":"property:1"}')).toEqual({ t: "media", room: "property:1" });
+    expect(parseClientMessage('{"t":"request","to":"zeke","id":"r1","body":{"text":"help"}}')).toMatchObject({ to: "zeke" });
+    expect(parseClientMessage('{"t":"request","to":42,"id":"r1","body":{"text":"hi","intent":"help"}}')).toMatchObject({ to: 42 });
+    expect(parseClientMessage('{"t":"reply","to":42,"id":"r1","body":{"text":"ok"}}')).toMatchObject({ t: "reply" });
+  });
+  it("rejects bad requests", () => {
+    expect(parseClientMessage('{"t":"request","to":"Zeke!","id":"r1","body":{"text":"x"}}')).toBeNull();
+    expect(parseClientMessage('{"t":"request","to":"zeke","id":"has space","body":{"text":"x"}}')).toBeNull();
+    expect(parseClientMessage('{"t":"request","to":"zeke","id":"r1","body":{"text":""}}')).toBeNull();
+    expect(parseClientMessage('{"t":"reply","to":"zeke","id":"r1","body":{"text":"x"}}')).toBeNull();
+    const big = JSON.stringify({ t: "request", to: "zeke", id: "r1", body: { text: "x", context: { pad: "y".repeat(9000) } } });
+    expect(parseClientMessage(big)).toBeNull();
+  });
   it("rejects malformed input", () => {
     expect(parseClientMessage("not json")).toBeNull();
     expect(parseClientMessage('{"t":"move","room":"map","pos":{}}')).toBeNull();
