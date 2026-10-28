@@ -1,0 +1,28 @@
+:root {
+  --bg: #f6f8f7;
+  --fg: #10201a;
+  --muted: #5b6b64;
+  --accent: #1fa37a;
+  --card: #ffffff;
+  --border: #dfe7e3;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c1411;
+    --fg: #e6efeb;
+    --muted: #93a39c;
+    --card: #131e1a;
+    --border: #22312b;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+a { color: var(--accent); }
+header.site { display: flex; gap: 20px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+header.site strong { font-size: 18px; margin-right: auto; }
+main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-decoration: none; color: inherit; }
+.card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; background: var(--border); }
+.muted { color: var(--muted); }
+.map-wrap { position: fixed; inset: 57px 0 0 0; }

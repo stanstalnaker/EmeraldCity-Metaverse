@@ -1,0 +1,28 @@
+{
+  "name": "@emerald-city/gaia-map",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gaia map layer: Emerald City properties dropped onto real-world vector tiles (MapLibre GL).",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@emerald-city/core": "workspace:*",
+    "maplibre-gl": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.14",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0"
+  }
+}

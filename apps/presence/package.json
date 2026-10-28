@@ -1,0 +1,24 @@
+{
+  "name": "@emerald-city/presence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Realtime presence for humans and agents. Identity comes from a verified HubID token, never from the client.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@emerald-city/core": "workspace:*",
+    "@emerald-city/hubid-client": "workspace:*",
+    "jose": "^5.9.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.0",
+    "tsx": "^4.19.0"
+  }
+}
