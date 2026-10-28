@@ -34,7 +34,7 @@ See [ZEKE.md](ZEKE.md) and [VOICE.md](VOICE.md).
 
 | Legacy | Beta |
 |---|---|
-| `emerald-city-laravel` property list/single/my-properties | `apps/web` `/properties`, `/p/[id]` (read). Create/edit flows next |
+| `emerald-city-laravel` login, property list/single/my-properties, launch-properties | `apps/web`: `/login` (HubID session in an httpOnly cookie), `/properties`, `/p/[id]`, `/my-properties`, `/properties/new`, `/p/[id]/edit` |
 | Google Maps pin drop in launch-properties | `gaia-map` with MapLibre and OpenFreeMap (no API key) |
 | `vr-hubculture-city` Babylon scene, hardcoded building positions | `apps/vr`: parcels placed from HubID lat/lng |
 | Photon `joinRandomRoom`, self-asserted identity | `apps/presence` |
@@ -45,7 +45,8 @@ See [ZEKE.md](ZEKE.md) and [VOICE.md](VOICE.md).
 
 ## Next steps
 
-1. Authenticated web flows: HubID login (server session), my-properties, create/edit property with a map pin.
+1. ~~Authenticated web flows: HubID login, my-properties, create/edit property with a map pin.~~ Done. Still to come: logo/background uploads, zones, admins.
 2. Property scenes in VR: per-property rooms, zones and seats from `/pavilions/{id}/zones`.
 3. HubID work for agents (see AGENTS.md): scoped agent tokens, presence scopes, owner consent.
-4. Complete the private HubID security checklist before opening write flows.
+4. Complete the private HubID security checklist before opening write flows to the public. Until HubID's access check counts `pavilion_admins`, only owners can edit; listed admins get a "no permission" message.
+5. Presence tickets: let `apps/web` issue a short-lived presence token for the signed-in user, so the browser never needs the HubID JWT (kept in an httpOnly cookie).

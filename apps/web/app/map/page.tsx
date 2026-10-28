@@ -1,4 +1,5 @@
 import { cityProperties } from "@/lib/hubid";
+import { mapStyleUrl } from "@/lib/map";
 import MapView from "./MapView";
 
 export const revalidate = 300;
@@ -10,7 +11,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
     <div className="map-wrap">
       <MapView
         properties={properties}
-        styleUrl={process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? "https://tiles.openfreemap.org/styles/liberty"}
+        styleUrl={mapStyleUrl()}
         focus={focus}
       />
     </div>

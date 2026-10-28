@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { HubIdClient, HubIdError } from "./index";
+import { HubIdClient, HubIdError, slugify } from "./index";
 
 const envelope = (data: unknown, status = "success") =>
   new Response(JSON.stringify({ status, errors: [], data, code: 200, time: 0 }), { status: 200 });
@@ -36,5 +36,50 @@ describe("HubIdClient", () => {
     const client = new HubIdClient({ baseUrl: "https://api.test", privateKey: "pk", fetch });
     await expect(client.getSelf()).rejects.toThrow(/token is required/);
     await expect(client.getProperty(1)).rejects.toBeInstanceOf(HubIdError);
+  });
+});
+
+describe("property writes", () => {
+  it("creates a property with HubID's required fields", async () => {
+    const pavilion = { id: 9, group: 1, name: "Café Örbit", visible: 1, is_private: false, latitude: "51.5", longitude: "-0.12" };
+    const fetch = vi.fn().mockResolvedValue(envelope({ success: true, pavilion }));
+    const client = new HubIdClient({ baseUrl: "https://api.test", privateKey: "pk", fetch }).withToken("jwt");
+    const p = await client.createProperty({ name: "  Café Örbit ", location: { lat: 51.5, lng: -0.12 }, timezone: "Europe/London" });
+    expect(p).toMatchObject({ id: 9, location: { lat: 51.5, lng: -0.12 } });
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe("https://api.test/pavilions");
+    expect(JSON.parse((init as RequestInit).body as string)).toEqual({
+      name: "Café Örbit",
+      localename: "Café Örbit",
+      url: "cafe-orbit",
+      timezone: "Europe/London",
+      latitude: "51.500000",
+      longitude: "-0.120000",
+      address: "Emerald City",
+      territory: "Emerald City",
+      visible: true,
+      is_private: false,
+    });
+  });
+
+  it("validates names before calling HubID", async () => {
+    const fetch = vi.fn();
+    const client = new HubIdClient({ baseUrl: "https://api.test", privateKey: "pk", fetch }).withToken("jwt");
+    await expect(client.createProperty({ name: "x", location: { lat: 1, lng: 1 } })).rejects.toThrow(/2–50/);
+    await expect(client.createProperty({ name: "!!", location: { lat: 1, lng: 1 } })).rejects.toThrow(/letters or digits/);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("sends only changed fields on update", async () => {
+    const fetch = vi.fn().mockResolvedValue(envelope({}));
+    const client = new HubIdClient({ baseUrl: "https://api.test", privateKey: "pk", fetch }).withToken("jwt");
+    await client.updateProperty(5, { location: { lat: 1.23456789, lng: 2 } });
+    expect(JSON.parse((fetch.mock.calls[0]![1] as RequestInit).body as string)).toEqual({ latitude: "1.234568", longitude: "2.000000" });
+    await client.updateProperty(5, {});
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("slugifies like the legacy site", () => {
+    expect(slugify("Hub Culture — Davos Pavilion!")).toBe("hub-culture-davos-pavilion");
   });
 });

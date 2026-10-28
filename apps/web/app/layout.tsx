@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Header } from "@/components/Header";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
@@ -12,11 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <header className="site">
-          <strong>Emerald City</strong>
-          <Link href="/map">Gaia map</Link>
-          <Link href="/properties">Properties</Link>
-        </header>
+        <Header />
         {children}
       </body>
     </html>

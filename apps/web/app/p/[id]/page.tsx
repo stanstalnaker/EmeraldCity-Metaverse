@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HubIdError } from "@emerald-city/hubid-client";
 import { hubid } from "@/lib/hubid";
+import { getSession } from "@/lib/session";
 
 export const revalidate = 300;
 
@@ -14,7 +15,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     if (err instanceof HubIdError && err.status < 500) return null;
     throw err;
   });
-  if (!property || property.isPrivate) notFound();
+  const session = await getSession().catch(() => null);
+  const canEdit = session ? (await session.client.myProperties().catch(() => [])).some((p) => p.id === numericId) : false;
+  // Private properties are visible only to their owners.
+  if (!property || (property.isPrivate && !canEdit)) notFound();
 
   return (
     <main>
@@ -22,6 +26,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         <Link href="/properties">← Properties</Link>
       </p>
       <h1>{property.name}</h1>
+      {canEdit && (
+        <p>
+          <Link href={`/p/${property.id}/edit`}>Edit property</Link>
+        </p>
+      )}
       {property.message && <p>{property.message}</p>}
       {property.location ? (
         <p>

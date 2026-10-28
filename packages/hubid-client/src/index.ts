@@ -42,6 +42,43 @@ export interface ListPropertiesParams {
   limit?: number;
 }
 
+/** Fields for creating a property (HubID `POST /pavilions`). */
+export interface NewPropertyInput {
+  name: string;
+  location: { lat: number; lng: number };
+  isPrivate?: boolean;
+  /** IANA zone, e.g. "Europe/London". */
+  timezone?: string;
+  territory?: string;
+}
+
+export interface PropertyPatch {
+  name?: string;
+  location?: { lat: number; lng: number };
+  isPrivate?: boolean;
+  visible?: boolean;
+}
+
+/** HubID validates most pavilion strings as 2–50 characters. */
+export function validatePropertyName(name: string): string | null {
+  const n = name.trim();
+  if (n.length < 2 || n.length > 50) return "Name must be 2–50 characters.";
+  return null;
+}
+
+/** URL slug HubID uses as the pavilion's unique `url` (same rule as the legacy site's str_slug). */
+export function slugify(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50);
+}
+
+const coord = (n: number) => n.toFixed(6);
+
 export class HubIdClient {
   private readonly opts: HubIdClientOptions;
   private readonly fetchImpl: typeof fetch;
@@ -90,6 +127,65 @@ export class HubIdClient {
   /** GET /pavilions/{id}: a single public property. */
   async getProperty(id: number): Promise<Property> {
     return toProperty(await this.request<HubPavilion>("GET", `/pavilions/${encodeURIComponent(id)}`));
+  }
+
+  /** GET /pavilions: properties the signed-in user owns (directly or via sub-profiles). */
+  async myPavilions(params: { territory?: string; offset?: number; limit?: number } = {}): Promise<HubPage<HubPavilion>> {
+    const q = new URLSearchParams();
+    q.set("territory", params.territory ?? EMERALD_CITY_TERRITORY);
+    q.set("offset", String(params.offset ?? 0));
+    q.set("limit", String(Math.min(params.limit ?? 50, 250)));
+    return this.request<HubPage<HubPavilion>>("GET", `/pavilions?${q}`, { key: "private", auth: true });
+  }
+
+  async myProperties(territory?: string): Promise<Property[]> {
+    return (await this.myPavilions({ territory, limit: 250 })).items.map(toProperty);
+  }
+
+  /** POST /pavilions: create a property owned by the signed-in user (via a new property bot sub-profile). */
+  async createProperty(input: NewPropertyInput): Promise<Property> {
+    const err = validatePropertyName(input.name);
+    if (err) throw new Error(err);
+    const name = input.name.trim();
+    const url = slugify(name);
+    if (url.length < 2) throw new Error("Name must contain at least two letters or digits.");
+    const data = await this.request<{ pavilion: HubPavilion }>("POST", "/pavilions", {
+      key: "private",
+      auth: true,
+      body: {
+        name,
+        localename: name,
+        url,
+        timezone: input.timezone || "UTC",
+        latitude: coord(input.location.lat),
+        longitude: coord(input.location.lng),
+        // HubID requires an address; city properties have always used the territory name.
+        address: input.territory ?? EMERALD_CITY_TERRITORY,
+        territory: input.territory ?? EMERALD_CITY_TERRITORY,
+        visible: true,
+        is_private: Boolean(input.isPrivate),
+      },
+    });
+    return toProperty(data.pavilion);
+  }
+
+  /** PUT /pavilions/{id}: update a property the signed-in user can manage. */
+  async updateProperty(id: number, patch: PropertyPatch): Promise<void> {
+    const body: Record<string, unknown> = {};
+    if (patch.name !== undefined) {
+      const err = validatePropertyName(patch.name);
+      if (err) throw new Error(err);
+      body.name = patch.name.trim();
+      body.localename = patch.name.trim();
+    }
+    if (patch.location) {
+      body.latitude = coord(patch.location.lat);
+      body.longitude = coord(patch.location.lng);
+    }
+    if (patch.isPrivate !== undefined) body.is_private = patch.isPrivate;
+    if (patch.visible !== undefined) body.visible = patch.visible;
+    if (Object.keys(body).length === 0) return;
+    await this.request("PUT", `/pavilions/${encodeURIComponent(id)}`, { key: "private", auth: true, body });
   }
 
   /** GET /user: the signed-in user's profile. */
