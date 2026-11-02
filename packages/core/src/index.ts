@@ -7,3 +7,4 @@ export * from "./city";
 export * from "./membership";
 export * from "./market";
 export * from "./anchors";
+export * from "./designs";

@@ -51,6 +51,10 @@ the HubID changes in [HubID changes](#hubid-changes) first.**
   each linked world as a floating sphere you tap to visit. This is richer when the property holds
   photos, video and other content ("memories"). It is the hook for the **Andromeda** idea:
   discoverable digital artifacts left at real places and unlocked later (to be specified).
+- **Designs** (buildings, landscapes, items, art from Architects, Designers and Artisans) are posted
+  **directly to the Hub stores** as digital items, alongside the stores' existing digital goods, with
+  no approval to sell, which grows the VEN economy. Cities can mark **approval zones** (e.g. a historic
+  district or the central plaza) where *placing* a design on a parcel needs City Council approval.
 
 **Data**
 - The Gaia layer is built from OpenStreetMap: © OpenStreetMap contributors, ODbL. Parcel geometry
@@ -108,6 +112,17 @@ membership names were confirmed to match `LEVEL_BY_NAME`.
 AI brokers promote listings over the presence agent-to-agent protocol with intent `property.listing`.
 Zeke and other agents can ask brokers what's for sale. Brokers are always owned by a human or hub
 (agents carry `ownerHubId`), so commission and accountability go to a real owner.
+
+## Designs and approval zones (`packages/core/src/designs.ts`)
+
+- A design is a Hub store item (`items`) with a GLB model, a kind (building, landscape, item or art),
+  a price and an optional footprint. Buying it uses the existing store and VEN flows.
+- **Placing** a design on a parcel is immediate (`placed`), unless the parcel's centre falls inside one
+  of the city's approval zones. Then the placement starts as `pending-approval` until the **City
+  Council** approves it: the city's council hub if one is set, otherwise the city owner hub's admins.
+  Zones can target specific design kinds (e.g. only buildings, or only public art).
+- `checkPlacement(design, parcel, zones)` returns whether approval is needed, which zones apply, and
+  whether the design's footprint fits the parcel.
 
 ## Real-world anchors and AR (`packages/core/src/anchors.ts`)
 
@@ -172,6 +187,29 @@ CREATE TABLE real_world_anchors (                    -- many anchors may share o
   SPATIAL INDEX (location), INDEX (kind, ref)
 ) DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE cities ADD COLUMN council_group_id INT UNSIGNED NULL; -- City Council hub (defaults to owner hub admins)
+
+CREATE TABLE approval_zones (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  city_id     INT UNSIGNED NOT NULL,
+  name        VARCHAR(120) NOT NULL,
+  geometry    GEOMETRY NOT NULL SRID 0,
+  design_kinds SET('building','landscape','item','art') NULL,  -- NULL = all kinds
+  SPATIAL INDEX (geometry)
+) DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE design_placements (
+  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  pavilion_id  INT UNSIGNED NOT NULL,
+  parcel_id    VARCHAR(24) NOT NULL,
+  store_item_id INT UNSIGNED NOT NULL,                -- the design, sold through the Hub stores
+  transform    JSON NOT NULL,                         -- position / rotation / scale on the parcel
+  status       ENUM('placed','pending-approval','approved','rejected') NOT NULL,
+  reviewed_by_user_id INT UNSIGNED NULL,
+  reviewed_at  TIMESTAMP NULL,
+  created_at TIMESTAMP NULL
+) DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE property_listings (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   parcel_id    VARCHAR(24) NOT NULL,
@@ -208,6 +246,9 @@ API (HubID), behind the existing auth:
 - `POST /properties/{id}/transfer` (p2p) and `POST /properties/{id}/listings` / `POST /listings/{id}/buy`
   (brokered, 1% to the broker), all moving VEN and ownership atomically.
 - `GET /anchors/near?lat=&lng=&radius=`: AR discovery of every world anchored near a place.
+- `POST /properties/{id}/placements` (checks approval zones and footprint) and
+  `PUT /placements/{id}/review` (City Council: approve or reject).
+- Designs use the existing store item endpoints, with a "design" category and a model URL.
 - `PavilionAccess::canManage`: add admins of `owner_group_id`.
 
 ## Migration of today's Emerald City properties
@@ -221,12 +262,11 @@ Emerald City properties are pavilions with `territory = 'Emerald City'` and a po
 
 ## Open questions
 
-1. **Design approval:** do Architects' and Designers' submissions need City Council approval before others can buy them?
-2. **Anchoring proof:** linking is many-to-one (decided). Does anchoring to a real address or Gaia
+1. **Anchoring proof:** linking is many-to-one (decided). Does anchoring to a real address or Gaia
    parcel need any proof (e.g. owning the Gaia parcel, or being there)? Should the Gaia parcel's
    owner be able to hide or curate what is anchored on their land?
-3. **Andromeda:** artifact rules (who can drop them, discovery and unlock conditions, expiry), to be specified.
-4. **Rural threshold:** confirm 25 ha on a real rural sample. This hasn't been tested yet, because the
+2. **Andromeda:** artifact rules (who can drop them, discovery and unlock conditions, expiry), to be specified.
+3. **Rural threshold:** confirm 25 ha on a real rural sample. This hasn't been tested yet, because the
    repo's samples are all dense city.
 
 Resolved since the first draft:
@@ -234,6 +274,7 @@ Resolved since the first draft:
 - Transfers: peer to peer, or brokered at 1%.
 - Many-to-one real-world links: yes.
 - Membership names: confirmed.
+- Designs: posted directly to Hub stores, with City Council approval only for placements inside approval zones.
 
 ## Code
 

@@ -26,6 +26,8 @@ export interface City {
   kind: CityKind;
   /** Partner hub that owns and runs the city (HubID groups.id). Hub Culture for the Gaia layer. */
   ownerHubId: number;
+  /** City Council hub that approves placements in approval zones; defaults to the owner hub's admins. */
+  councilHubId?: number;
   launchPolicy: LaunchPolicy;
   pricing: CityPricing;
   /** Parcel rules version the city's parcels were cut with. */

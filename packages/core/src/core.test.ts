@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  checkPlacement,
+  pointInRings,
   anchorsNear,
   canBroker,
   quoteClaim,
@@ -168,5 +170,26 @@ describe("claims, transfers and anchors", () => {
       100,
     );
     expect(near.map((a) => a.ref)).toEqual(["501", "209"]);
+  });
+});
+
+describe("designs and approval zones", () => {
+  const sq = (x: number, y: number, s: number): [number, number][] => [[x, y], [x + s, y], [x + s, y + s], [x, y + s], [x, y]];
+  const plaza = { id: "z1", cityId: "emerald-city", name: "Central Plaza", rings: [sq(0, 0, 500)] };
+  const parcelIn = { rings: [sq(100, 100, 100)], areaM2: 10_000 };
+  const parcelOut = { rings: [sq(900, 900, 100)], areaM2: 10_000 };
+  it("placing a design needs council approval only inside approval zones", () => {
+    expect(checkPlacement({ kind: "building" }, parcelIn, [plaza])).toMatchObject({ needsApproval: true, initialStatus: "pending-approval" });
+    expect(checkPlacement({ kind: "building" }, parcelOut, [plaza])).toMatchObject({ needsApproval: false, initialStatus: "placed" });
+  });
+  it("zones can target specific design kinds, and footprints must fit", () => {
+    const artOnly = { ...plaza, kinds: ["art" as const] };
+    expect(checkPlacement({ kind: "building" }, parcelIn, [artOnly]).needsApproval).toBe(false);
+    expect(checkPlacement({ kind: "art" }, parcelIn, [artOnly]).needsApproval).toBe(true);
+    expect(checkPlacement({ kind: "building", footprintM2: 20_000 }, parcelOut, []).fits).toBe(false);
+  });
+  it("point in polygon respects holes", () => {
+    expect(pointInRings([250, 250], [sq(0, 0, 500), sq(200, 200, 100)])).toBe(false);
+    expect(pointInRings([50, 50], [sq(0, 0, 500), sq(200, 200, 100)])).toBe(true);
   });
 });
