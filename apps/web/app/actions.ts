@@ -60,6 +60,7 @@ function readLocation(form: FormData) {
 export async function createProperty(_: FormState, form: FormData): Promise<FormState> {
   const session = await getSession();
   if (!session) redirect("/login?next=/properties/new");
+  if (!session.entitlements.capabilities.has("claim-parcel")) return { error: "Your HubID membership can't launch properties yet.", values: propertyValues(form) };
   const location = readLocation(form);
   if (!location) return { error: "Drop a pin on the map to place your property.", values: propertyValues(form) };
   let id: number;

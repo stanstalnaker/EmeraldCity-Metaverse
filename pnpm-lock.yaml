@@ -73,6 +73,9 @@ importers:
       '@emerald-city/hubid-client':
         specifier: workspace:*
         version: link:../../packages/hubid-client
+      '@emerald-city/parcels':
+        specifier: workspace:*
+        version: link:../../packages/parcels
       maplibre-gl:
         specifier: ^5.0.0
         version: 5.24.0
@@ -190,6 +193,19 @@ importers:
       '@emerald-city/core':
         specifier: workspace:*
         version: link:../core
+
+  packages/parcels:
+    dependencies:
+      '@emerald-city/core':
+        specifier: workspace:*
+        version: link:../core
+      jsts:
+        specifier: ^2.12.1
+        version: 2.12.1
+    devDependencies:
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.15
 
   packages/zeke-client: {}
 
@@ -1495,6 +1511,9 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
+  fastpriorityqueue@0.7.5:
+    resolution: {integrity: sha512-3Pa0n9gwy8yIbEsT3m2j/E9DXgWvvjfiZjjqcJ+AdNKTAlVMIuFYrYG5Y3RHEM8O6cwv9hOpOWY/NaMfywoQVA==}
+
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
@@ -1618,6 +1637,10 @@ packages:
   jsonrepair@3.15.0:
     resolution: {integrity: sha512-wy8OTjwsJwQRnQJkKnMJJ9vcytRdBPAgIF/Hy6+s1dAj42BHMKiyL8JzEieIl3JY7idt8eyHwBWTO8mh/+mtwA==}
     hasBin: true
+
+  jsts@2.12.1:
+    resolution: {integrity: sha512-aaiCZeGfeU5o9TbrYF1KF0VvhGGLtG3w7vNynmaTjC8XRmS2v15lq+2Bxa8lMtprsFFJiIpAayJZguLruiHd0w==}
+    engines: {node: '>= 18'}
 
   kdbush@4.1.0:
     resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
@@ -3314,6 +3337,8 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
+  fastpriorityqueue@0.7.5: {}
+
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
       picomatch: 4.0.7
@@ -3434,6 +3459,10 @@ snapshots:
   json-stringify-safe@5.0.1: {}
 
   jsonrepair@3.15.0: {}
+
+  jsts@2.12.1:
+    dependencies:
+      fastpriorityqueue: 0.7.5
 
   kdbush@4.1.0: {}
 

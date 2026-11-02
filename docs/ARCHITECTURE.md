@@ -18,7 +18,7 @@
                         LiveKit (voice/video) ◄── zeke-concierge  apps/zeke-host ──► zeke-ai-server /chat
 ```
 
-See [ZEKE.md](ZEKE.md) and [VOICE.md](VOICE.md).
+See [ZEKE.md](ZEKE.md), [VOICE.md](VOICE.md) and [PARCELS.md](PARCELS.md) (cities, parcels, ownership, membership layers).
 
 ## Key decisions
 

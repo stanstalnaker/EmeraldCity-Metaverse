@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { cityEntitlements, levelsFromMembershipNames, type CityEntitlements } from "@emerald-city/core";
 import { HubIdError, type HubIdClient } from "@emerald-city/hubid-client";
 import { hubid } from "./hubid";
 
@@ -11,10 +12,14 @@ const MAX_AGE = 24 * 60 * 60;
 export interface SessionUser {
   hubId: number;
   name: string;
+  /** HubID membership names as returned by the API (e.g. "Architects"). */
+  memberships: string[];
 }
 
 export interface Session {
   user: SessionUser;
+  /** What this member may do in the city (membership layers → capabilities). */
+  entitlements: CityEntitlements;
   /** HubID client acting as this user. Server-side only. */
   client: HubIdClient;
 }
@@ -24,6 +29,7 @@ interface HubSelf {
   name?: string;
   first?: string;
   last?: string;
+  memberships?: string[];
 }
 
 export async function setSessionToken(token: string): Promise<void> {
@@ -48,7 +54,10 @@ export const getSession = cache(async (): Promise<Session | null> => {
   try {
     const self = await client.getSelf<HubSelf>();
     const name = self.name || [self.first, self.last].filter(Boolean).join(" ") || `HubID ${self.id}`;
-    return { user: { hubId: Number(self.id), name }, client };
+    const memberships = Array.isArray(self.memberships) ? self.memberships : [];
+    // Partner records (for launching cities) are checked separately, when city launch lands.
+    const entitlements = cityEntitlements({ signedIn: true, levels: levelsFromMembershipNames(memberships) });
+    return { user: { hubId: Number(self.id), name, memberships }, entitlements, client };
   } catch (err) {
     if (err instanceof HubIdError && err.status >= 400 && err.status < 500) return null; // expired or revoked
     throw err;

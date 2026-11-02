@@ -1,0 +1,24 @@
+{
+  "name": "@emerald-city/parcels",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Parcel engine: road/water/border-bounded parcels for the Gaia layer and virtual cities, plus the seeded starter-city generator.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "generate": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@emerald-city/core": "workspace:*",
+    "jsts": "^2.12.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

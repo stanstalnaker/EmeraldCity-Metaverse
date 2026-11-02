@@ -36,3 +36,9 @@ main { padding: 20px; max-width: 1100px; margin: 0 auto; }
 button.link { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; }
 .error { color: #c0392b; margin: 0; }
 .notice { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 10px 12px; border-radius: 6px; }
+.city-view { display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
+.city-map { height: 70vh; min-height: 420px; border-radius: 10px; overflow: hidden; }
+.city-panel h3 { margin-top: 0; word-break: break-all; }
+.legend { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; font-size: 13px; }
+.legend i { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
+@media (max-width: 760px) { .city-view { grid-template-columns: 1fr; } }

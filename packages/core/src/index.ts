@@ -3,3 +3,5 @@ export * from "./property";
 export * from "./geo";
 export * from "./actor";
 export * from "./presence";
+export * from "./city";
+export * from "./membership";

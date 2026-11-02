@@ -19,6 +19,9 @@
 
 Private properties and unplaced properties are never included in map output.
 
+> **Superseded:** the one-hectare squares below are being replaced by road-, water- and
+> border-bounded parcels. See [PARCELS.md](PARCELS.md).
+
 ## Open questions and HubID follow-ups
 
 1. **Validate on write.** HubID should reject invalid lat/lng and store `DECIMAL(9,6)`, then backfill existing rows. Until that happens, `/properties` shows which properties are "Not yet placed".

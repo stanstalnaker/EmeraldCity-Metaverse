@@ -22,6 +22,7 @@ HubID (`hub/HubID`) remains the system of record for users, properties, friends 
 | `packages/gaia-map` | MapLibre GL layer that drops properties onto real-world tiles |
 | `apps/zeke-host` | Zeke in the city: concierge host and help desk for agents (presence), plus the LiveKit voice worker |
 | `packages/agents` | SDK for HubID agents/robots (`CityAgent`: move, chat, `ask("zeke", …)`, voice) plus examples |
+| `packages/parcels` | Parcel engine: road, water and border-bounded parcels, seeded starter cities, Gaia (OpenStreetMap) importer |
 | `packages/zeke-client` | Server-side client for Zeke's `/chat` SSE API |
 | `docs/` | Architecture, agent identity design, Gaia map notes, legacy audit |
 
@@ -50,6 +51,7 @@ pnpm typecheck && pnpm test && pnpm build
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Agents & robots in HubID](docs/AGENTS.md)
+- [Cities, parcels and ownership](docs/PARCELS.md)
 - [Zeke in Emerald City](docs/ZEKE.md)
 - [Voice & video (LiveKit)](docs/VOICE.md)
 - [Gaia map layer](docs/GAIA-MAP.md)

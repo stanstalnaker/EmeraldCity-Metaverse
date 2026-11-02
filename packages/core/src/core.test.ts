@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  cityEntitlements,
+  HUB_LEVEL,
+  levelsFromMembershipNames,
+  parcelPrice,
+  tierFor,
   distanceMeters,
   parseClientMessage,
   parseLngLat,
@@ -89,5 +94,36 @@ describe("parseClientMessage", () => {
     expect(parseClientMessage('{"t":"move","room":"map","pos":{}}')).toBeNull();
     expect(parseClientMessage('{"t":"say","room":"map","text":""}')).toBeNull();
     expect(parseClientMessage('{"t":"nope","room":"map"}')).toBeNull();
+  });
+});
+
+describe("membership layers", () => {
+  it("anyone signed in can launch a property; visitors cannot", () => {
+    expect(cityEntitlements({ signedIn: false, levels: [] }).capabilities.has("claim-parcel")).toBe(false);
+    const citizen = cityEntitlements({ signedIn: true, levels: [HUB_LEVEL.LOGGED_IN_USERS] });
+    expect(citizen.tier).toBe("citizen");
+    expect(citizen.capabilities.has("claim-parcel")).toBe(true);
+    expect(citizen.maxParcels).toBeNull();
+  });
+  it("cities need a partner record, not just the Partner level", () => {
+    expect(cityEntitlements({ signedIn: true, levels: [HUB_LEVEL.PARTNER] }).capabilities.has("launch-city")).toBe(false);
+    expect(cityEntitlements({ signedIn: true, levels: [], hasPartnerRecord: true }).capabilities.has("launch-city")).toBe(true);
+  });
+  it("tiers and professions unlock city capabilities", () => {
+    const e = cityEntitlements({ signedIn: true, levels: [HUB_LEVEL.BUSINESS_DELUXE, HUB_LEVEL.ARCHITECTS, HUB_LEVEL.REAL_ESTATE_AGENTS] });
+    expect(e.tier).toBe("business");
+    expect([...e.capabilities]).toEqual(expect.arrayContaining(["submit-designs", "broker"]));
+    expect(cityEntitlements({ signedIn: true, levels: [HUB_LEVEL.SUPER_ADMINISTRATORS] }).capabilities.has("administer")).toBe(true);
+  });
+  it("maps HubID membership names to levels", () => {
+    expect(levelsFromMembershipNames(["Super Administrators", "architects", "Unknown"])).toEqual([HUB_LEVEL.SUPER_ADMINISTRATORS, HUB_LEVEL.ARCHITECTS]);
+  });
+});
+
+describe("parcels: tiers and pricing", () => {
+  it("bands parcels by size and prices by area with a floor", () => {
+    expect([5_000, 20_000, 100_000, 400_000].map(tierFor)).toEqual(["core", "urban", "suburban", "rural"]);
+    expect(parcelPrice(25_000, { venPerHectare: 10 })).toBe(25);
+    expect(parcelPrice(1_000, { venPerHectare: 10, minimumVen: 5 })).toBe(5);
   });
 });
