@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  quoteLinkRequest,
   checkPlacement,
   pointInRings,
   anchorsNear,
@@ -191,5 +192,27 @@ describe("designs and approval zones", () => {
   it("point in polygon respects holes", () => {
     expect(pointInRings([250, 250], [sq(0, 0, 500), sq(200, 200, 100)])).toBe(false);
     expect(pointInRings([50, 50], [sq(0, 0, 500), sq(200, 200, 100)])).toBe(true);
+  });
+});
+
+describe("Gaia land owners control links to their land", () => {
+  it("open land and owners link immediately; curated land waits; rent land charges per period", () => {
+    expect(quoteLinkRequest({ requesterOwnsLand: false })).toEqual({ status: "visible", rentVen: 0, needsOwnerApproval: false });
+    expect(quoteLinkRequest({ requesterOwnsLand: true, policy: { mode: "curated" } }).status).toBe("visible");
+    expect(quoteLinkRequest({ requesterOwnsLand: false, policy: { mode: "curated" } })).toMatchObject({ status: "pending", needsOwnerApproval: true });
+    expect(quoteLinkRequest({ requesterOwnsLand: false, policy: { mode: "rent", rentVen: 25, rentPeriodDays: 30 } })).toMatchObject({ status: "visible", rentVen: 25, rentPeriodDays: 30 });
+  });
+  it("hidden and pending anchors never show in AR", () => {
+    const at = { lat: 0, lng: 0 };
+    const near = anchorsNear(
+      [
+        { kind: "virtual-property", ref: "1", location: at },
+        { kind: "virtual-property", ref: "2", location: at, status: "hidden" },
+        { kind: "virtual-property", ref: "3", location: at, status: "pending" },
+      ],
+      at,
+      10,
+    );
+    expect(near.map((a) => a.ref)).toEqual(["1"]);
   });
 });

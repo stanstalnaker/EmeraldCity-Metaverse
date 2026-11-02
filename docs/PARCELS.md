@@ -51,6 +51,9 @@ the HubID changes in [HubID changes](#hubid-changes) first.**
   each linked world as a floating sphere you tap to visit. This is richer when the property holds
   photos, video and other content ("memories"). It is the hook for the **Andromeda** idea:
   discoverable digital artifacts left at real places and unlocked later (to be specified).
+- **Gaia parcel owners control their land's links.** They can leave it open, curate it (approve each
+  link), or charge rent to others who want to link there, and can hide anything anchored on it.
+  Unowned land is open.
 - **Designs** (buildings, landscapes, items, art from Architects, Designers and Artisans) are posted
   **directly to the Hub stores** as digital items, alongside the stores' existing digital goods, with
   no approval to sell, which grows the VEN economy. Cities can mark **approval zones** (e.g. a historic
@@ -132,6 +135,17 @@ Zeke and other agents can ask brokers what's for sale. Brokers are always owned 
   each result as a floating sphere or speck. Tapping one opens that world.
 - The anchor kind already includes `artifact`, so Andromeda-style discoverable items can use the same
   lookup once that product is specified.
+- **Land owner control** (`quoteLinkRequest`): when someone links to a Gaia parcel they don't own, the
+  owner's policy applies:
+
+  | Mode | What happens |
+  |---|---|
+  | open | visible immediately |
+  | curated | pending until the owner approves |
+  | rent | visible while rent (VEN per period) is paid |
+
+  The owner can hide any anchor at any time, and only visible anchors appear in AR. Owners link to
+  their own land free. Unowned land is open.
 
 ## HubID changes
 
@@ -210,6 +224,15 @@ CREATE TABLE design_placements (
   created_at TIMESTAMP NULL
 ) DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE parcels
+  ADD COLUMN link_mode ENUM('open','curated','rent') NOT NULL DEFAULT 'open',  -- Gaia parcels: owner's link policy
+  ADD COLUMN link_rent_ven DECIMAL(12,2) NULL,
+  ADD COLUMN link_rent_period_days SMALLINT NULL;
+
+ALTER TABLE real_world_anchors
+  ADD COLUMN status ENUM('visible','pending','hidden') NOT NULL DEFAULT 'visible',
+  ADD COLUMN rent_paid_until TIMESTAMP NULL;         -- rent mode: hidden automatically when lapsed
+
 CREATE TABLE property_listings (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   parcel_id    VARCHAR(24) NOT NULL,
@@ -245,7 +268,10 @@ API (HubID), behind the existing auth:
   bot in **one transaction** (today's create is not transactional).
 - `POST /properties/{id}/transfer` (p2p) and `POST /properties/{id}/listings` / `POST /listings/{id}/buy`
   (brokered, 1% to the broker), all moving VEN and ownership atomically.
-- `GET /anchors/near?lat=&lng=&radius=`: AR discovery of every world anchored near a place.
+- `GET /anchors/near?lat=&lng=&radius=`: AR discovery of every visible world anchored near a place.
+- `PUT /parcels/{id}/link-policy` (owner: open, curated or rent) and `PUT /anchors/{id}`
+  (owner: approve, hide or unhide). Rent is charged per period in VEN; when it lapses, the anchor
+  is hidden automatically.
 - `POST /properties/{id}/placements` (checks approval zones and footprint) and
   `PUT /placements/{id}/review` (City Council: approve or reject).
 - Designs use the existing store item endpoints, with a "design" category and a model URL.
@@ -262,9 +288,8 @@ Emerald City properties are pavilions with `territory = 'Emerald City'` and a po
 
 ## Open questions
 
-1. **Anchoring proof:** linking is many-to-one (decided). Does anchoring to a real address or Gaia
-   parcel need any proof (e.g. owning the Gaia parcel, or being there)? Should the Gaia parcel's
-   owner be able to hide or curate what is anchored on their land?
+1. **Addresses without a Gaia owner:** links to unowned land are open. Should linking to a street
+   address need any proof (e.g. being there), or is the map position enough?
 2. **Andromeda:** artifact rules (who can drop them, discovery and unlock conditions, expiry), to be specified.
 3. **Rural threshold:** confirm 25 ha on a real rural sample. This hasn't been tested yet, because the
    repo's samples are all dense city.
@@ -275,6 +300,7 @@ Resolved since the first draft:
 - Many-to-one real-world links: yes.
 - Membership names: confirmed.
 - Designs: posted directly to Hub stores, with City Council approval only for placements inside approval zones.
+- Gaia land owners: can curate, hide, or charge rent for links to their land.
 
 ## Code
 
