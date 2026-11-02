@@ -71,6 +71,8 @@ export default function CityView({ slug }: { slug: string }) {
                 <>
                   <br />
                   Starter price: {selected.priceVen} VEN
+                  <br />
+                  <span className="muted">First 3 parcels included with any HubID; +10 VEN for each parcel after that.</span>
                 </>
               )}
             </p>

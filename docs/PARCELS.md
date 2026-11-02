@@ -42,6 +42,15 @@ the HubID changes in [HubID changes](#hubid-changes) first.**
 - Only partners can launch cities. Existing HubID partner records grant this; the Partner level alone does not.
 - Partners set their own launch rules (open, approval, or invite) and pricing for their city.
 - Every property gets its own hub. A hub can also launch or own several properties. That ownership link is private.
+- Each membership includes **3 parcels**. Every parcel beyond that costs **10 VEN** on top of the land
+  price. Optional per-tier hard caps exist, but are off.
+- **Transfers:** peer to peer with no fee, for speed and convenience. Or brokered: **1% of the value**
+  goes to a broker who promotes the property. Brokers are Real Estate Agents, or **AI agents** with the
+  `property:broker` scope, whose job is promoting listings, including to other agents.
+- **Many virtual properties can link to the same real-world place.** At that place, an AR view shows
+  each linked world as a floating sphere you tap to visit. This is richer when the property holds
+  photos, video and other content ("memories"). It is the hook for the **Andromeda** idea:
+  discoverable digital artifacts left at real places and unlocked later (to be specified).
 
 **Data**
 - The Gaia layer is built from OpenStreetMap: © OpenStreetMap contributors, ODbL. Parcel geometry
@@ -85,7 +94,29 @@ HubID memberships are numbered levels, sold through the Hub Culture store and sh
 | Professions | Architects, Designers → submit designs. Real Estate Agents → broker. Planners → plan districts. Merchants → sell. Artisans → create art. Services, Teachers, Healthcare, Financial Services → offer services. Influencers → promote. Developers → develop | capabilities |
 | Platform | Gaia → manage the Gaia layer and reserved land. Administrators → everything. Partner record → launch cities | capabilities |
 
-Parcel limits per tier exist as a policy knob. Today every tier is **unlimited**, matching current behaviour.
+Every tier includes **3 parcels**, then pays **10 VEN** extra for each additional parcel
+(`quoteClaim`). Hard caps per tier are available in `MembershipPolicy.maxParcels`, but off. HubID's
+membership names were confirmed to match `LEVEL_BY_NAME`.
+
+## Transfers and brokers (`packages/core/src/market.ts`)
+
+| Kind | Who | Fee |
+|---|---|---|
+| Peer to peer | owner → buyer directly | none |
+| Brokered | listed through a broker (Real Estate Agent, or AI agent with `property:broker`) | 1% of the sale price, paid to the broker out of the price |
+
+AI brokers promote listings over the presence agent-to-agent protocol with intent `property.listing`.
+Zeke and other agents can ask brokers what's for sale. Brokers are always owned by a human or hub
+(agents carry `ownerHubId`), so commission and accountability go to a real owner.
+
+## Real-world anchors and AR (`packages/core/src/anchors.ts`)
+
+- A virtual property's `real_world_link` becomes an **anchor**: a point on Earth plus what is anchored there.
+- Any number of virtual properties, across any cities, can share one place.
+- `anchorsNear(point, radius)` returns everything anchored nearby, nearest first. An AR client renders
+  each result as a floating sphere or speck. Tapping one opens that world.
+- The anchor kind already includes `artifact`, so Andromeda-style discoverable items can use the same
+  lookup once that product is specified.
 
 ## HubID changes
 
@@ -129,14 +160,54 @@ ALTER TABLE pavilions
   ADD COLUMN real_world_link JSON NULL;               -- {kind: address|point|gaia-parcel, …}
 
 ALTER TABLE pavilions ADD UNIQUE KEY pavilions_group_unique (`group`); -- one hub per property (after de-duplicating)
+
+CREATE TABLE real_world_anchors (                    -- many anchors may share one place
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  kind        ENUM('virtual-property','artifact') NOT NULL,
+  ref         VARCHAR(64) NOT NULL,                  -- pavilion id, or artifact id later
+  city_id     INT UNSIGNED NULL,
+  location    POINT NOT NULL SRID 4326,
+  address     VARCHAR(255) NULL,
+  gaia_parcel_id VARCHAR(24) NULL,
+  SPATIAL INDEX (location), INDEX (kind, ref)
+) DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE property_listings (
+  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  parcel_id    VARCHAR(24) NOT NULL,
+  pavilion_id  INT UNSIGNED NOT NULL,
+  seller_user_id INT UNSIGNED NOT NULL,
+  broker_user_id INT UNSIGNED NULL,                  -- Real Estate Agent or AI agent sub-profile
+  price_ven    DECIMAL(14,2) NOT NULL,
+  status       ENUM('active','sold','withdrawn') NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
+  INDEX (status), INDEX (broker_user_id)
+) DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE property_transfers (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  parcel_id     VARCHAR(24) NOT NULL,
+  pavilion_id   INT UNSIGNED NOT NULL,
+  from_owner    VARCHAR(32) NOT NULL,                -- user:<id> or hub:<id>
+  to_owner      VARCHAR(32) NOT NULL,
+  kind          ENUM('p2p','brokered') NOT NULL,
+  price_ven     DECIMAL(14,2) NOT NULL,
+  broker_fee_ven DECIMAL(14,2) NOT NULL DEFAULT 0,
+  broker_user_id INT UNSIGNED NULL,
+  transaction_id INT UNSIGNED NULL,                  -- VEN transaction
+  created_at TIMESTAMP NULL
+) DEFAULT CHARSET=utf8mb4;
 ```
 
 API (HubID), behind the existing auth:
 - `GET /cities`, `GET /cities/{slug}`, `GET /cities/{slug}/parcels?bbox=…`
 - `POST /cities` (partner record required), `PUT /cities/{slug}` (city admins)
-- `POST /parcels/{id}/claim`: checks the city launch policy, membership entitlements and price,
-  charges VEN, then creates the pavilion, its hub and its bot in **one transaction** (today's create
-  is not transactional).
+- `POST /parcels/{id}/claim`: checks the city launch policy and membership entitlements, then quotes
+  land price + extra-parcel fee (`quoteClaim`), charges VEN, and creates the pavilion, its hub and its
+  bot in **one transaction** (today's create is not transactional).
+- `POST /properties/{id}/transfer` (p2p) and `POST /properties/{id}/listings` / `POST /listings/{id}/buy`
+  (brokered, 1% to the broker), all moving VEN and ownership atomically.
+- `GET /anchors/near?lat=&lng=&radius=`: AR discovery of every world anchored near a place.
 - `PavilionAccess::canManage`: add admins of `owner_group_id`.
 
 ## Migration of today's Emerald City properties
@@ -150,14 +221,19 @@ Emerald City properties are pavilions with `territory = 'Emerald City'` and a po
 
 ## Open questions
 
-1. **Parcel limits per membership tier:** keep unlimited, or cap claims (e.g. per tier) to stop a land rush on early-player land?
-2. **Which professions are required for which actions:** e.g. must a Real Estate Agent broker every
-   transfer, or is brokering optional? Do Architects' designs need City Council approval?
-3. **Reconciliation:** can several virtual properties link to the same Gaia parcel? Does linking to a
-   Gaia parcel require owning it, and does linking to an address need proof?
-4. **Membership names:** HubID's API returns level names, not ids. Verify `LEVEL_BY_NAME` against the `levels` table.
-5. **Rural threshold:** confirm 25 ha on a real rural sample. This hasn't been tested yet, because the
+1. **Design approval:** do Architects' and Designers' submissions need City Council approval before others can buy them?
+2. **Anchoring proof:** linking is many-to-one (decided). Does anchoring to a real address or Gaia
+   parcel need any proof (e.g. owning the Gaia parcel, or being there)? Should the Gaia parcel's
+   owner be able to hide or curate what is anchored on their land?
+3. **Andromeda:** artifact rules (who can drop them, discovery and unlock conditions, expiry), to be specified.
+4. **Rural threshold:** confirm 25 ha on a real rural sample. This hasn't been tested yet, because the
    repo's samples are all dense city.
+
+Resolved since the first draft:
+- Parcel limits: 3 included, then 10 VEN per extra parcel.
+- Transfers: peer to peer, or brokered at 1%.
+- Many-to-one real-world links: yes.
+- Membership names: confirmed.
 
 ## Code
 

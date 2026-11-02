@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  anchorsNear,
+  canBroker,
+  quoteClaim,
+  quoteTransfer,
   cityEntitlements,
   HUB_LEVEL,
   levelsFromMembershipNames,
@@ -104,6 +108,7 @@ describe("membership layers", () => {
     expect(citizen.tier).toBe("citizen");
     expect(citizen.capabilities.has("claim-parcel")).toBe(true);
     expect(citizen.maxParcels).toBeNull();
+    expect(citizen.includedParcels).toBe(3);
   });
   it("cities need a partner record, not just the Partner level", () => {
     expect(cityEntitlements({ signedIn: true, levels: [HUB_LEVEL.PARTNER] }).capabilities.has("launch-city")).toBe(false);
@@ -125,5 +130,43 @@ describe("parcels: tiers and pricing", () => {
     expect([5_000, 20_000, 100_000, 400_000].map(tierFor)).toEqual(["core", "urban", "suburban", "rural"]);
     expect(parcelPrice(25_000, { venPerHectare: 10 })).toBe(25);
     expect(parcelPrice(1_000, { venPerHectare: 10, minimumVen: 5 })).toBe(5);
+  });
+});
+
+describe("claims, transfers and anchors", () => {
+  const citizen = cityEntitlements({ signedIn: true, levels: [] });
+  it("includes 3 parcels, then charges 10 VEN per extra parcel", () => {
+    expect(quoteClaim({ landVen: 20, parcelsHeld: 2, entitlements: citizen })).toMatchObject({ allowed: true, extraParcelFeeVen: 0, totalVen: 20 });
+    expect(quoteClaim({ landVen: 20, parcelsHeld: 3, entitlements: citizen })).toMatchObject({ allowed: true, extraParcelFeeVen: 10, totalVen: 30 });
+    expect(quoteClaim({ landVen: 20, parcelsHeld: 0, entitlements: cityEntitlements({ signedIn: false, levels: [] }) }).allowed).toBe(false);
+  });
+  it("supports optional hard caps per tier", () => {
+    const capped = cityEntitlements({ signedIn: true, levels: [] }, { includedParcels: { visitor: 0, citizen: 3, member: 3, business: 3, patron: 3, admin: 3 }, extraParcelFeeVen: 10, maxParcels: { visitor: 0, citizen: 5, member: null, business: null, patron: null, admin: null } });
+    expect(quoteClaim({ landVen: 1, parcelsHeld: 5, entitlements: capped })).toMatchObject({ allowed: false, reason: "cap-reached" });
+  });
+  it("p2p transfers are free; brokered ones pay the broker 1%", () => {
+    expect(quoteTransfer(500, "p2p")).toEqual({ kind: "p2p", priceVen: 500, brokerFeeVen: 0, sellerReceivesVen: 500 });
+    expect(quoteTransfer(500, "brokered")).toEqual({ kind: "brokered", priceVen: 500, brokerFeeVen: 5, sellerReceivesVen: 495 });
+  });
+  it("brokers are Real Estate Agents or AI agents with property:broker", () => {
+    const agent = { kind: "agent" as const, hubId: 9, displayName: "Listing Bot", avatarUrl: null, ownerHubId: 1, variant: "ai__ai", scopes: ["property:broker" as const] };
+    expect(canBroker(agent)).toBe(true);
+    expect(canBroker({ ...agent, scopes: [] })).toBe(false);
+    const human = { kind: "human" as const, hubId: 2, displayName: "Ana", avatarUrl: null };
+    expect(canBroker(human, cityEntitlements({ signedIn: true, levels: [HUB_LEVEL.REAL_ESTATE_AGENTS] }))).toBe(true);
+    expect(canBroker(human, citizen)).toBe(false);
+  });
+  it("finds every virtual world anchored near a real place, nearest first", () => {
+    const here = { lat: 46.8027, lng: 9.836 }; // Davos
+    const near = anchorsNear(
+      [
+        { kind: "virtual-property", ref: "209", citySlug: "emerald-city", location: { lat: 46.8028, lng: 9.8361 } },
+        { kind: "virtual-property", ref: "501", citySlug: "nova-lisboa", location: { lat: 46.8027, lng: 9.836 } },
+        { kind: "artifact", ref: "a1", location: { lat: 46.81, lng: 9.85 } },
+      ],
+      here,
+      100,
+    );
+    expect(near.map((a) => a.ref)).toEqual(["501", "209"]);
   });
 });

@@ -31,6 +31,7 @@ The beta adds these to the Mandala scope registry:
 | `property:manage` | act as a property admin (only for properties the owner administers) |
 | `media:join` | get a LiveKit token for a joined room (voice/video) |
 | `agents:request` | send requests to other agents, including Zeke |
+| `property:broker` | act as a property broker: promote listings (to people and other agents, intent `property.listing`) and earn 1% on brokered sales |
 
 `messages:send` already exists. In the city it must also pass the recipient's interaction policy.
 

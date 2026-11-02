@@ -69,16 +69,24 @@ export type CityCapability =
 export interface CityEntitlements {
   tier: MembershipTier;
   capabilities: ReadonlySet<CityCapability>;
-  /** Max parcels a member may hold at once; null = no limit. */
+  /** Parcels included with the membership before the extra-parcel fee applies. */
+  includedParcels: number;
+  /** Hard cap on parcels held at once; null = no cap (extra parcels just cost more). */
   maxParcels: number | null;
 }
 
 export interface MembershipPolicy {
-  /** Parcel limits per tier (null = unlimited). Today everyone is unlimited, matching current behaviour. */
+  /** Parcels included per tier. Decided: 3, then a fee per additional parcel. */
+  includedParcels: Record<MembershipTier, number>;
+  /** Fee in VEN for each parcel held beyond the included allowance, on top of the land price. */
+  extraParcelFeeVen: number;
+  /** Optional hard caps per tier (null = none). Off by default; the extra-parcel fee is the brake. */
   maxParcels: Record<MembershipTier, number | null>;
 }
 
 export const DEFAULT_MEMBERSHIP_POLICY: MembershipPolicy = {
+  includedParcels: { visitor: 0, citizen: 3, member: 3, business: 3, patron: 3, admin: 3 },
+  extraParcelFeeVen: 10,
   maxParcels: { visitor: 0, citizen: null, member: null, business: null, patron: null, admin: null },
 };
 
@@ -126,7 +134,32 @@ export function cityEntitlements(
     caps.add("manage-gaia");
     caps.add("launch-city");
   }
-  return { tier, capabilities: caps, maxParcels: policy.maxParcels[tier] };
+  return { tier, capabilities: caps, includedParcels: policy.includedParcels[tier], maxParcels: policy.maxParcels[tier] };
+}
+
+export interface ClaimQuote {
+  allowed: boolean;
+  reason?: "not-signed-in" | "cap-reached";
+  /** Land price under the city's pricing. */
+  landVen: number;
+  /** Extra-parcel fee once the member holds more than their included parcels. */
+  extraParcelFeeVen: number;
+  totalVen: number;
+}
+
+/**
+ * What claiming one more parcel costs this member: the city's land price, plus the extra-parcel fee
+ * once they already hold their included allowance (3 by default).
+ */
+export function quoteClaim(
+  input: { landVen: number; parcelsHeld: number; entitlements: CityEntitlements },
+  policy: MembershipPolicy = DEFAULT_MEMBERSHIP_POLICY,
+): ClaimQuote {
+  const { landVen, parcelsHeld, entitlements: e } = input;
+  if (!e.capabilities.has("claim-parcel")) return { allowed: false, reason: "not-signed-in", landVen, extraParcelFeeVen: 0, totalVen: 0 };
+  if (e.maxParcels !== null && parcelsHeld >= e.maxParcels) return { allowed: false, reason: "cap-reached", landVen, extraParcelFeeVen: 0, totalVen: 0 };
+  const extra = parcelsHeld >= e.includedParcels ? policy.extraParcelFeeVen : 0;
+  return { allowed: true, landVen, extraParcelFeeVen: extra, totalVen: Math.round((landVen + extra) * 100) / 100 };
 }
 
 /**

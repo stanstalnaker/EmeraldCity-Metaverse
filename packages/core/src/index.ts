@@ -5,3 +5,5 @@ export * from "./actor";
 export * from "./presence";
 export * from "./city";
 export * from "./membership";
+export * from "./market";
+export * from "./anchors";

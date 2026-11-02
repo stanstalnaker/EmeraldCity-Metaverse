@@ -46,6 +46,7 @@ export const AGENT_SCOPES = [
   "property:manage",
   "media:join",
   "agents:request",
+  "property:broker",
 ] as const;
 
 export type AgentScope = (typeof AGENT_SCOPES)[number];
