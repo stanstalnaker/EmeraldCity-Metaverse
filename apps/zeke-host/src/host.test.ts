@@ -17,7 +17,7 @@ const ask = vi.fn(async ({ message, data, threadId }: { message: string; caller:
 }));
 const property: Property = {
   id: 209, slug: "city-hall", name: "City Hall", territory: "Emerald City", isPrivate: false,
-  image: null, backgroundImage: null, message: "", ownerProfileId: 1, location: null,
+  image: null, backgroundImage: null, message: "", ownerProfileId: 1, location: null, parcelId: null, cityId: null,
 };
 
 function ready(agent: CityAgent) {

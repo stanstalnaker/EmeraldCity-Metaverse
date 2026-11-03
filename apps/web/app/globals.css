@@ -42,3 +42,13 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); fon
 .legend { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; font-size: 13px; }
 .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
 @media (max-width: 760px) { .city-view { grid-template-columns: 1fr; } }
+.claim { display: grid; gap: 10px; }
+.claim label, .city-panel label { display: grid; gap: 4px; font-size: 14px; }
+.claim select, .stack input, .stack select { padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; }
+.ok { color: #1e8449; margin: 0; }
+.stack { display: grid; gap: 10px; max-width: 520px; }
+.section { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--border); font-size: 12px; margin-right: 4px; }
+.sphere { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #b8f5d6, #1fa37a 60%, #0b5a42); box-shadow: 0 0 18px #1fa37a88; flex: none; }
+.nearby-item { display: flex; gap: 14px; align-items: center; }
+.stack label { display: grid; gap: 6px; font-weight: 500; }

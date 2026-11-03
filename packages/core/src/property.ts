@@ -15,6 +15,9 @@ export interface Property {
   ownerProfileId: number | null;
   /** Where the property drops onto the Gaia map. Null when the pavilion has no usable coordinates. */
   location: LngLat | null;
+  /** Emerald City parcel and city, once the property has claimed land. */
+  parcelId: string | null;
+  cityId: number | null;
 }
 
 export function toProperty(p: HubPavilion): Property {
@@ -29,6 +32,8 @@ export function toProperty(p: HubPavilion): Property {
     message: p.message ?? "",
     ownerProfileId: p.created_by_user?.id ?? null,
     location: parseLngLat(p.latitude, p.longitude),
+    parcelId: p.parcel_id ?? null,
+    cityId: p.city_id ?? null,
   };
 }
 

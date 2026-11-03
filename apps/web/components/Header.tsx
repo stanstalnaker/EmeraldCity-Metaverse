@@ -12,6 +12,8 @@ export async function Header() {
       <Link href="/map">Gaia map</Link>
       <Link href="/properties">Properties</Link>
       <Link href="/cities">Cities</Link>
+      <Link href="/market">Market</Link>
+      <Link href="/nearby">Nearby</Link>
       {session ? (
         <>
           <Link href="/my-properties">My properties</Link>

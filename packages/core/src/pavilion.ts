@@ -24,6 +24,9 @@ export interface HubPavilion {
   image?: string | null;
   background_image?: string | null;
   message?: string;
+  /** Emerald City parcel the property sits on, once claimed. */
+  parcel_id?: string | null;
+  city_id?: number | null;
   zones?: HubPavilionZone[];
   created_by_user?: {
     id: number;

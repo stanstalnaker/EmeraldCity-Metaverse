@@ -83,3 +83,19 @@ describe("property writes", () => {
     expect(slugify("Hub Culture — Davos Pavilion!")).toBe("hub-culture-davos-pavilion");
   });
 });
+
+describe("Emerald City endpoints", () => {
+  it("returns null for cities HubID doesn't know, and claims with the private key + token", async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ status: "error", errors: ["City not found"], data: null, code: 404 }), { status: 404 }))
+      .mockResolvedValueOnce(envelope({ parcel_id: "p_1", pavilion_id: 9, land_ven: 20, extra_parcel_fee_ven: 10, total_ven: 30 }));
+    const client = new HubIdClient({ baseUrl: "https://api.test", privateKey: "pk", fetch }).withToken("jwt");
+    expect(await client.getCity("nowhere")).toBeNull();
+    expect(await client.claimParcel("p_1", 9)).toMatchObject({ total_ven: 30 });
+    const [url, init] = fetch.mock.calls[1]!;
+    expect(url).toBe("https://api.test/parcels/p_1/claim");
+    expect(JSON.parse((init as RequestInit).body as string)).toEqual({ pavilion_id: 9 });
+    expect((init as RequestInit).headers).toMatchObject({ "Private-Key": "pk", Authorization: "Bearer jwt" });
+  });
+});

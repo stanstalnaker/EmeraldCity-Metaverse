@@ -325,8 +325,14 @@ Resolved since the first draft:
 - `packages/parcels`: engine (`cutParcels`), rules, starter generator, Gaia importer (Overpass JSON),
   admin-level lookup, GeoJSON/SVG export, CLI (`pnpm --filter @emerald-city/parcels generate <slug>`).
 - `packages/core`: `City`, `Parcel`, `RealWorldLink`, tiers and pricing, membership layers.
-- `apps/web`: `/cities` and `/cities/[slug]` (viewer), `GET /api/cities/{slug}/parcels`. Launching
-  a property checks membership entitlements.
+- `apps/web`:
+  - `/cities/[slug]` shows a launched city's parcels from HubID, or a starter preview. On a launched
+    city it offers a claim panel (quote, then claim), and city admins can publish the starter layout.
+  - `/p/[id]` lets the owner list a property (optionally through a broker), give it away, or link it
+    to a real place (optional verification runs automatically). Visitors can buy it.
+  - `/market` lists properties for sale. `/nearby` shows the worlds linked to where you're standing
+    (the web version of the AR spheres).
+  - All of it calls HubID's `feature/emerald-city-parcels` endpoints.
 
 Engine note: JSTS (pure JavaScript) is fine for virtual cities and interactive editing (~1–2 s per
 city). For building the Gaia layer at country scale, run the same rules in PostGIS/GEOS as a batch job.

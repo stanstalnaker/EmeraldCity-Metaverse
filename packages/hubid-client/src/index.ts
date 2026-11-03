@@ -79,6 +79,71 @@ export function slugify(name: string): string {
 
 const coord = (n: number) => n.toFixed(6);
 
+/** HubID Emerald City records (snake_case, as the API returns them). */
+export interface HubCity {
+  id: number;
+  slug: string;
+  name: string;
+  kind: "gaia" | "virtual";
+  owner_group_id: number;
+  council_group_id: number | null;
+  launch_policy: "open" | "approval" | "invite";
+  ven_per_hectare: number | string;
+  minimum_ven: number | string | null;
+  rules_version: string;
+}
+
+export interface HubParcel {
+  id: string;
+  city_id: number;
+  status: "free" | "claimed" | "public" | "reserved";
+  reserved_reason: string | null;
+  area_m2: number;
+  tier: "core" | "urban" | "suburban" | "rural";
+  geometry: [number, number][][];
+  pavilion_id: number | null;
+  link_mode: "open" | "curated" | "rent";
+  link_rent_ven: number | string | null;
+  price_ven: number | null;
+  city_slug?: string | null;
+}
+
+export interface ClaimQuote {
+  land_ven: number;
+  extra_parcel_fee_ven: number;
+  total_ven: number;
+  parcels_held?: number;
+  included_parcels?: number;
+}
+
+export interface HubListing {
+  id: number;
+  parcel_id: string;
+  pavilion_id: number;
+  seller_user_id: number;
+  broker_user_id: number | null;
+  price_ven: number | string;
+  status: "active" | "sold" | "withdrawn";
+  city_id?: number;
+  area_m2?: number;
+  tier?: string;
+}
+
+export interface HubAnchor {
+  id: number;
+  kind: "virtual-property" | "artifact";
+  ref: string;
+  city_id: number | null;
+  lat: number | string;
+  lng: number | string;
+  address: string | null;
+  gaia_parcel_id: string | null;
+  status: "visible" | "pending" | "hidden";
+  trust: "unverified" | "place" | "presence" | "resident" | "owner";
+  badges: string[] | string | null;
+  distance_m?: number;
+}
+
 export class HubIdClient {
   private readonly opts: HubIdClientOptions;
   private readonly fetchImpl: typeof fetch;
@@ -191,6 +256,83 @@ export class HubIdClient {
   /** GET /user: the signed-in user's profile. */
   async getSelf<T = Record<string, unknown>>(): Promise<T> {
     return this.request<T>("GET", "/user", { key: "private", auth: true });
+  }
+
+  // ---- Emerald City (HubID feature/emerald-city-parcels) ----
+
+  async listCities(): Promise<HubCity[]> {
+    return (await this.request<{ items: HubCity[] }>("GET", "/cities")).items;
+  }
+
+  /** A city, or null if HubID doesn't know it (e.g. a starter preview that hasn't launched). */
+  async getCity(slug: string): Promise<HubCity | null> {
+    try {
+      return await this.request<HubCity>("GET", `/cities/${encodeURIComponent(slug)}`);
+    } catch (err) {
+      if (err instanceof HubIdError && err.status === 404) return null;
+      throw err;
+    }
+  }
+
+  async cityParcels(slug: string, opts: { limit?: number; offset?: number } = {}): Promise<{ total: number; items: HubParcel[] }> {
+    const q = new URLSearchParams({ limit: String(opts.limit ?? 2000), offset: String(opts.offset ?? 0) });
+    return this.request("GET", `/cities/${encodeURIComponent(slug)}/parcels?${q}`);
+  }
+
+  async getParcel(id: string): Promise<HubParcel> {
+    return this.request("GET", `/parcels/${encodeURIComponent(id)}`);
+  }
+
+  async quoteClaim(parcelId: string): Promise<ClaimQuote> {
+    return this.request("GET", `/parcels/${encodeURIComponent(parcelId)}/quote`, { key: "private", auth: true });
+  }
+
+  async claimParcel(parcelId: string, pavilionId: number): Promise<ClaimQuote & { parcel_id: string; pavilion_id: number }> {
+    return this.request("POST", `/parcels/${encodeURIComponent(parcelId)}/claim`, { key: "private", auth: true, body: { pavilion_id: pavilionId } });
+  }
+
+  async importParcels(slug: string, rulesVersion: string, parcels: unknown[]): Promise<{ created: number; updated: number; skippedClaimed: number; invalid: number }> {
+    return this.request("POST", `/cities/${encodeURIComponent(slug)}/parcels/import`, { key: "private", auth: true, body: { rules_version: rulesVersion, parcels } });
+  }
+
+  async listings(params: { cityId?: number; pavilionId?: number } = {}): Promise<{ total: number; items: HubListing[] }> {
+    const q = new URLSearchParams();
+    if (params.cityId) q.set("city_id", String(params.cityId));
+    if (params.pavilionId) q.set("pavilion_id", String(params.pavilionId));
+    return this.request("GET", `/listings${q.size ? `?${q}` : ""}`);
+  }
+
+  async createListing(pavilionId: number, priceVen: number, brokerUserId?: number): Promise<HubListing> {
+    return this.request("POST", `/properties/${pavilionId}/listings`, { key: "private", auth: true, body: { price_ven: priceVen, ...(brokerUserId ? { broker_user_id: brokerUserId } : {}) } });
+  }
+
+  async buyListing(listingId: number): Promise<{ listing_id: number; pavilion_id: number; price_ven: number; broker_fee_ven: number }> {
+    return this.request("POST", `/listings/${listingId}/buy`, { key: "private", auth: true, body: {} });
+  }
+
+  async withdrawListing(listingId: number): Promise<void> {
+    await this.request("DELETE", `/listings/${listingId}`, { key: "private", auth: true });
+  }
+
+  async transferProperty(pavilionId: number, toUserId: number): Promise<void> {
+    await this.request("POST", `/properties/${pavilionId}/transfer`, { key: "private", auth: true, body: { to_user_id: toUserId } });
+  }
+
+  async anchorsNear(lat: number, lng: number, radiusM = 200): Promise<HubAnchor[]> {
+    const q = new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radiusM) });
+    return (await this.request<{ items: HubAnchor[] }>("GET", `/anchors/near?${q}`)).items;
+  }
+
+  async createAnchor(input: { pavilionId: number; lat: number; lng: number; address?: string }): Promise<HubAnchor & { needs_owner_approval: boolean; rent_ven: number }> {
+    return this.request("POST", "/anchors", {
+      key: "private",
+      auth: true,
+      body: { pavilion_id: input.pavilionId, lat: input.lat, lng: input.lng, ...(input.address ? { address: input.address } : {}) },
+    });
+  }
+
+  async verifyAnchor(anchorId: number): Promise<{ badges: string[]; trust: string }> {
+    return this.request("POST", `/anchors/${anchorId}/verify`, { key: "private", auth: true, body: {} });
   }
 
   /** GET /google-places: the signed-in user's Google Place check-ins (self-reported). */
