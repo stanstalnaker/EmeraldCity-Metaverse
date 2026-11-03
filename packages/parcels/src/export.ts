@@ -63,3 +63,34 @@ export function renderSvg(result: CutResult, land: G.PolygonRings[], size = 900,
 }
 
 const escapeXml = (s: string) => s.replace(/[<>&"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" })[c]!);
+
+export interface HubIdImportPayload {
+  rules_version: string;
+  parcels: {
+    id: string;
+    status: Parcel["status"];
+    reserved_reason: string | null;
+    area_m2: number;
+    tier: Parcel["tier"];
+    geometry: XY[][];
+  }[];
+}
+
+/**
+ * Parcels in the shape HubID's import expects (POST /cities/{slug}/parcels/import and
+ * `php artisan emeraldcity:import-parcels`). Coordinates stay in the city's frame, rounded to cm.
+ */
+export function toHubIdImport(result: Pick<CutResult, "parcels" | "reserved">, rulesVersion: string): HubIdImportPayload {
+  const cm = (v: number) => Math.round(v * 100) / 100;
+  return {
+    rules_version: rulesVersion,
+    parcels: [...result.parcels, ...result.reserved].map((p) => ({
+      id: p.id,
+      status: p.status,
+      reserved_reason: p.reservedReason ?? null,
+      area_m2: cm(p.areaM2),
+      tier: p.tier,
+      geometry: p.rings.map((r) => r.map(([x, y]) => [cm(x), cm(y)] as XY)),
+    })),
+  };
+}

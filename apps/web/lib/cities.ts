@@ -1,5 +1,5 @@
 import "server-only";
-import { cutParcels, generateStarterCity, parcelsToGeoJSON, RULES, type ParcelCollection } from "@emerald-city/parcels";
+import { cutParcels, generateStarterCity, parcelsToGeoJSON, RULES, toHubIdImport, type ParcelCollection } from "@emerald-city/parcels";
 import { parcelPrice, type CityPricing } from "@emerald-city/core";
 import type { HubCity, HubParcel } from "@emerald-city/hubid-client";
 import { hubid } from "./hubid";
@@ -98,16 +98,6 @@ function summarise(areasM2: number[]): CitySummary {
 
 /** Engine parcels for a starter layout, in the shape HubID's import endpoint expects (local metres). */
 export function starterImportPayload(slug: string) {
-  const result = cutParcels(slug, generateStarterCity(slug).layers);
-  return {
-    rulesVersion: RULES.version,
-    parcels: [...result.parcels, ...result.reserved].map((p) => ({
-      id: p.id,
-      status: p.status,
-      reserved_reason: p.reservedReason ?? null,
-      area_m2: Math.round(p.areaM2 * 100) / 100,
-      tier: p.tier,
-      geometry: p.rings.map((r) => r.map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100])),
-    })),
-  };
+  const payload = toHubIdImport(cutParcels(slug, generateStarterCity(slug).layers), RULES.version);
+  return { rulesVersion: payload.rules_version, parcels: payload.parcels };
 }

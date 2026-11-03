@@ -68,4 +68,5 @@ pnpm typecheck && pnpm test && pnpm build
 - [Zeke in Emerald City](docs/ZEKE.md)
 - [Voice & video (LiveKit)](docs/VOICE.md)
 - [Gaia map layer](docs/GAIA-MAP.md)
+- [Deploying hubculture.city](docs/DEPLOY.md)
 - [Legacy audit](docs/LEGACY-AUDIT.md): what the old repos do and what the beta replaces

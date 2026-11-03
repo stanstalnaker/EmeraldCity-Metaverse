@@ -1,15 +1,17 @@
 /**
  * Generate starter cities and write GeoJSON + SVG previews.
  *   pnpm --filter @emerald-city/parcels generate emerald-city nova-lisboa --out ./out
+ *   pnpm --filter @emerald-city/parcels generate emerald-city --hubid --out ./out   # + <slug>.hubid.json for HubID import
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cutParcels, generateStarterCity, parcelsToGeoJSON, renderSvg } from "./index";
+import { cutParcels, generateStarterCity, parcelsToGeoJSON, renderSvg, toHubIdImport, RULES } from "./index";
 
 const args = process.argv.slice(2);
 const outIdx = args.indexOf("--out");
 const outDir = outIdx >= 0 ? args[outIdx + 1]! : "out";
-const slugs = args.filter((a, i) => a !== "--out" && i !== outIdx + 1);
+const hubid = args.includes("--hubid");
+const slugs = args.filter((a, i) => a !== "--out" && a !== "--hubid" && (outIdx < 0 || i !== outIdx + 1));
 if (slugs.length === 0) {
   console.error("usage: generate <city-slug>... [--out dir]");
   process.exit(1);
@@ -24,5 +26,6 @@ for (const slug of slugs) {
   const summary = `${areas.length} parcels · median ${areas[areas.length >> 1]!.toFixed(2)} ha · largest ${areas.at(-1)!.toFixed(0)} ha`;
   writeFileSync(join(outDir, `${slug}.geojson`), JSON.stringify(parcelsToGeoJSON(result)));
   writeFileSync(join(outDir, `${slug}.svg`), renderSvg(result, plan.layers.land, 900, `${slug} — ${summary}`));
-  console.log(`${slug}: ${summary} (${Date.now() - t0} ms) → ${outDir}/${slug}.{geojson,svg}`);
+  if (hubid) writeFileSync(join(outDir, `${slug}.hubid.json`), JSON.stringify(toHubIdImport(result, RULES.version)));
+  console.log(`${slug}: ${summary} (${Date.now() - t0} ms) → ${outDir}/${slug}.{geojson,svg${hubid ? ",hubid.json" : ""}}`);
 }
