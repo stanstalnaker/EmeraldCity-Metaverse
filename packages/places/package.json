@@ -1,0 +1,20 @@
+{
+  "name": "@emerald-city/places",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Server-side Google Maps geocoding and optional real-world link verification against HubID.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@emerald-city/core": "workspace:*",
+    "@emerald-city/hubid-client": "workspace:*"
+  }
+}

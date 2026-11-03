@@ -23,6 +23,7 @@ HubID (`hub/HubID`) remains the system of record for users, properties, friends 
 | `apps/zeke-host` | Zeke in the city: concierge host and help desk for agents (presence), plus the LiveKit voice worker |
 | `packages/agents` | SDK for HubID agents/robots (`CityAgent`: move, chat, `ask("zeke", …)`, voice) plus examples |
 | `packages/parcels` | Parcel engine: road, water and border-bounded parcels, seeded starter cities, Gaia (OpenStreetMap) importer |
+| `packages/places` | Server-side Google Maps geocoding and optional real-world link verification against HubID |
 | `packages/zeke-client` | Server-side client for Zeke's `/chat` SSE API |
 | `docs/` | Architecture, agent identity design, Gaia map notes, legacy audit |
 

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  evaluateLinkCredentials,
+  profileAddress,
   quoteLinkRequest,
   checkPlacement,
   pointInRings,
@@ -214,5 +216,25 @@ describe("Gaia land owners control links to their land", () => {
       10,
     );
     expect(near.map((a) => a.ref)).toEqual(["1"]);
+  });
+});
+
+describe("optional link credentials", () => {
+  const davos = { lat: 46.8027, lng: 9.836 };
+  const place = { placeId: "gp_davos", location: { lat: 46.8028, lng: 9.8361 }, formattedAddress: "Promenade 1, 7270 Davos, Switzerland" };
+  it("is unverified without evidence, and needs the point to match Google's place", () => {
+    expect(evaluateLinkCredentials({ linkLocation: davos })).toEqual({ badges: [], trust: "unverified" });
+    expect(evaluateLinkCredentials({ linkLocation: { lat: 46.9, lng: 9.9 }, linkPlace: place }).trust).toBe("unverified");
+    expect(evaluateLinkCredentials({ linkLocation: davos, linkPlace: place })).toEqual({ badges: ["real-place"], trust: "place" });
+  });
+  it("adds check-in, HubID address and land ownership badges, strongest wins", () => {
+    expect(evaluateLinkCredentials({ linkLocation: davos, linkPlace: place, checkInPlaceIds: ["gp_davos"] }).trust).toBe("presence");
+    const resident = evaluateLinkCredentials({ linkLocation: davos, linkPlace: place, profilePlace: { ...place, placeId: "other", location: { lat: 46.8035, lng: 9.8365 } } });
+    expect(resident).toEqual({ badges: ["real-place", "hubid-address"], trust: "resident" });
+    expect(evaluateLinkCredentials({ linkLocation: davos, ownsGaiaParcel: true }).trust).toBe("owner");
+  });
+  it("builds a geocodable address from HubID profile fields", () => {
+    expect(profileAddress({ address: "Promenade 1", city: "Davos", zip: "7270", country: "CH" })).toBe("Promenade 1, Davos, 7270, CH");
+    expect(profileAddress({ address: "", city: "Davos" })).toBeNull();
   });
 });

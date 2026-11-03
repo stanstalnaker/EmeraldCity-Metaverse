@@ -207,6 +207,15 @@ importers:
         specifier: ^4.19.0
         version: 4.23.15
 
+  packages/places:
+    dependencies:
+      '@emerald-city/core':
+        specifier: workspace:*
+        version: link:../core
+      '@emerald-city/hubid-client':
+        specifier: workspace:*
+        version: link:../hubid-client
+
   packages/zeke-client: {}
 
 packages:

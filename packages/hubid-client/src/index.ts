@@ -193,6 +193,12 @@ export class HubIdClient {
     return this.request<T>("GET", "/user", { key: "private", auth: true });
   }
 
+  /** GET /google-places: the signed-in user's Google Place check-ins (self-reported). */
+  async getMyCheckIns(): Promise<{ googlePlaceId: string; createdAt?: string }[]> {
+    const rows = await this.request<{ google_place_id: string; created_at?: string }[]>("GET", "/google-places", { key: "private", auth: true });
+    return (rows ?? []).map((r) => ({ googlePlaceId: r.google_place_id, createdAt: r.created_at }));
+  }
+
   /** GET /user/{id}: another user's profile. */
   async getUser<T = Record<string, unknown>>(userId: number): Promise<T> {
     return this.request<T>("GET", `/user/${encodeURIComponent(userId)}`, { key: "private", auth: true });

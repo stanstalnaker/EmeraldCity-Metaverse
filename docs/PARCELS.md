@@ -146,6 +146,18 @@ Zeke and other agents can ask brokers what's for sale. Brokers are always owned 
 
   The owner can hide any anchor at any time, and only visible anchors appear in AR. Owners link to
   their own land free. Unowned land is open.
+- **Optional credentials** (`evaluateLinkCredentials`, `packages/places` `verifyLink`): linking never
+  needs proof, but a link can be checked against Google Maps and HubID to earn badges:
+
+  | Badge | Evidence | Trust |
+  |---|---|---|
+  | Real place | Google geocodes the address (or point), and the link is within 75 m of it | place |
+  | Checked in | The person has a HubID check-in at that Google place (`/google-places`; self-reported, so weak) | presence |
+  | HubID address | The person's HubID profile address geocodes to the same place (within 150 m) | resident |
+  | Land owner | They own the Gaia parcel under the link | owner |
+
+  The strongest badge sets the link's trust, which AR and listings can show (e.g. a verified ring on
+  the sphere). Failures (no profile address, Google or HubID unavailable) just earn fewer badges.
 
 ## HubID changes
 
@@ -231,7 +243,11 @@ ALTER TABLE parcels
 
 ALTER TABLE real_world_anchors
   ADD COLUMN status ENUM('visible','pending','hidden') NOT NULL DEFAULT 'visible',
-  ADD COLUMN rent_paid_until TIMESTAMP NULL;         -- rent mode: hidden automatically when lapsed
+  ADD COLUMN rent_paid_until TIMESTAMP NULL,         -- rent mode: hidden automatically when lapsed
+  ADD COLUMN google_place_id VARCHAR(255) NULL,      -- optional credentials
+  ADD COLUMN trust ENUM('unverified','place','presence','resident','owner') NOT NULL DEFAULT 'unverified',
+  ADD COLUMN badges SET('real-place','checked-in','hubid-address','land-owner') NULL,
+  ADD COLUMN verified_at TIMESTAMP NULL;
 
 CREATE TABLE property_listings (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -269,6 +285,8 @@ API (HubID), behind the existing auth:
 - `POST /properties/{id}/transfer` (p2p) and `POST /properties/{id}/listings` / `POST /listings/{id}/buy`
   (brokered, 1% to the broker), all moving VEN and ownership atomically.
 - `GET /anchors/near?lat=&lng=&radius=`: AR discovery of every visible world anchored near a place.
+- `POST /anchors/{id}/verify`: runs the optional Google Maps + HubID checks and stores badges and trust
+  (Google key server-side only, `GOOGLE_MAPS_API_KEY`).
 - `PUT /parcels/{id}/link-policy` (owner: open, curated or rent) and `PUT /anchors/{id}`
   (owner: approve, hide or unhide). Rent is charged per period in VEN; when it lapses, the anchor
   is hidden automatically.
@@ -288,11 +306,9 @@ Emerald City properties are pavilions with `territory = 'Emerald City'` and a po
 
 ## Open questions
 
-1. **Addresses without a Gaia owner:** links to unowned land are open. Should linking to a street
-   address need any proof (e.g. being there), or is the map position enough?
-2. **Andromeda:** artifact rules (who can drop them, discovery and unlock conditions, expiry), to be specified.
-3. **Rural threshold:** confirm 25 ha on a real rural sample. This hasn't been tested yet, because the
-   repo's samples are all dense city.
+1. **Andromeda:** to be specified as a separate project. Anchors already support an `artifact` kind for it.
+
+No other questions are open.
 
 Resolved since the first draft:
 - Parcel limits: 3 included, then 10 VEN per extra parcel.
@@ -301,6 +317,8 @@ Resolved since the first draft:
 - Membership names: confirmed.
 - Designs: posted directly to Hub stores, with City Council approval only for placements inside approval zones.
 - Gaia land owners: can curate, hide, or charge rent for links to their land.
+- Address links: no proof required; optional credentials from Google Maps and HubID earn trust badges.
+- Very large rural parcels: acceptable for the early use cases. The 25 ha re-cut stays as is.
 
 ## Code
 
