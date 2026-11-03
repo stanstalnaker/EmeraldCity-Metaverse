@@ -42,6 +42,18 @@ Try an agent locally. With no `HUBID_JWT_SECRET` set, the presence server accept
 AGENT_TOKEN=agent:900:1:Concierge PROPERTY_ID=209 pnpm --filter @emerald-city/agents example:concierge
 ```
 
+## Try it locally (no real HubID needed)
+
+```bash
+pnpm install
+pnpm demo                # mock HubID on :4900 + site on http://localhost:3000
+```
+
+Sign in as **stan@demo.hub** or **ana@demo.hub** (password `demo`). Stan owns two properties.
+Open **Cities → emerald-city**, click **Publish starter layout**, then claim a parcel, list it on the
+Market, link it to a real place, and sign in as Ana to buy it. The mock (`tools/mock-hubid`) keeps
+everything in memory and resets on restart. Zeke's account receives Hub Culture's payments.
+
 ## Checks
 
 ```bash

@@ -42,6 +42,8 @@ the HubID changes in [HubID changes](#hubid-changes) first.**
 - Only partners can launch cities. Existing HubID partner records grant this; the Partner level alone does not.
 - Partners set their own launch rules (open, approval, or invite) and pricing for their city.
 - Every property gets its own hub. A hub can also launch or own several properties. That ownership link is private.
+- **Zeke's HubID account is the Hub Culture treasury.** Payments that settle to Hub Culture (Gaia land
+  sales, extra-parcel fees) go to Zeke. Land in a partner's city pays the partner.
 - Each membership includes **3 parcels**. Every parcel beyond that costs **10 VEN** on top of the land
   price. Optional per-tier hard caps exist, but are off.
 - **Transfers:** peer to peer with no fee, for speed and convenience. Or brokered: **1% of the value**

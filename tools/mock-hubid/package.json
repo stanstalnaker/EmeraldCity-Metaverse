@@ -1,0 +1,10 @@
+{
+  "name": "@emerald-city/mock-hubid",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "In-memory mock of HubID for local demos. Not for production.",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}

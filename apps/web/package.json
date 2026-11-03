@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "demo": "HUBID_API_URL=http://localhost:4900 HUBID_PUBLIC_KEY=demo HUBID_PRIVATE_KEY=demo NEXT_PUBLIC_MAP_STYLE_URL=https://tiles.openfreemap.org/styles/liberty next dev -p 3000"
   },
   "dependencies": {
     "@emerald-city/core": "workspace:*",
