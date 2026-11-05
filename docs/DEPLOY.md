@@ -1,15 +1,20 @@
-# Deploying Emerald City (hubculture.city)
+# Deploying Emerald City (beta)
+
+> **The live hubculture.city and vr.hubculture.city stay untouched.** This beta runs side by side on
+> its own subdomain (e.g. `beta.hubculture.city`) and must not replace or interfere with the live
+> environment until it reaches parity with the existing metaverse (see docs/PARITY.md, in progress)
+> and Hub Culture signs off. HubID changes ship only as reviewed, backwards-compatible additions.
 
 ## What runs where
 
 | Service | Image / command | Public address (suggested) |
 |---|---|---|
-| Web site | `deploy/web.Dockerfile` (Next.js standalone, port 3000) | `https://hubculture.city` |
-| Presence (people + agents, WebSocket) | `deploy/services.Dockerfile` (port 8787) | `wss://presence.hubculture.city` |
+| Web site | `deploy/web.Dockerfile` (Next.js standalone, port 3000) | `https://beta.hubculture.city` |
+| Presence (people + agents, WebSocket) | `deploy/services.Dockerfile` (port 8787) | `wss://presence.beta.hubculture.city` |
 | Zeke host (in-world Zeke) | `deploy/services.Dockerfile`, `zeke-host` command | internal only |
 | Zeke voice worker (optional) | `deploy/services.Dockerfile`, `zeke-voice` command | internal only (connects out to LiveKit) |
 | HubID | existing `hub/HubID` API, with branches `fix/pavilion-authz` + `feature/emerald-city-parcels` merged | `https://id.hubculture.com` |
-| Legacy site | `hub-culture/emerald-city-laravel` | `https://legacy.hubculture.city` (temporary) |
+| Live site (unchanged) | `hub-culture/emerald-city-laravel`, `hub/vr-hubculture-city` | `https://hubculture.city`, `https://vr.hubculture.city` |
 
 Both images were built and smoke-tested: all web pages served from the container against a HubID
 mock, and presence started and rejected invalid tokens (close code 4401).
@@ -23,10 +28,10 @@ docker compose -f deploy/docker-compose.yml --env-file .env --profile voice up -
 ```
 
 Put a TLS reverse proxy in front (Caddy, nginx, or a load balancer):
-- `hubculture.city` → `web:3000`.
-- `presence.hubculture.city` → `presence:8787`, with WebSocket upgrade enabled.
+- `beta.hubculture.city` → `web:3000`.
+- `presence.beta.hubculture.city` → `presence:8787`, with WebSocket upgrade enabled.
 
-Set `NEXT_PUBLIC_PRESENCE_URL=wss://presence.hubculture.city` and `VITE_PRESENCE_URL` for the VR app.
+Set `NEXT_PUBLIC_PRESENCE_URL=wss://presence.beta.hubculture.city` and `VITE_PRESENCE_URL` for the VR app.
 
 ## Environment
 
@@ -71,13 +76,12 @@ HubID itself needs (in `config/emeraldcity.php` / its `.env`):
    ```
    Existing properties are grandfathered (no charge). The oldest properties get the most central
    parcels. Their real lat/lng becomes a real-world link.
-4. **Deploy and cut over hubculture.city.**
-   - Deploy the stack to staging (e.g. `beta.hubculture.city`), then smoke-test sign-in, a claim, the market and nearby.
-   - Move the legacy Laravel site to `legacy.hubculture.city`.
-   - Point `hubculture.city` at the new web service.
-   - Add redirects for legacy URLs: `/c/{slug}` (conferences) → `legacy.hubculture.city/c/{slug}`, and
-     `/p/{slug}/{id}` → `/p/{id}`.
-   - Lower the DNS TTL a day before the switch.
+4. **Deploy the beta alongside the live site (no cutover).**
+   - Deploy the stack to `beta.hubculture.city` only.
+   - Point it at a **staging HubID** first, not production.
+   - The live hubculture.city and vr.hubculture.city keep running unchanged.
+   - Any later cutover is a separate decision, made only after parity with the existing metaverse and
+     Hub Culture sign-off. It would then need a migration plan for live users, URLs and conferences.
 5. **Rotate credentials before launch.** Follow the private rotation runbook (not in this public repo):
    - HubID public/private keys,
    - Google Maps keys,
