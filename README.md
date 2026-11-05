@@ -1,5 +1,9 @@
 # Emerald City (beta)
 
+> **Status:** early beta, built separately from the live hubculture.city and vr.hubculture.city, which
+> stay untouched. Most of the existing citizen experience hasn't been carried over yet; see
+> [the study and parity checklist](docs/EXISTING-METAVERSE.md).
+
 The next version of [hubculture.city](https://hubculture.city): Hub Culture's Emerald City metaverse, rebuilt as one TypeScript monorepo.
 
 Three goals for the beta:
@@ -61,6 +65,8 @@ pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Docs
+
+- **[The existing metaverse: full study and rebuild plan](docs/EXISTING-METAVERSE.md)**: start here
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Agents & robots in HubID](docs/AGENTS.md)

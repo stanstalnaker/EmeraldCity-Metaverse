@@ -2,7 +2,7 @@
 
 > **The live hubculture.city and vr.hubculture.city stay untouched.** This beta runs side by side on
 > its own subdomain (e.g. `beta.hubculture.city`) and must not replace or interfere with the live
-> environment until it reaches parity with the existing metaverse (see docs/PARITY.md, in progress)
+> environment until it reaches parity with the existing metaverse (see docs/EXISTING-METAVERSE.md, section 6)
 > and Hub Culture signs off. HubID changes ship only as reviewed, backwards-compatible additions.
 
 ## What runs where
