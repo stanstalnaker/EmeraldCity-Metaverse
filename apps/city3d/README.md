@@ -21,8 +21,16 @@ Useful URLs:
 - `?fly&pos=150,60,650&yaw=-1.84&pitch=0.16` positions a free camera
 - `?off=ssao,shadows,detail` switches effects off for debugging
 
-Controls: WASD/arrows + mouse; Teleport menu (arrival kiosk and properties); click screens; VR
-headsets via WebXR.
+Controls: WASD/arrows + mouse (virtual joysticks on touch screens); **M** opens the map with the 14
+destinations; Fly/Walk toggle; compass; Teleport menu; VR headsets via WebXR.
+
+In-world features ported from the live client (`src/interactions.ts`, with legacy line references):
+- arrival kiosk and all lift buttons (Cognizant, Fashion Boulevard, University, BTG) teleport on click;
+- Cognizant magazines flip pages; the memorial slideshow advances; university seats sit you down;
+- underwater wellness centre: fog below the surface, glowing pyramid, pulsing sphere light, star dome;
+- planetarium sun and orbits glow; spatial ambient sound near the beach;
+- screens open their real content (live pages, YouTube, Hub Culture Radio). Property-zone screens
+  show where their content comes from until the beta is connected to staging HubID.
 
 ## Rendering
 

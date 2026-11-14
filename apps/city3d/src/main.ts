@@ -10,6 +10,8 @@ import { Scene, UniversalCamera, Vector3, type AbstractMesh } from "@babylonjs/c
 import type { ScreenContent, WorldManifest } from "@emerald-city/world";
 import emeraldCity from "@emerald-city/world/data/emerald-city.world.json";
 import { spawnFor } from "@emerald-city/world";
+import { setupInteractions } from "./interactions";
+import { setupHud } from "./hud";
 import { createEngine } from "./engine";
 import { setupLegacyLook, setupRealism } from "./realism";
 import { WorldStreamer } from "./streaming";
@@ -56,6 +58,10 @@ async function main() {
     ? setupLegacyLook(scene)
     : setupRealism(scene, camera, kind, { shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: !off.has("detail") });
 
+  const interactions = setupInteractions(scene, camera, world, assetBase, () => streamer.update(camera.position), {
+    mode: scene.fogMode, density: scene.fogDensity, color: scene.fogColor.clone(),
+  });
+
   // Screens: mesh name → what it shows.
   const screens = new Map(world.screens.map((s) => [s.mesh, s.content]));
   const wireScreens = (meshes: AbstractMesh[]) => {
@@ -73,6 +79,7 @@ async function main() {
         if (/collider|collision/i.test(mesh.name)) mesh.isVisible = false;
       }
       look.adopt(container.meshes);
+      interactions.adopt(container.meshes);
       wireScreens(container.meshes);
       if (model.id === "terrain") terrainMeshes.push(...container.meshes);
     },
@@ -99,9 +106,13 @@ async function main() {
 
   // Click a screen to see what it shows.
   scene.onPointerDown = (_evt, pick) => {
-    const content = pick?.hit && pick.pickedMesh ? screens.get(pick.pickedMesh.name) : undefined;
-    if (content) showScreen(pick!.pickedMesh!.name, content);
+    if (!pick?.hit || !pick.pickedMesh) return;
+    if (interactions.click(pick.pickedMesh, pick.pickedPoint)) return;
+    const content = screens.get(pick.pickedMesh.name);
+    if (content) showScreen(pick.pickedMesh.name, content);
   };
+  scene.onBeforeRenderObservable.add(() => interactions.tick());
+  setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly") });
 
   // Teleports: arrival kiosk destinations plus property spawns.
   const select = $<HTMLSelectElement>("teleport");
@@ -143,24 +154,40 @@ async function main() {
     $("stats").textContent = `${engine.getFps().toFixed(0)} fps`;
   });
   window.addEventListener("resize", () => engine.resize());
+  if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions } });
   (window as unknown as { __ready: boolean }).__ready = true;
 }
 
+function esc(t: string) {
+  return t.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
+}
+
+/** YouTube links become embeds, as on the live site (VideoPlayer.js getMeshData). */
+function embedUrl(url: string): string {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}?rel=0&autoplay=1&modestbranding=1` : url;
+}
+
 function showScreen(mesh: string, c: ScreenContent) {
-  const panel = $("panel");
-  panel.style.display = "block";
-  const close = `<p><button onclick="this.closest('#panel').style.display='none'">Close</button></p>`;
+  const panel = $("screen");
+  const body = $("screen-body");
+  $("screen-title").textContent = c.kind === "zone" ? `${c.pavilionName} · ${c.zoneName}` : mesh.replace(/_/g, " ");
   if (c.kind === "link") {
-    panel.innerHTML = `<h3>Screen · ${mesh}</h3><p>Shows a live page:</p><p><a href="${c.url}" target="_blank" rel="noopener">${c.url}</a></p>${close}`;
+    const url = embedUrl(c.url);
+    if (/\.(jpe?g|png|gif|webp)$/i.test(url)) body.innerHTML = `<img src="${esc(url)}" alt="">`;
+    else body.innerHTML = `<iframe src="${esc(url)}" allow="autoplay; fullscreen; camera; microphone" referrerpolicy="no-referrer"></iframe>`;
+    $("screen-open").setAttribute("href", c.url);
   } else if (c.kind === "zone") {
-    panel.innerHTML =
-      `<h3>${c.pavilionName}</h3><p>Zone <b>${c.zoneName}</b> (${c.zoneType || "zone"}) · ${c.slot === "media" ? "media" : "files"} slot ${c.index + 1}</p>` +
-      `<p>Shows what the property owner uploads to this zone on hubculture.city. Live content arrives when this client connects to HubID property zones.</p>` +
-      (c.fallbackUrl ? `<p><a href="${c.fallbackUrl}" target="_blank" rel="noopener">Fallback page</a></p>` : "") +
-      close;
+    const page = `https://hubculture.city/c/${encodeURIComponent(c.pavilionName.replace(/\s+/g, "-"))}`;
+    body.innerHTML =
+      `<div class="empty"><p>This screen shows ${c.slot === "media" ? "media" : "file"} ${c.index + 1} from the zone <b>${esc(c.zoneName)}</b> of <b>${esc(c.pavilionName)}</b>.</p>` +
+      `<p>Property owners upload content on their property page. Live zone content appears here once this beta is connected to HubID (staging).</p></div>`;
+    $("screen-open").setAttribute("href", c.fallbackUrl ?? page);
   } else {
-    panel.innerHTML = `<h3>Screen · ${mesh}</h3><p>${c.html.replace(/</g, "&lt;")}</p>${close}`;
+    body.innerHTML = `<div class="empty">${esc(c.html)}</div>`;
+    $("screen-open").removeAttribute("href");
   }
+  panel.style.display = "flex";
 }
 
 main().catch((err) => {
