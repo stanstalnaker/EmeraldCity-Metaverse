@@ -49,7 +49,9 @@ export interface RealismOptions {
 export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" | "webgl", opts: RealismOptions = {}): Realism {
   const useShadows = opts.shadows ?? true;
   const useSsao = opts.ssao ?? true;
-  const useDetail = opts.detail ?? true;
+  // Off by default: on Babylon 9 the procedural detail map cancelled direct sunlight on every
+  // untextured surface (lawns, terrain, plain walls stayed lit by sky only). ?detail turns it back on.
+  const useDetail = opts.detail ?? false;
   const SUN = (opts.sunDirection ?? SUN_DIR).normalizeToNew();
   scene.clearColor = new Color4(0.62, 0.74, 0.86, 1);
 
@@ -73,14 +75,14 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
   probe.renderList!.push(sky);
   probe.refreshRate = 0; // render once
   scene.environmentTexture = probe.cubeTexture;
-  scene.environmentIntensity = 0.85;
+  scene.environmentIntensity = 0.6;
 
   // Sun and soft sky fill.
   const sun = new DirectionalLight("sun", SUN, scene);
   sun.intensity = 3.2;
   sun.diffuse = new Color3(1.0, 0.95, 0.86);
   const fill = new HemisphericLight("fill", new Vector3(0, 1, 0), scene);
-  fill.intensity = 0.5; // keeps facet shading readable on façades facing away from the sun
+  fill.intensity = 0.3; // keeps facet shading readable on façades facing away from the sun
   fill.groundColor = new Color3(0.25, 0.27, 0.22);
 
   // Cascaded shadows (stable across the large city).
@@ -216,11 +218,11 @@ export function realisticAlbedo(c: Color3): Color3 {
   const max = Math.max(c.r, c.g, c.b);
   const min = Math.min(c.r, c.g, c.b);
   const saturation = max === 0 ? 0 : (max - min) / max;
-  if (saturation < 0.35 || max >= 0.5 || max === 0) return c.clone();
-  const scale = 0.5 / max;
+  if (saturation < 0.35 || max >= 0.32 || max === 0) return c.clone();
+  const scale = 0.32 / max;
   const lifted = new Color3(c.r * scale, c.g * scale, c.b * scale);
   // Mix a quarter toward grey of the same luminance: the legacy lights washed colours out, so a
   // straight lift reads more saturated than the art ever looked.
   const lum = 0.2126 * lifted.r + 0.7152 * lifted.g + 0.0722 * lifted.b;
-  return Color3.Lerp(lifted, new Color3(lum, lum, lum), 0.25);
+  return Color3.Lerp(lifted, new Color3(lum, lum, lum), 0.12);
 }

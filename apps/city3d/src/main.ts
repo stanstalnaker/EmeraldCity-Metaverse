@@ -68,28 +68,28 @@ async function main() {
   const look = legacyLook
     ? setupLegacyLook(scene)
     : setupRealism(scene, camera, kind, {
-        shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: !off.has("detail"),
+        shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: params.has("detail"),
         // Mountains read best under a lower sun; the sky box must fit inside the larger far plane.
         // In Davos the winter sun is low in the south-southeast (north is +z); islands get a higher sun.
         ...(world.terrain
-          ? { sunDirection: world.environment?.style === "alpine" ? new Vector3(-0.3, -0.42, 0.86) : new Vector3(-0.4, -0.7, 0.5), skySize: 30000 }
+          ? { sunDirection: params.has("sun") ? new Vector3(...(params.get("sun")!.split(",").map(Number) as [number, number, number])) : world.environment?.style === "alpine" ? new Vector3(-0.3, -0.42, 0.86) : new Vector3(-0.4, -0.7, 0.5), skySize: 30000 }
           : {}),
       });
 
   if (world.environment?.fog !== undefined && !legacyLook) scene.fogDensity = world.environment.fog;
   if (world.terrain && !legacyLook) {
-    // A low winter sun leaves wide valleys in shade: lean more on bright sky and snow bounce.
+    // Snow and open valleys: a little more sky light than the city.
     const sun = scene.getLightByName("sun");
     const fill = scene.lights.find((l) => l.getClassName() === "HemisphericLight");
-    if (sun) sun.intensity = world.environment?.style === "alpine" ? 4.2 : 3.6;
-    if (fill) fill.intensity = world.environment?.style === "alpine" ? 1.05 : 0.8;
-    scene.environmentIntensity = 1.1;
+    if (sun) sun.intensity = 3.0;
+    if (fill) fill.intensity = 0.35;
+    scene.environmentIntensity = 0.7;
   }
   if (world.environment?.style === "alpine") scene.fogColor.set(0.7, 0.8, 0.92);
 
   // Landscape worlds (Davos, Bermuda): terrain, forest, water, imported shapes and models, portals.
   const landscape = world.terrain || world.primitives?.length || world.portals?.length
-    ? await buildLandscape(scene, world, WORLDS[worldSlug]!.heights ?? null, unityBase)
+    ? await buildLandscape(scene, params.has("lite") ? { ...world, trees: undefined, meshes: [] } : world, WORLDS[worldSlug]!.heights ?? null, unityBase)
     : null;
   if (landscape) {
     look.adopt(landscape.meshes);
