@@ -1,0 +1,17 @@
+{
+ "heightmap": "davos.dem.png",
+ "resolution": 1025,
+ "size": [
+  14000.0,
+  14000.0
+ ],
+ "base": 1182.5,
+ "height": 1626.8,
+ "center": [
+  46.8027,
+  9.836
+ ],
+ "zoom": 13,
+ "metersPerSourcePixel": 13.08,
+ "attribution": "Elevation: AWS Terrain Tiles (Mapzen/Tilezen; SRTM, EU-DEM and others)"
+}

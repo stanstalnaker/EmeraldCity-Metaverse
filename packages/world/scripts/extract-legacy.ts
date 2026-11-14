@@ -227,6 +227,11 @@ const manifest: WorldManifest = {
   defaultSpawn,
   spawns,
   teleports,
+  // Portals to the sister worlds, beside the arrival kiosk (not in the legacy code).
+  portals: [
+    { to: "davos", label: "Davos", position: [44, 3.6, 384] },
+    { to: "bermuda", label: "Bermuda", position: [60, 3.6, 384] },
+  ],
 };
 const out = new URL("../data/emerald-city.world.json", import.meta.url);
 writeFileSync(out, JSON.stringify(manifest, null, 1) + "\n");

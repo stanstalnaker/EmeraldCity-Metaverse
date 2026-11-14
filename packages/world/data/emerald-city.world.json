@@ -3856,5 +3856,25 @@
    },
    "group": "kiosk"
   }
+ ],
+ "portals": [
+  {
+   "to": "davos",
+   "label": "Davos",
+   "position": [
+    44,
+    3.6,
+    384
+   ]
+  },
+  {
+   "to": "bermuda",
+   "label": "Bermuda",
+   "position": [
+    60,
+    3.6,
+    384
+   ]
+  }
  ]
 }

@@ -21,13 +21,14 @@ const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; y
   { icon: "childrens", label: "Children's House", pos: [-835, 11.3, -1360], yaw: 0 },
 ];
 
-export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean }) {
+export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; map: boolean }) {
   const { camera, assetBase } = o;
   const $ = (id: string) => document.getElementById(id)!;
   const ui = (f: string) => `${assetBase}models/ui/${f}`;
 
-  // Map
+  // Map (Emerald City only for now)
   const map = $("map");
+  if (!o.map) $("map-btn").style.display = "none";
   $("map-image").setAttribute("src", ui("map.png"));
   $("map-stops").innerHTML = MAP_STOPS.map(
     (s, i) => `<button data-i="${i}" title="${s.label}"><img src="${ui(`map_icons/${s.icon}_icon.png`)}" alt="${s.label}"></button>`,
@@ -74,7 +75,7 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
     $("screen-body").innerHTML = "";
   };
   window.addEventListener("keydown", (e) => {
-    if (e.key === "m" || e.key === "M") $("map-btn").click();
+    if ((e.key === "m" || e.key === "M") && o.map) $("map-btn").click();
     if (e.key === "Escape") {
       map.style.display = "none";
       $("screen-close").click();

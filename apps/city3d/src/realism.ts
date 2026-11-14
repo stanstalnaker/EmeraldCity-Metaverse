@@ -40,24 +40,29 @@ export interface RealismOptions {
   shadows?: boolean;
   ssao?: boolean;
   detail?: boolean;
+  /** Direction the sunlight travels (default: late-morning sun for the city). */
+  sunDirection?: Vector3;
+  /** Size of the sky box; must stay inside the camera's far plane (default 9000). */
+  skySize?: number;
 }
 
 export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" | "webgl", opts: RealismOptions = {}): Realism {
   const useShadows = opts.shadows ?? true;
   const useSsao = opts.ssao ?? true;
   const useDetail = opts.detail ?? true;
+  const SUN = (opts.sunDirection ?? SUN_DIR).normalizeToNew();
   scene.clearColor = new Color4(0.62, 0.74, 0.86, 1);
 
   // Physically based sky (Preetham model), oriented to the sun.
   const skyMat = new SkyMaterial("sky", scene);
   skyMat.backFaceCulling = false;
   skyMat.useSunPosition = true;
-  skyMat.sunPosition = SUN_DIR.scale(-1000);
+  skyMat.sunPosition = SUN.scale(-1000);
   skyMat.turbidity = 6;
   skyMat.luminance = 1;
   skyMat.rayleigh = 1.6;
   skyMat.mieDirectionalG = 0.82;
-  const sky = MeshBuilder.CreateBox("skyBox", { size: 9000 }, scene);
+  const sky = MeshBuilder.CreateBox("skyBox", { size: opts.skySize ?? 9000 }, scene);
   sky.material = skyMat;
   sky.infiniteDistance = true;
   sky.isPickable = false;
@@ -71,7 +76,7 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
   scene.environmentIntensity = 0.85;
 
   // Sun and soft sky fill.
-  const sun = new DirectionalLight("sun", SUN_DIR, scene);
+  const sun = new DirectionalLight("sun", SUN, scene);
   sun.intensity = 3.2;
   sun.diffuse = new Color3(1.0, 0.95, 0.86);
   const fill = new HemisphericLight("fill", new Vector3(0, 1, 0), scene);

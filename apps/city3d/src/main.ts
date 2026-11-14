@@ -3,13 +3,15 @@
  * property (?pavilion_id=, compatible with the live site's links), teleports via the arrival kiosk
  * and lifts, and makes the ~150 property screens interactive.
  *
- * ?look=legacy  flat legacy lighting for comparison · ?renderer=webgl  force WebGL2 · ?shot  no HUD
+ * ?world=davos|bermuda  other worlds (default Emerald City) · ?look=legacy  flat legacy lighting for comparison · ?renderer=webgl  force WebGL2 · ?shot  no HUD
  * ?off=ssao,shadows,detail  switch individual effects off (debugging) · ?fly&pos=x,y,z&yaw=&pitch=  camera
  */
 import { Scene, UniversalCamera, Vector3, type AbstractMesh } from "@babylonjs/core";
 import type { ScreenContent, WorldManifest } from "@emerald-city/world";
-import emeraldCity from "@emerald-city/world/data/emerald-city.world.json";
 import { spawnFor } from "@emerald-city/world";
+import davosHeights from "@emerald-city/world/data/davos.r16?url";
+import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
+import { buildLandscape } from "./landscape";
 import { setupInteractions } from "./interactions";
 import { setupHud } from "./hud";
 import { createEngine } from "./engine";
@@ -17,12 +19,21 @@ import { setupLegacyLook, setupRealism } from "./realism";
 import { WorldStreamer } from "./streaming";
 
 const params = new URLSearchParams(location.search);
-const world = emeraldCity as unknown as WorldManifest;
+const WORLDS: Record<string, { load: () => Promise<{ default: unknown }>; heights?: string }> = {
+  "emerald-city": { load: () => import("@emerald-city/world/data/emerald-city.world.json") },
+  davos: { load: () => import("@emerald-city/world/data/davos.world.json"), heights: davosHeights },
+  bermuda: { load: () => import("@emerald-city/world/data/bermuda.world.json"), heights: bermudaHeights },
+};
+const worldSlug = WORLDS[params.get("world") ?? ""] ? params.get("world")! : "emerald-city";
+let world: WorldManifest;
+/** Models and textures of the 2017-18 Unity worlds, converted (served like /legacy/, not committed). */
+const unityBase = (import.meta.env.VITE_UNITY_ASSET_BASE as string | undefined) ?? "/unity/";
 const assetBase = (import.meta.env.VITE_ASSET_BASE as string | undefined) ?? "/legacy/";
 const legacyLook = params.get("look") === "legacy";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 async function main() {
+  world = (await WORLDS[worldSlug]!.load()).default as WorldManifest;
   const canvas = $<HTMLCanvasElement>("c");
   const { engine, kind } = await createEngine(canvas);
   const scene = new Scene(engine);
@@ -35,7 +46,7 @@ async function main() {
   const camera = new UniversalCamera("eye", new Vector3(spawn.position.x, spawn.position.y + 1.7, spawn.position.z), scene);
   camera.rotation.y = spawn.rotationY;
   camera.minZ = 0.2;
-  camera.maxZ = 9000;
+  camera.maxZ = world.terrain ? 24000 : 9000;
   camera.speed = 1.1;
   camera.angularSensibility = 2500;
   camera.keysUp.push(87); // W
@@ -56,7 +67,24 @@ async function main() {
   const off = new Set((params.get("off") ?? "").split(","));
   const look = legacyLook
     ? setupLegacyLook(scene)
-    : setupRealism(scene, camera, kind, { shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: !off.has("detail") });
+    : setupRealism(scene, camera, kind, {
+        shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: !off.has("detail"),
+        // Mountains read best under a lower sun; the sky box must fit inside the larger far plane.
+        ...(world.terrain ? { sunDirection: new Vector3(-0.55, -0.42, -0.72), skySize: 30000 } : {}),
+      });
+
+  if (world.environment?.fog !== undefined && !legacyLook) scene.fogDensity = world.environment.fog;
+  if (world.environment?.style === "alpine") scene.fogColor.set(0.7, 0.8, 0.92);
+
+  // Landscape worlds (Davos, Bermuda): terrain, forest, water, imported shapes and models, portals.
+  const landscape = world.terrain || world.primitives?.length || world.portals?.length
+    ? await buildLandscape(scene, world, WORLDS[worldSlug]!.heights ?? null, unityBase)
+    : null;
+  if (landscape) {
+    look.adopt(landscape.meshes);
+    camera.speed = 1.6;
+    scene.gravity = Vector3.Zero(); // falling onto the terrain is handled below
+  }
 
   const interactions = setupInteractions(scene, camera, world, assetBase, () => streamer.update(camera.position), {
     mode: scene.fogMode, density: scene.fogDensity, color: scene.fogColor.clone(),
@@ -94,10 +122,21 @@ async function main() {
   // Load what's around the spawn before showing the first frame (avoids falling through terrain).
   camera.applyGravity = false;
   await streamer.preload(camera.position);
+  if (landscape) terrainMeshes.push(...landscape.meshes.filter((m) => m.name === "terrain"));
   camera.applyGravity = !params.has("fly");
   setInterval(() => {
     streamer.update(camera.position);
     // Safety net: if you ever fall out of the world, return to the spawn point.
+    // Portals: walk into one to travel to that world.
+    for (const p of landscape?.portals ?? []) {
+      if (Math.hypot(camera.position.x - p.position[0], camera.position.z - p.position[2]) < 1.8 && Math.abs(camera.position.y - p.position[1] - 2) < 3) {
+        const q = new URLSearchParams(location.search);
+        q.delete("pos");
+        if (p.to === "emerald-city") q.delete("world");
+        else q.set("world", p.to);
+        location.search = q.toString();
+      }
+    }
     if (camera.position.y < -150) {
       camera.position.set(spawn.position.x, spawn.position.y + 1.7, spawn.position.z);
       camera.rotation.y = spawn.rotationY;
@@ -112,7 +151,23 @@ async function main() {
     if (content) showScreen(pick.pickedMesh.name, content);
   };
   scene.onBeforeRenderObservable.add(() => interactions.tick());
-  setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly") });
+  // Stand on the terrain (cheaper than mesh collisions on a 260k-vertex ground).
+  if (landscape) {
+    let vy = 0;
+    scene.onBeforeRenderObservable.add(() => {
+      const g = landscape.groundAt(camera.position.x, camera.position.z);
+      if (g === null || !camera.applyGravity) return;
+      const eye = g + 1.7;
+      if (camera.position.y <= eye + 0.05) {
+        camera.position.y = eye;
+        vy = 0;
+      } else {
+        vy = Math.min(vy + 0.02, 2);
+        camera.position.y = Math.max(eye, camera.position.y - vy);
+      }
+    });
+  }
+  setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly"), map: worldSlug === "emerald-city" });
 
   // Teleports: arrival kiosk destinations plus property spawns.
   const select = $<HTMLSelectElement>("teleport");

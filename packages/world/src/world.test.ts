@@ -44,3 +44,33 @@ describe("Emerald City manifest (imported from the legacy scene)", () => {
     expect(JSON.stringify(w)).not.toMatch(/Private-Key|private_key|password|access_token|token=/i);
   });
 });
+
+import davos from "../data/davos.world.json";
+import bermuda from "../data/bermuda.world.json";
+import { readFileSync } from "node:fs";
+import { terrainHeight } from "./index";
+
+describe("landscape worlds", () => {
+  it("Davos sits on the real valley: Davos Platz near 1,560 m, forest below the treeline", () => {
+    const w = davos as unknown as WorldManifest;
+    const t = w.terrain!;
+    const raw = readFileSync(new URL("../data/" + t.heightmap, import.meta.url));
+    const h = new Uint16Array(raw.buffer, raw.byteOffset, raw.byteLength / 2);
+    expect(h.length).toBe(t.resolution * t.resolution);
+    expect(terrainHeight(t, h, 0, 0) + t.base!).toBeGreaterThan(1500);
+    expect(terrainHeight(t, h, 0, 0) + t.base!).toBeLessThan(1620);
+    expect(w.trees!.instances.length).toBeGreaterThan(10000);
+    for (const [x, y, z] of w.trees!.instances.slice(0, 200)) {
+      expect(y + t.base!).toBeLessThan(2101);
+      expect(Math.abs(terrainHeight(t, h, x, z) - y)).toBeLessThan(25);
+    }
+    expect(w.portals!.map((p) => p.to).sort()).toEqual(["bermuda", "emerald-city"]);
+  });
+
+  it("Bermuda keeps the Unity island layout with portals home", () => {
+    const w = bermuda as unknown as WorldManifest;
+    expect(w.primitives!.length).toBeGreaterThan(100);
+    expect(w.trees!.kind).toBe("palm");
+    expect(w.portals!.map((p) => p.to).sort()).toEqual(["davos", "emerald-city"]);
+  });
+});

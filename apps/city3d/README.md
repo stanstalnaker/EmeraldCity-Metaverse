@@ -32,6 +32,28 @@ In-world features ported from the live client (`src/interactions.ts`, with legac
 - screens open their real content (live pages, YouTube, Hub Culture Radio). Property-zone screens
   show where their content comes from until the beta is connected to staging HubID.
 
+## Worlds
+
+`?world=` picks the world. Glowing portals link them: two beside the Emerald City arrival kiosk, and
+two in each sister world.
+
+| World | What it is | Source |
+|---|---|---|
+| `emerald-city` (default) | The city from the live VR site | `hub/vr-hubculture-city` (2021), imported by `packages/world/scripts/extract-legacy.ts` |
+| `davos` | The **real** 14 km Landwasser valley around Davos Platz, with forest up to the 2,100 m treeline, snow above about 1,900 m, and Lake Davos. The 2017-18 chalet, ski area, Zeke and portal sit on a hillside above the town. | Open elevation data (`fetch-dem.py`); `hub/VR-HubCulture` `davos.unity` (`extract-unity.py`) |
+| `bermuda` | The island from the 2017-18 VR app: terrain, beach house, pool, tennis court, palms and ocean | `hub/VR-HubCulture` `bahamas.unity` (the Unity file is misnamed; it is Bermuda) |
+
+To rebuild the sister worlds:
+1. `git lfs pull` in a VR-HubCulture checkout, for the Davos, Bahamas, Games, Zeke and UI folders.
+2. `python3 packages/world/scripts/extract-unity.py <VR-HubCulture> davos > packages/world/data/davos.unity.json`. Do the same for `bermuda`.
+3. `python3 packages/world/scripts/fetch-dem.py davos 46.8027 9.8360 14 13`
+4. `python3 packages/world/scripts/build-unity-worlds.py`
+
+Models and textures are served from `UNITY_ASSETS_DIR` (default `../../../vr-hubculture-web`) at
+`/unity/`. Textures are converted to PNG. The FBX models must be converted to GLB with the same
+relative paths. Until then, worlds render without them: the terrain, forest, water, shapes and
+portals all work.
+
 ## Rendering
 
 - WebGPU with WebGL2 fallback.
