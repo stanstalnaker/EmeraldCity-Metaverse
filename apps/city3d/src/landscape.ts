@@ -165,19 +165,32 @@ export async function buildLandscape(scene: Scene, world: WorldManifest, heightm
         console.info("model not converted yet:", file);
         return;
       }
+      container.addAllToScene(); // materials and textures belong to the scene; the sources stay hidden
       const sources = container.meshes.filter((m): m is Mesh => m instanceof Mesh && m.getTotalVertices() > 0);
+      for (const m of container.meshes) m.setEnabled(false);
+      // glTF is right-handed; Unity (and this scene) are left-handed. Unity's own FBX import negates
+      // X, so bake the same mirror into each source mesh once (faces are flipped to match).
+      for (const src of sources) {
+        src.parent = null;
+        src.bakeTransformIntoVertices(Matrix.Scaling(-1, 1, 1));
+      }
+      // Unity splits multi-material meshes into "<name>_MeshPartN" objects that share one transform;
+      // the converted model keeps one mesh, so place it once.
+      const seen = new Set<string>();
       for (const pl of placements as (Placement & { mesh: string | null })[]) {
-        const picks = pl.mesh ? sources.filter((s) => s.name === pl.mesh || s.name.startsWith(pl.mesh + "_") || s.parent?.name === pl.mesh) : sources;
+        const base = pl.mesh?.replace(/_MeshPart\d+$/, "") ?? null;
+        const key = `${base}@${pl.position.join(",")}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const picks = base ? sources.filter((s) => s.name === base || s.name.startsWith(base + "_primitive") || s.parent?.name === base) : sources;
         for (const src of picks) {
           const inst = src.clone(`${pl.name ?? src.name}`, null, true, false);
           if (!inst) continue;
           inst.parent = null;
-          inst.setPreTransformMatrix(Matrix.Identity());
           place(inst, pl);
           if (pl.material?.texture || pl.material?.color) inst.material = material(scene, pl.material, assetBase);
           inst.checkCollisions = true;
           inst.setEnabled(true);
-          scene.addMesh(inst);
           out.push(inst);
         }
       }

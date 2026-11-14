@@ -84,7 +84,9 @@ for _ in range(4000):
     if not (town + 40 < h < town + 250):
         continue
     slope = max(abs(ground(x + 30, z) - ground(x - 30, z)), abs(ground(x, z + 30) - ground(x, z - 30))) / 60
-    score = slope + math.hypot(x, z) / 20000
+    # Prefer slopes facing the winter sun (south, i.e. ground falling towards -z), like the town's sunny side.
+    south = (ground(x, z + 30) - ground(x, z - 30)) / 60
+    score = slope + math.hypot(x, z) / 20000 - 0.6 * min(max(south, 0), 0.25)
     if best is None or score < best[0]:
         best = (score, x, z, h)
 _, wx, wz, wh = best
@@ -130,7 +132,7 @@ write("davos", {
     "trees": {"kind": "conifer", "instances": trees},
     "primitives": davos_objs_p, "meshes": davos_objs_m,
     "models": [], "screens": [], "zones": [],
-    "defaultSpawn": {"position": {"x": spawn[0], "y": spawn[1], "z": spawn[2]}, "rotationY": 0.6},
+    "defaultSpawn": {"position": {"x": spawn[0], "y": spawn[1], "z": spawn[2]}, "rotationY": 3.0},  # looking south over the town
     "spawns": {"town": {"position": {"x": 0, "y": round(town + 2, 1), "z": 0}, "rotationY": 0.8}},
     "teleports": [
         {"id": "chalet", "label": "Chalet", "position": {"x": spawn[0], "y": spawn[1], "z": spawn[2]}, "group": "kiosk"},

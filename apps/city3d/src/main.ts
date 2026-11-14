@@ -70,10 +70,21 @@ async function main() {
     : setupRealism(scene, camera, kind, {
         shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: !off.has("detail"),
         // Mountains read best under a lower sun; the sky box must fit inside the larger far plane.
-        ...(world.terrain ? { sunDirection: new Vector3(-0.55, -0.42, -0.72), skySize: 30000 } : {}),
+        // In Davos the winter sun is low in the south-southeast (north is +z); islands get a higher sun.
+        ...(world.terrain
+          ? { sunDirection: world.environment?.style === "alpine" ? new Vector3(-0.3, -0.42, 0.86) : new Vector3(-0.4, -0.7, 0.5), skySize: 30000 }
+          : {}),
       });
 
   if (world.environment?.fog !== undefined && !legacyLook) scene.fogDensity = world.environment.fog;
+  if (world.terrain && !legacyLook) {
+    // A low winter sun leaves wide valleys in shade: lean more on bright sky and snow bounce.
+    const sun = scene.getLightByName("sun");
+    const fill = scene.lights.find((l) => l.getClassName() === "HemisphericLight");
+    if (sun) sun.intensity = world.environment?.style === "alpine" ? 4.2 : 3.6;
+    if (fill) fill.intensity = world.environment?.style === "alpine" ? 1.05 : 0.8;
+    scene.environmentIntensity = 1.1;
+  }
   if (world.environment?.style === "alpine") scene.fogColor.set(0.7, 0.8, 0.92);
 
   // Landscape worlds (Davos, Bermuda): terrain, forest, water, imported shapes and models, portals.
