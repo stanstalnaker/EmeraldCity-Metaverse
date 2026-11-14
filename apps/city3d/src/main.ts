@@ -220,6 +220,13 @@ async function main() {
     $("stats").textContent = `${engine.getFps().toFixed(0)} fps`;
   });
   window.addEventListener("resize", () => engine.resize());
+  // Debug switches for lighting: ?kill=fog,ibl,sun,fill,pipe
+  const kill = new Set((params.get("kill") ?? "").split(","));
+  if (kill.has("fog")) scene.fogEnabled = false;
+  if (kill.has("ibl")) scene.environmentIntensity = 0;
+  if (kill.has("sun")) scene.getLightByName("sun")!.intensity = 0;
+  if (kill.has("fill")) scene.getLightByName("fill")!.intensity = 0;
+  if (kill.has("pipe")) scene.postProcessRenderPipelineManager.supportedPipelines.forEach((pl) => scene.postProcessRenderPipelineManager.detachCamerasFromRenderPipeline(pl.name, camera));
   if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions } });
   (window as unknown as { __ready: boolean }).__ready = true;
 }
