@@ -1,0 +1,3860 @@
+{
+ "version": 1,
+ "slug": "emerald-city",
+ "name": "Emerald City",
+ "source": {
+  "repo": "hub/vr-hubculture-city",
+  "file": "src/scripts/scenes/demo3t.js",
+  "commit": "11af14a",
+  "extractedAt": "2026-11-14"
+ },
+ "models": [
+  {
+   "id": "terrain",
+   "file": "models/terrain.babylon",
+   "anchor": null,
+   "radius": null
+  },
+  {
+   "id": "high3",
+   "file": "models/high3/2.babylon",
+   "anchor": {
+    "x": 1590,
+    "y": 130.5,
+    "z": -92
+   },
+   "radius": 555,
+   "transform": {
+    "position": {
+     "x": 1590,
+     "y": 130.5,
+     "z": -92
+    },
+    "scale": 0.9,
+    "rotationY": 1.5707963267948966
+   }
+  },
+  {
+   "id": "wellness-underwater",
+   "file": "models/wellness_underwater/2.babylon",
+   "anchor": {
+    "x": -1450,
+    "y": -0.01,
+    "z": -195
+   },
+   "radius": 555,
+   "transform": {
+    "position": {
+     "x": -1450,
+     "y": -0.01,
+     "z": -195
+    },
+    "scale": 24.801,
+    "rotationY": 0
+   }
+  },
+  {
+   "id": "city-hall",
+   "file": "models/city-hall.babylon",
+   "anchor": {
+    "x": -269,
+    "y": 4,
+    "z": 534
+   },
+   "radius": 555
+  },
+  {
+   "id": "boulevard",
+   "file": "models/boulevard.babylon",
+   "anchor": {
+    "x": 366,
+    "y": -2,
+    "z": -1401
+   },
+   "radius": 555
+  },
+  {
+   "id": "a-transformation-1",
+   "file": "models/a-transformation_1.babylon",
+   "anchor": {
+    "x": -1567,
+    "y": 10,
+    "z": 200
+   },
+   "radius": 555
+  },
+  {
+   "id": "a-transformation-2",
+   "file": "models/a-transformation_2.babylon",
+   "anchor": {
+    "x": -1567,
+    "y": 10,
+    "z": 200
+   },
+   "radius": 555
+  },
+  {
+   "id": "a-transformation-3",
+   "file": "models/a-transformation_3.babylon",
+   "anchor": {
+    "x": -1370,
+    "y": 10,
+    "z": 218
+   },
+   "radius": 555
+  },
+  {
+   "id": "a-transformation-4",
+   "file": "models/a-transformation_4.babylon",
+   "anchor": {
+    "x": -1370,
+    "y": 10,
+    "z": 218
+   },
+   "radius": 555
+  },
+  {
+   "id": "cognizant-n2",
+   "file": "models/cognizant_n2.babylon",
+   "anchor": {
+    "x": 1035,
+    "y": 6.1,
+    "z": -51
+   },
+   "radius": 555
+  },
+  {
+   "id": "btg",
+   "file": "models/btg.babylon",
+   "anchor": {
+    "x": 500,
+    "y": 14,
+    "z": 1000
+   },
+   "radius": 555,
+   "transform": {
+    "position": {
+     "x": 475,
+     "y": 0,
+     "z": 889
+    },
+    "scale": 25.4,
+    "rotationY": 0.5183627878423159
+   }
+  },
+  {
+   "id": "university-1",
+   "file": "models/university_1.babylon",
+   "anchor": {
+    "x": -522.5,
+    "y": 3.5,
+    "z": -911
+   },
+   "radius": 555
+  },
+  {
+   "id": "university-2",
+   "file": "models/university_2.babylon",
+   "anchor": {
+    "x": -522.5,
+    "y": 3.5,
+    "z": -911
+   },
+   "radius": 555
+  },
+  {
+   "id": "montessori",
+   "file": "models/montessori.babylon",
+   "anchor": {
+    "x": -800.5,
+    "y": 3.5,
+    "z": -1360
+   },
+   "radius": 555
+  },
+  {
+   "id": "arrival",
+   "file": "models/arrival.babylon",
+   "anchor": {
+    "x": -269,
+    "y": 4,
+    "z": 534
+   },
+   "radius": 555
+  },
+  {
+   "id": "information",
+   "file": "models/information.babylon",
+   "anchor": {
+    "x": -269,
+    "y": 4,
+    "z": 534
+   },
+   "radius": 555
+  },
+  {
+   "id": "nightclub",
+   "file": "models/nightclub.babylon",
+   "anchor": {
+    "x": -269,
+    "y": 4,
+    "z": 534
+   },
+   "radius": 555
+  },
+  {
+   "id": "houses-t3",
+   "file": "models/houses_t3.babylon",
+   "anchor": {
+    "x": -500,
+    "y": 4,
+    "z": 850
+   },
+   "radius": 1110
+  },
+  {
+   "id": "house-4",
+   "file": "models/house_4.babylon",
+   "anchor": {
+    "x": -1000,
+    "y": 3.5,
+    "z": -911
+   },
+   "radius": 1110
+  }
+ ],
+ "screens": [
+  {
+   "mesh": "city_hall_monitor",
+   "content": {
+    "kind": "link",
+    "url": "https://live.hubculture.city/plaza"
+   }
+  },
+  {
+   "mesh": "city_hall_monitor.001",
+   "content": {
+    "kind": "link",
+    "url": "https://live.hubculture.city/plaza"
+   }
+  },
+  {
+   "mesh": "city_hall_monitor.002",
+   "content": {
+    "kind": "link",
+    "url": "https://live.hubculture.city/plaza"
+   }
+  },
+  {
+   "mesh": "city_hall_monitor.003",
+   "content": {
+    "kind": "link",
+    "url": "https://live.hubculture.city/plaza"
+   }
+  },
+  {
+   "mesh": "BM_video_plane",
+   "content": {
+    "kind": "link",
+    "url": "https://live.hubculture.city/a-transformation-station"
+   }
+  },
+  {
+   "mesh": "university_screen_3-13",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 26,
+    "zoneName": "Arrivals",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_3-14",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 26,
+    "zoneName": "Arrivals",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_3-15",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 26,
+    "zoneName": "Arrivals",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_3-16",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 26,
+    "zoneName": "Arrivals",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_1-1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 27,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_1-2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 27,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_1-3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 27,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_1-4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 27,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_1-5",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 28,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_1-6",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 28,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_1-7",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 28,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_1-8",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 28,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_1-9",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 29,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_1-10",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 29,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_1-11",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 29,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_1-12",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 29,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_1-13",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 30,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_1-14",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 30,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_1-15",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 30,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_1-16",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 30,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_2-1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 31,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_2-2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 31,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_2-3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 31,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_2-4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 31,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_2-5",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 32,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_2-6",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 32,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_2-7",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 32,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_2-8",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 32,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_2-9",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 33,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_2-10",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 33,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_2-11",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 33,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_2-12",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 33,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_2-13",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 34,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_2-14",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 34,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_2-15",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 34,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_2-16",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 34,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_2-17",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 35,
+    "zoneName": "Iota",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_2-18",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 35,
+    "zoneName": "Iota",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_2-19",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 35,
+    "zoneName": "Iota",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_2-20",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 35,
+    "zoneName": "Iota",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_2-21",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 36,
+    "zoneName": "Kappa",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_2-22",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 36,
+    "zoneName": "Kappa",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_2-23",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 36,
+    "zoneName": "Kappa",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_2-24",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 36,
+    "zoneName": "Kappa",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_3-1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 37,
+    "zoneName": "Lambda",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_3-2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 37,
+    "zoneName": "Lambda",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_3-3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 37,
+    "zoneName": "Lambda",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_3-4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 37,
+    "zoneName": "Lambda",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_3-5",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 38,
+    "zoneName": "Mu",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_3-6",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 38,
+    "zoneName": "Mu",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_3-7",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 38,
+    "zoneName": "Mu",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_3-8",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 38,
+    "zoneName": "Mu",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_3-9",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 39,
+    "zoneName": "Artemis",
+    "zoneType": "Garden",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_3-10",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 39,
+    "zoneName": "Artemis",
+    "zoneType": "Garden",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_3-11",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 39,
+    "zoneName": "Artemis",
+    "zoneType": "Garden",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_3-12",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 236,
+    "pavilionName": "American University",
+    "zoneId": 39,
+    "zoneName": "Artemis",
+    "zoneType": "Garden",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_lobby1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 13,
+    "zoneName": "Sky Pavilion",
+    "zoneType": "Terrace",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_lobby2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 13,
+    "zoneName": "Sky Pavilion",
+    "zoneType": "Terrace",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_lobby3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 13,
+    "zoneName": "Sky Pavilion",
+    "zoneType": "Terrace",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_a1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 17,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_a2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 17,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_a3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 17,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_a4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 17,
+    "zoneName": "Alpha",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_b1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 18,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_b2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 18,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_b3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 18,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_b4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 18,
+    "zoneName": "Beta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_g1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 19,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_g2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 19,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_g3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 19,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_g4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 19,
+    "zoneName": "Gamma",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_d1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 20,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_d2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 20,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_d3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 20,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_d4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 20,
+    "zoneName": "Delta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_e1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 21,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_e2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 21,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_e3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 21,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_e4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 21,
+    "zoneName": "Epsilon",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_h1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 22,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_h2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 22,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_h3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 22,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_h4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 22,
+    "zoneName": "Zeta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_c1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 23,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_c2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 23,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_c3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 23,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_c4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 23,
+    "zoneName": "Eta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "university_screen_f1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 24,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "university_screen_f2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 24,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "university_screen_f3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 24,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "university_screen_f4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 235,
+    "pavilionName": "University of Hawai'i at Manoa",
+    "zoneId": 24,
+    "zoneName": "Theta",
+    "zoneType": "Classroom",
+    "slot": "media",
+    "index": 3
+   }
+  },
+  {
+   "mesh": "cognizant_video",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 167,
+    "pavilionName": "Cognizant",
+    "zoneId": 8,
+    "zoneName": "Entrance Lobby",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "cognizant_video2",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "cognizant_video3",
+   "content": {
+    "kind": "html",
+    "html": "My Message</div>"
+   }
+  },
+  {
+   "mesh": "cognizant_monitor1",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/Cognizant"
+   }
+  },
+  {
+   "mesh": "cognizant_monitor2",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/Cognizant"
+   }
+  },
+  {
+   "mesh": "cognizant_monitor3",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/Cognizant"
+   }
+  },
+  {
+   "mesh": "cognizant_monitor4",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/Cognizant"
+   }
+  },
+  {
+   "mesh": "cognizant_monitor5",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 167,
+    "pavilionName": "Cognizant",
+    "zoneId": 9,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "cognizant_monitor6",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 167,
+    "pavilionName": "Cognizant",
+    "zoneId": 10,
+    "zoneName": "Meeting Room 2",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "cognizant_monitor7",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 167,
+    "pavilionName": "Cognizant",
+    "zoneId": 40,
+    "zoneName": "Meeting Room 3",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "cognizant_monitor8",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 167,
+    "pavilionName": "Cognizant",
+    "zoneId": 41,
+    "zoneName": "Meeting Room 4",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "cognizant_monitor9",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 167,
+    "pavilionName": "Cognizant",
+    "zoneId": 44,
+    "zoneName": "Roof Terrace",
+    "zoneType": "Terrace",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Box687",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 49,
+    "zoneName": "Main Lobby",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Box688",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 49,
+    "zoneName": "Main Lobby",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Box729",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane061",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 51,
+    "zoneName": "Beta Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Plane060",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 51,
+    "zoneName": "Beta Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Plane059",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 51,
+    "zoneName": "Beta Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "Box733",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 52,
+    "zoneName": "Gamma Room",
+    "zoneType": "Meeting Room",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Box730",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane063",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 63,
+    "zoneName": "Gamma Side Room",
+    "zoneType": "",
+    "slot": "file",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Plane062",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 63,
+    "zoneName": "Gamma Side Room",
+    "zoneType": "",
+    "slot": "file",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "Box708a",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 53,
+    "zoneName": "Delta Room",
+    "zoneType": "Meeting Room",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Box708",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane057",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 53,
+    "zoneName": "Delta Room",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Plane056",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 53,
+    "zoneName": "Delta Room",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Plane055",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 53,
+    "zoneName": "Delta Room",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "Box731",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane065",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 65,
+    "zoneName": "Beta Room 1",
+    "zoneType": "",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Plane064",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 65,
+    "zoneName": "Beta Room 1",
+    "zoneType": "",
+    "slot": "file",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Box709",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane058",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 64,
+    "zoneName": "Beta Room 1",
+    "zoneType": "",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "BTG_out_screen_back",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 54,
+    "zoneName": "Social Terrace",
+    "zoneType": "Terrace",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Box680",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane049",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 56,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Plane050",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 56,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Plane048",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 56,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "Box706",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/BridgingTheGap"
+   }
+  },
+  {
+   "mesh": "Plane051",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 57,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Plane053",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 57,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "Plane052",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 57,
+    "zoneName": "Meeting Room 1",
+    "zoneType": "Meeting Room",
+    "slot": "file",
+    "index": 2
+   }
+  },
+  {
+   "mesh": "BTG_out_screen_front",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 209,
+    "pavilionName": "BridgingTheGap",
+    "zoneId": 58,
+    "zoneName": "Welcome Garden",
+    "zoneType": "Garden",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "wellnessScreen333",
+   "content": {
+    "kind": "html",
+    "html": "<div style=\"font-size=48px\">My Message</div>"
+   }
+  },
+  {
+   "mesh": "wellnessScreen1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 221,
+    "pavilionName": "undefined",
+    "zoneId": 59,
+    "zoneName": "undefined",
+    "zoneType": "",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "wellnessScreen3",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/Dolphin-Touch-Wellness-Center"
+   }
+  },
+  {
+   "mesh": "wellnessScreen4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 221,
+    "pavilionName": "undefined",
+    "zoneId": 59,
+    "zoneName": "undefined",
+    "zoneType": "",
+    "slot": "media",
+    "index": 1
+   }
+  },
+  {
+   "mesh": "wellnessScreen2",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/Dolphin-Touch-Wellness-Center"
+   }
+  },
+  {
+   "mesh": "uwSphereScreen",
+   "content": {
+    "kind": "link",
+    "url": "https://youtu.be/ntbFSaiVHm4"
+   }
+  },
+  {
+   "mesh": "arrival_screen1",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.city/c/emerald"
+   }
+  },
+  {
+   "mesh": "arrival_screen2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 153,
+    "pavilionName": "undefined",
+    "zoneId": 6,
+    "zoneName": "undefined",
+    "zoneType": "",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Information_screen1",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 250,
+    "pavilionName": "undefined",
+    "zoneId": 73,
+    "zoneName": "undefined",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Information_screen2",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 250,
+    "pavilionName": "undefined",
+    "zoneId": 74,
+    "zoneName": "undefined",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Information_screen3",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 250,
+    "pavilionName": "undefined",
+    "zoneId": 75,
+    "zoneName": "undefined",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "Information_screen4",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 250,
+    "pavilionName": "undefined",
+    "zoneId": 76,
+    "zoneName": "undefined",
+    "zoneType": "Lobby",
+    "slot": "media",
+    "index": 0
+   }
+  },
+  {
+   "mesh": "vip_screen",
+   "content": {
+    "kind": "link",
+    "url": "https://hubculture.com/radio?equalizerAnimation=1"
+   }
+  },
+  {
+   "mesh": "main_screen",
+   "content": {
+    "kind": "zone",
+    "pavilionId": 251,
+    "pavilionName": "Nightclub",
+    "zoneId": 77,
+    "zoneName": "Dance Floor",
+    "zoneType": "",
+    "slot": "media",
+    "index": 0
+   }
+  }
+ ],
+ "zones": [
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 26,
+   "name": "Arrivals",
+   "type": "Lobby",
+   "mediaScreens": [
+    "university_screen_3-13",
+    "university_screen_3-14",
+    "university_screen_3-15",
+    "university_screen_3-16"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 27,
+   "name": "Alpha",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_1-1",
+    "university_screen_1-2",
+    "university_screen_1-3",
+    "university_screen_1-4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 28,
+   "name": "Beta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_1-5",
+    "university_screen_1-6",
+    "university_screen_1-7",
+    "university_screen_1-8"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 29,
+   "name": "Gamma",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_1-9",
+    "university_screen_1-10",
+    "university_screen_1-11",
+    "university_screen_1-12"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 30,
+   "name": "Delta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_1-13",
+    "university_screen_1-14",
+    "university_screen_1-15",
+    "university_screen_1-16"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 31,
+   "name": "Epsilon",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_2-1",
+    "university_screen_2-2",
+    "university_screen_2-3",
+    "university_screen_2-4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 32,
+   "name": "Zeta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_2-5",
+    "university_screen_2-6",
+    "university_screen_2-7",
+    "university_screen_2-8"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 33,
+   "name": "Eta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_2-9",
+    "university_screen_2-10",
+    "university_screen_2-11",
+    "university_screen_2-12"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 34,
+   "name": "Theta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_2-13",
+    "university_screen_2-14",
+    "university_screen_2-15",
+    "university_screen_2-16"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 35,
+   "name": "Iota",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_2-17",
+    "university_screen_2-18",
+    "university_screen_2-19",
+    "university_screen_2-20"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 36,
+   "name": "Kappa",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_2-21",
+    "university_screen_2-22",
+    "university_screen_2-23",
+    "university_screen_2-24"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 37,
+   "name": "Lambda",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_3-1",
+    "university_screen_3-2",
+    "university_screen_3-3",
+    "university_screen_3-4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 38,
+   "name": "Mu",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_3-5",
+    "university_screen_3-6",
+    "university_screen_3-7",
+    "university_screen_3-8"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 236,
+   "pavilionName": "American University",
+   "zoneId": 39,
+   "name": "Artemis",
+   "type": "Garden",
+   "mediaScreens": [
+    "university_screen_3-9",
+    "university_screen_3-10",
+    "university_screen_3-11",
+    "university_screen_3-12"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 13,
+   "name": "Sky Pavilion",
+   "type": "Terrace",
+   "mediaScreens": [
+    "university_screen_lobby1",
+    "university_screen_lobby2",
+    "university_screen_lobby3"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 14,
+   "name": "Oahu",
+   "type": "Classroom",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 15,
+   "name": "Kauai",
+   "type": "Classroom",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 16,
+   "name": "Maui",
+   "type": "Classroom",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 17,
+   "name": "Alpha",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_a1",
+    "university_screen_a2",
+    "university_screen_a3",
+    "university_screen_a4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 18,
+   "name": "Beta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_b1",
+    "university_screen_b2",
+    "university_screen_b3",
+    "university_screen_b4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 19,
+   "name": "Gamma",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_g1",
+    "university_screen_g2",
+    "university_screen_g3",
+    "university_screen_g4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 20,
+   "name": "Delta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_d1",
+    "university_screen_d2",
+    "university_screen_d3",
+    "university_screen_d4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 21,
+   "name": "Epsilon",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_e1",
+    "university_screen_e2",
+    "university_screen_e3",
+    "university_screen_e4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 22,
+   "name": "Zeta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_h1",
+    "university_screen_h2",
+    "university_screen_h3",
+    "university_screen_h4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 23,
+   "name": "Eta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_c1",
+    "university_screen_c2",
+    "university_screen_c3",
+    "university_screen_c4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 24,
+   "name": "Theta",
+   "type": "Classroom",
+   "mediaScreens": [
+    "university_screen_f1",
+    "university_screen_f2",
+    "university_screen_f3",
+    "university_screen_f4"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 235,
+   "pavilionName": "University of Hawai'i at Manoa",
+   "zoneId": 25,
+   "name": "Arrivals",
+   "type": "Lobby",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 233,
+   "pavilionName": "The Children's House of Washington",
+   "zoneId": 12,
+   "name": "Planetarium",
+   "type": "Classroom",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 49,
+   "name": "Main Lobby",
+   "type": "Lobby",
+   "mediaScreens": [
+    "Box687",
+    "Box688"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 51,
+   "name": "Beta Room",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "Box729"
+   ],
+   "fileScreens": [
+    "Plane061",
+    "Plane060",
+    "Plane059"
+   ]
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 52,
+   "name": "Gamma Room",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "Box773"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 53,
+   "name": "Delta Room",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "Box708",
+    "Box709"
+   ],
+   "fileScreens": [
+    "Plane057",
+    "Plane056",
+    "Plane055"
+   ]
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 54,
+   "name": "Social Terrace",
+   "type": "Terrace",
+   "mediaScreens": [
+    "BTG_out_screen_back"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 55,
+   "name": "Social Garden",
+   "type": "Garden",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 56,
+   "name": "Meeting Room 1",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "Box680"
+   ],
+   "fileScreens": [
+    "Plane049",
+    "Plane050",
+    "Plane048"
+   ]
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 57,
+   "name": "Meeting Room 2",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "Box706"
+   ],
+   "fileScreens": [
+    "Plane051",
+    "Plane053",
+    "Plane052"
+   ]
+  },
+  {
+   "pavilionId": 209,
+   "pavilionName": "BridgingTheGap",
+   "zoneId": 58,
+   "name": "Welcome Garden",
+   "type": "Garden",
+   "mediaScreens": [
+    "BTG_out_screen_front"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 8,
+   "name": "Entrance Lobby",
+   "type": "Lobby",
+   "mediaScreens": [
+    "cognizant_video"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 9,
+   "name": "Meeting Room 1",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "cognizant_monitor1"
+   ],
+   "fileScreens": [
+    "cognizant_monitor5"
+   ]
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 10,
+   "name": "Meeting Room 2",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "cognizant_monitor2"
+   ],
+   "fileScreens": [
+    "cognizant_monitor6"
+   ]
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 40,
+   "name": "Meeting Room 3",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "cognizant_monitor3"
+   ],
+   "fileScreens": [
+    "cognizant_monitor7"
+   ]
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 41,
+   "name": "Meeting Room 4",
+   "type": "Meeting Room",
+   "mediaScreens": [
+    "cognizant_monitor4"
+   ],
+   "fileScreens": [
+    "cognizant_monitor8"
+   ]
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 42,
+   "name": "Garden Terrace",
+   "type": "Terrace",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 43,
+   "name": "Sky Terrace",
+   "type": "Terrace",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 44,
+   "name": "Roof Terrace",
+   "type": "Terrace",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 167,
+   "pavilionName": "Cognizant",
+   "zoneId": 45,
+   "name": "Sculpture Garden",
+   "type": "Garden",
+   "mediaScreens": [],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 153,
+   "pavilionName": "Emerald City",
+   "zoneId": 45,
+   "name": "Entrance Lobby",
+   "type": "Lobby",
+   "mediaScreens": [
+    "arrival_screen1",
+    "arrival_screen2"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 250,
+   "pavilionName": "Knowledge Hub",
+   "zoneId": 73,
+   "name": "Ultra Exchange",
+   "type": "Lobby",
+   "mediaScreens": [
+    "Information_screen1"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 250,
+   "pavilionName": "Knowledge Hub",
+   "zoneId": 74,
+   "name": "AQUA - Active User Quarantine Ally",
+   "type": "Lobby",
+   "mediaScreens": [
+    "Information_screen2"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 250,
+   "pavilionName": "Knowledge Hub",
+   "zoneId": 75,
+   "name": "The Active Income and Innovation Access (AIIA)",
+   "type": "Lobby",
+   "mediaScreens": [
+    "Information_screen3"
+   ],
+   "fileScreens": []
+  },
+  {
+   "pavilionId": 250,
+   "pavilionName": "Knowledge Hub",
+   "zoneId": 76,
+   "name": "Emerald City",
+   "type": "Lobby",
+   "mediaScreens": [
+    "Information_screen4"
+   ],
+   "fileScreens": []
+  }
+ ],
+ "defaultSpawn": {
+  "position": {
+   "x": 52,
+   "y": 3.6,
+   "z": 388
+  },
+  "rotationY": 0
+ },
+ "spawns": {
+  "153": {
+   "position": {
+    "x": 247,
+    "y": 5,
+    "z": 587
+   },
+   "rotationY": 0
+  },
+  "157": {
+   "position": {
+    "x": -1487.6,
+    "y": 6,
+    "z": 220.5
+   },
+   "rotationY": 0
+  },
+  "167": {
+   "position": {
+    "x": 1042.2,
+    "y": 3.3,
+    "z": -85.2
+   },
+   "rotationY": 0
+  },
+  "201": {
+   "position": {
+    "x": -1750.6,
+    "y": 8,
+    "z": 220.5
+   },
+   "rotationY": 0
+  },
+  "209": {
+   "position": {
+    "x": 462.76,
+    "y": 13.33,
+    "z": 950.72
+   },
+   "rotationY": 0.43
+  },
+  "219": {
+   "position": {
+    "x": -1320,
+    "y": 3.5,
+    "z": 107
+   },
+   "rotationY": 0
+  },
+  "221": {
+   "position": {
+    "x": -1388,
+    "y": 3.3,
+    "z": -257.4
+   },
+   "rotationY": 0
+  },
+  "233": {
+   "position": {
+    "x": -700.66,
+    "y": 3.44,
+    "z": -1216.82
+   },
+   "rotationY": 3.59374
+  },
+  "235": {
+   "position": {
+    "x": -522.5,
+    "y": 3.5,
+    "z": -901
+   },
+   "rotationY": -2.607
+  },
+  "": {
+   "position": {
+    "x": -10,
+    "y": 25.3,
+    "z": 30
+   },
+   "rotationY": 0
+  }
+ },
+ "teleports": [
+  {
+   "id": "button_1",
+   "label": "button_1",
+   "position": {
+    "x": 1004.4,
+    "y": 6.7,
+    "z": -46.5
+   },
+   "group": "lift"
+  },
+  {
+   "id": "button_2",
+   "label": "button_2",
+   "position": {
+    "x": 1005.5,
+    "y": 23.5,
+    "z": -32.5
+   },
+   "group": "lift"
+  },
+  {
+   "id": "button_3",
+   "label": "button_3",
+   "position": {
+    "x": 1006,
+    "y": 42,
+    "z": -46.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "button_4",
+   "label": "button_4",
+   "position": {
+    "x": 1005.7,
+    "y": 59,
+    "z": -41.5
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button1",
+   "label": "f1_button1",
+   "position": {
+    "x": 327.4,
+    "y": 29.8,
+    "z": -976
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button1",
+   "label": "f2_button1",
+   "position": {
+    "x": 327.4,
+    "y": 3.3,
+    "z": -975.3
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button2",
+   "label": "f1_button2",
+   "position": {
+    "x": 213.6,
+    "y": 29.8,
+    "z": -977.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button2",
+   "label": "f2_button2",
+   "position": {
+    "x": 213.6,
+    "y": 3.3,
+    "z": -977.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button3",
+   "label": "f1_button3",
+   "position": {
+    "x": 240.5,
+    "y": 24.6,
+    "z": -1066
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button3",
+   "label": "f2_button3",
+   "position": {
+    "x": 240.5,
+    "y": 3.3,
+    "z": -1066
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button4",
+   "label": "f1_button4",
+   "position": {
+    "x": 347.7,
+    "y": 19.8,
+    "z": -1025.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button4",
+   "label": "f2_button4",
+   "position": {
+    "x": 347.7,
+    "y": 3.3,
+    "z": -1025.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button5",
+   "label": "f1_button5",
+   "position": {
+    "x": 271.3,
+    "y": 19.8,
+    "z": -1217.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button5",
+   "label": "f2_button5",
+   "position": {
+    "x": 271.3,
+    "y": 3.3,
+    "z": -1217.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button6",
+   "label": "f1_button6",
+   "position": {
+    "x": 376.6,
+    "y": 24.6,
+    "z": -1182
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button6",
+   "label": "f2_button6",
+   "position": {
+    "x": 376.6,
+    "y": 3.3,
+    "z": -1182
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button7",
+   "label": "f1_button7",
+   "position": {
+    "x": 407.1,
+    "y": 29.8,
+    "z": -1264
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button7",
+   "label": "f2_button7",
+   "position": {
+    "x": 407.1,
+    "y": 3.3,
+    "z": -1264
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button8",
+   "label": "f1_button8",
+   "position": {
+    "x": 289.9,
+    "y": 29.8,
+    "z": -1264
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button8",
+   "label": "f2_button8",
+   "position": {
+    "x": 289.9,
+    "y": 3.3,
+    "z": -1264
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button9",
+   "label": "f1_button9",
+   "position": {
+    "x": 310.2,
+    "y": 29.8,
+    "z": -1344.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button9",
+   "label": "f2_button9",
+   "position": {
+    "x": 310.2,
+    "y": 3.3,
+    "z": -1344.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button10",
+   "label": "f1_button10",
+   "position": {
+    "x": 427,
+    "y": 29.8,
+    "z": -1347
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button10",
+   "label": "f2_button10",
+   "position": {
+    "x": 427,
+    "y": 3.3,
+    "z": -1347
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button11",
+   "label": "f1_button11",
+   "position": {
+    "x": 445.7,
+    "y": 19.8,
+    "z": -1389.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button11",
+   "label": "f2_button11",
+   "position": {
+    "x": 445.7,
+    "y": 3.3,
+    "z": -1389.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button12",
+   "label": "f1_button12",
+   "position": {
+    "x": 337,
+    "y": 24.6,
+    "z": -1432.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button12",
+   "label": "f2_button12",
+   "position": {
+    "x": 337,
+    "y": 3.3,
+    "z": -1432.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button13",
+   "label": "f1_button13",
+   "position": {
+    "x": 477.2,
+    "y": 24.6,
+    "z": -1545.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button13",
+   "label": "f2_button13",
+   "position": {
+    "x": 477.2,
+    "y": 3.3,
+    "z": -1545.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button14",
+   "label": "f1_button14",
+   "position": {
+    "x": 371.4,
+    "y": 19.8,
+    "z": -1584.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button14",
+   "label": "f2_button14",
+   "position": {
+    "x": 371.4,
+    "y": 3.3,
+    "z": -1584.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button15",
+   "label": "f1_button15",
+   "position": {
+    "x": 503.2,
+    "y": 29.8,
+    "z": -1630.9
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f2_button15",
+   "label": "f2_button15",
+   "position": {
+    "x": 503.2,
+    "y": 3.3,
+    "z": -1630.9
+   },
+   "group": "lift"
+  },
+  {
+   "id": "f1_button16",
+   "label": "f1_button16",
+   "position": {
+    "x": 388.9,
+    "y": 29.8,
+    "z": -1627.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u1_button2",
+   "label": "u1_button2",
+   "position": {
+    "x": -408.8,
+    "y": 36.1,
+    "z": -986.1
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u1_button3",
+   "label": "u1_button3",
+   "position": {
+    "x": -408.8,
+    "y": 36.1,
+    "z": -986.1
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u1_button4",
+   "label": "u1_button4",
+   "position": {
+    "x": -408.8,
+    "y": 36.1,
+    "z": -986.1
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u2_button1",
+   "label": "u2_button1",
+   "position": {
+    "x": -412.8,
+    "y": 58.9,
+    "z": -987.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u2_button3",
+   "label": "u2_button3",
+   "position": {
+    "x": -412.8,
+    "y": 58.9,
+    "z": -987.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u2_button4",
+   "label": "u2_button4",
+   "position": {
+    "x": -412.8,
+    "y": 58.9,
+    "z": -987.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u3_button1",
+   "label": "u3_button1",
+   "position": {
+    "x": -408,
+    "y": 88.2,
+    "z": -980
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u3_button2",
+   "label": "u3_button2",
+   "position": {
+    "x": -408,
+    "y": 88.2,
+    "z": -980
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u3_button4",
+   "label": "u3_button4",
+   "position": {
+    "x": -408,
+    "y": 88.2,
+    "z": -980
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u4_button1",
+   "label": "u4_button1",
+   "position": {
+    "x": -405.6,
+    "y": 118.2,
+    "z": -969.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u4_button2",
+   "label": "u4_button2",
+   "position": {
+    "x": -405.6,
+    "y": 118.2,
+    "z": -969.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "u4_button3",
+   "label": "u4_button3",
+   "position": {
+    "x": -405.6,
+    "y": 118.2,
+    "z": -969.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "up1_button",
+   "label": "up1_button",
+   "position": {
+    "x": -659.4,
+    "y": 138.7,
+    "z": -839.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dh_button",
+   "label": "dh_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dg_button",
+   "label": "dg_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "df_button",
+   "label": "df_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "de_button",
+   "label": "de_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dd_button",
+   "label": "dd_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dc_button",
+   "label": "dc_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "db_button",
+   "label": "db_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "da_button",
+   "label": "da_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "uph_button",
+   "label": "uph_button",
+   "position": {
+    "x": -618.2,
+    "y": 99.6,
+    "z": -828.8
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upg_button",
+   "label": "upg_button",
+   "position": {
+    "x": -636.5,
+    "y": 107.6,
+    "z": -800.8
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upf_button",
+   "label": "upf_button",
+   "position": {
+    "x": -669.9,
+    "y": 99.6,
+    "z": 796.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upe_button",
+   "label": "upe_button",
+   "position": {
+    "x": -698,
+    "y": 107.6,
+    "z": -815.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upd_button",
+   "label": "upd_button",
+   "position": {
+    "x": -703.8,
+    "y": 99.6,
+    "z": -849.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upc_button",
+   "label": "upc_button",
+   "position": {
+    "x": -682.7,
+    "y": 107.6,
+    "z": -875.6
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upb_button",
+   "label": "upb_button",
+   "position": {
+    "x": -648.6,
+    "y": 99.6,
+    "z": -882
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upa_button",
+   "label": "upa_button",
+   "position": {
+    "x": -622.2,
+    "y": 107.6,
+    "z": -862.1
+   },
+   "group": "lift"
+  },
+  {
+   "id": "uph1_button",
+   "label": "uph1_button",
+   "position": {
+    "x": -597.2,
+    "y": 138.7,
+    "z": -822.8
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upg1_button",
+   "label": "upg1_button",
+   "position": {
+    "x": -627.2,
+    "y": 138.7,
+    "z": -784.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upf1_button",
+   "label": "upf1_button",
+   "position": {
+    "x": -674.4,
+    "y": 138.7,
+    "z": -778.2
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upe1_button",
+   "label": "upe1_button",
+   "position": {
+    "x": -716.4,
+    "y": 138.7,
+    "z": -805.5
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upd1_button",
+   "label": "upd1_button",
+   "position": {
+    "x": -721.4,
+    "y": 138.7,
+    "z": -856
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upc1_button",
+   "label": "upc1_button",
+   "position": {
+    "x": -694.4,
+    "y": 138.7,
+    "z": -893.9
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upb1_button",
+   "label": "upb1_button",
+   "position": {
+    "x": -645.2,
+    "y": 138.7,
+    "z": -901.4
+   },
+   "group": "lift"
+  },
+  {
+   "id": "upa1_button",
+   "label": "upa1_button",
+   "position": {
+    "x": -603.8,
+    "y": 138.7,
+    "z": -874
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dh1_button",
+   "label": "dh1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dg1_button",
+   "label": "dg1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "df1_button",
+   "label": "df1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "de1_button",
+   "label": "de1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dd1_button",
+   "label": "dd1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "dc1_button",
+   "label": "dc1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "db1_button",
+   "label": "db1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "da1_button",
+   "label": "da1_button",
+   "position": {
+    "x": -644.9,
+    "y": 36,
+    "z": -852
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev1",
+   "label": "high_elev1",
+   "position": {
+    "x": 1677.6,
+    "y": 3.6,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev2",
+   "label": "high_elev2",
+   "position": {
+    "x": 1677.6,
+    "y": 49.1,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev3",
+   "label": "high_elev3",
+   "position": {
+    "x": 1677.6,
+    "y": 64.71,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev4",
+   "label": "high_elev4",
+   "position": {
+    "x": 1677.6,
+    "y": 80.4,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev5",
+   "label": "high_elev5",
+   "position": {
+    "x": 1677.6,
+    "y": 96.1,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev6",
+   "label": "high_elev6",
+   "position": {
+    "x": 1677.6,
+    "y": 111.8,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev7",
+   "label": "high_elev7",
+   "position": {
+    "x": 1677.6,
+    "y": 127.5,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev8",
+   "label": "high_elev8",
+   "position": {
+    "x": 1677.6,
+    "y": 143.2,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev9",
+   "label": "high_elev9",
+   "position": {
+    "x": 1677.6,
+    "y": 158.9,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev10",
+   "label": "high_elev10",
+   "position": {
+    "x": 1677.6,
+    "y": 174.6,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev11",
+   "label": "high_elev11",
+   "position": {
+    "x": 1677.6,
+    "y": 190.3,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev12",
+   "label": "high_elev12",
+   "position": {
+    "x": 1677.6,
+    "y": 206,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev13",
+   "label": "high_elev13",
+   "position": {
+    "x": 1677.6,
+    "y": 221.7,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev14",
+   "label": "high_elev14",
+   "position": {
+    "x": 1677.6,
+    "y": 237.4,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev15",
+   "label": "high_elev15",
+   "position": {
+    "x": 1677.6,
+    "y": 253.1,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "high_elev16",
+   "label": "high_elev16",
+   "position": {
+    "x": 1677.6,
+    "y": 268.8,
+    "z": -135.7
+   },
+   "group": "lift"
+  },
+  {
+   "id": "arrival_button1",
+   "label": "Cognizant",
+   "position": {
+    "x": 1042.2,
+    "y": 3.3,
+    "z": -85.2
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button2",
+   "label": "Children's House",
+   "position": {
+    "x": -700.66,
+    "y": 3.44,
+    "z": -1216.82
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button3",
+   "label": "University",
+   "position": {
+    "x": -478.41,
+    "y": 3.27,
+    "z": -824.66
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button4",
+   "label": "Fashion",
+   "position": {
+    "x": 232.37,
+    "y": 3.27,
+    "z": -898.15
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button5",
+   "label": "Bridging The Gap",
+   "position": {
+    "x": 462.76,
+    "y": 13.33,
+    "z": 950.72
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button6",
+   "label": "Beach",
+   "position": {
+    "x": -1750.6,
+    "y": 8,
+    "z": 220.5
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button7",
+   "label": "Memorial",
+   "position": {
+    "x": -1487.6,
+    "y": 6,
+    "z": 220.5
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button8",
+   "label": "Amphitheatre",
+   "position": {
+    "x": -380,
+    "y": 3.6,
+    "z": -550
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button9",
+   "label": "Emerald Plaza",
+   "position": {
+    "x": 247,
+    "y": 5,
+    "z": 587
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button10",
+   "label": "Lotus",
+   "position": {
+    "x": -10,
+    "y": 25.3,
+    "z": 30
+   },
+   "group": "kiosk"
+  },
+  {
+   "id": "arrival_button11",
+   "label": "City Hall",
+   "position": {
+    "x": -269,
+    "y": 3.6,
+    "z": 534
+   },
+   "group": "kiosk"
+  }
+ ]
+}

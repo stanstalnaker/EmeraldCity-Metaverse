@@ -1,0 +1,21 @@
+{
+  "name": "@emerald-city/city3d",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Emerald City 3D client on Babylon.js 9 (WebGPU/WebGL2, WebXR) rendering a world manifest with physically based lighting.",
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^9.36.0",
+    "@babylonjs/materials": "^9.36.0",
+    "@emerald-city/world": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

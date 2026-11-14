@@ -21,6 +21,22 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@22.20.5)(tsx@4.23.15)
 
+  apps/city3d:
+    dependencies:
+      '@babylonjs/core':
+        specifier: ^9.36.0
+        version: 9.36.0
+      '@babylonjs/materials':
+        specifier: ^9.36.0
+        version: 9.36.0(@babylonjs/core@9.36.0)
+      '@emerald-city/world':
+        specifier: workspace:*
+        version: link:../../packages/world
+    devDependencies:
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.5(@types/node@22.20.5)(tsx@4.23.15)
+
   apps/presence:
     dependencies:
       '@emerald-city/core':
@@ -219,6 +235,15 @@ importers:
         specifier: workspace:*
         version: link:../hubid-client
 
+  packages/world:
+    devDependencies:
+      acorn:
+        specifier: ^8.15.0
+        version: 8.19.0
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.15
+
   packages/zeke-client: {}
 
   tools/mock-hubid: {}
@@ -227,6 +252,14 @@ packages:
 
   '@anthropic-ai/sdk@0.33.1':
     resolution: {integrity: sha512-VrlbxiAdVRGuKP2UQlCnsShDHJKWepzvfRCkZMpU+oaUdKLpOfmylLMRojGrAgebV+kDtPjewCVP0laHXg+vsA==}
+
+  '@babylonjs/core@9.36.0':
+    resolution: {integrity: sha512-PCrCshQ6hhvyxsp/FAq7GMPrmX8asloy+fXs1+mF2SCREx0hqCb4xtfbIoyID43rqX8+1UTw5RtodixXowRp7w==}
+
+  '@babylonjs/materials@9.36.0':
+    resolution: {integrity: sha512-VxJ0KWLzmchzFz2CIb/+ESUFcD26xzkX9//V2gO1LXLD/0Um8eLlcm713RHAU/ke4afM1Y1XbbGMqUZosctgrQ==}
+    peerDependencies:
+      '@babylonjs/core': ^9.0.0
 
   '@bufbuild/protobuf@1.10.1':
     resolution: {integrity: sha512-wJ8ReQbHxsAfXhrf9ixl0aYbZorRuOWpBNzm8pL8ftmSxQx/wnJD5Eg861NwJU/czy2VXFIebCeZnZrI9rktIQ==}
@@ -1331,6 +1364,11 @@ packages:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
     engines: {node: '>=6.5'}
 
+  acorn@8.19.0:
+    resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
   adm-zip@0.5.18:
     resolution: {integrity: sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==}
     engines: {node: '>=12.0'}
@@ -2340,6 +2378,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@babylonjs/core@9.36.0': {}
+
+  '@babylonjs/materials@9.36.0(@babylonjs/core@9.36.0)':
+    dependencies:
+      '@babylonjs/core': 9.36.0
+
   '@bufbuild/protobuf@1.10.1': {}
 
   '@datastructures-js/deque@1.0.8': {}
@@ -3240,6 +3284,8 @@ snapshots:
   abort-controller@3.0.0:
     dependencies:
       event-target-shim: 5.0.1
+
+  acorn@8.19.0: {}
 
   adm-zip@0.5.18: {}
 

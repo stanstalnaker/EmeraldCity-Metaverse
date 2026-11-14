@@ -1,0 +1,22 @@
+{
+  "name": "@emerald-city/world",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "World manifests: the data that defines a 3D city (models, screens bound to property zones, spawns, teleports). Emerald City's is imported from the legacy vr.hubculture.city code.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./data/*": "./data/*"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "extract:legacy": "tsx scripts/extract-legacy.ts"
+  },
+  "devDependencies": {
+    "acorn": "^8.15.0",
+    "tsx": "^4.19.0"
+  }
+}

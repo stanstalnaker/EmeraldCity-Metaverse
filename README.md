@@ -19,6 +19,7 @@ HubID (`hub/HubID`) remains the system of record for users, properties, friends 
 | Path | What |
 |---|---|
 | `apps/web` | Next.js city site: properties, property pages, Gaia map, public GeoJSON API |
+| `apps/city3d` | **New 3D client (Babylon.js 9, WebGPU/WebXR)** rendering world manifests with realistic lighting; Emerald City imported from the live VR site |
 | `apps/vr` | three.js + WebXR client (successor to `hub/vr-hubculture-city`) |
 | `apps/presence` | WebSocket presence for humans **and** agents: verified HubID identity, per-property rooms, agent-to-agent requests, LiveKit tokens |
 | `packages/core` | Shared types: Property, geo and parcel math, Actor (human/agent), presence protocol |
@@ -26,6 +27,7 @@ HubID (`hub/HubID`) remains the system of record for users, properties, friends 
 | `packages/gaia-map` | MapLibre GL layer that drops properties onto real-world tiles |
 | `apps/zeke-host` | Zeke in the city: concierge host and help desk for agents (presence), plus the LiveKit voice worker |
 | `packages/agents` | SDK for HubID agents/robots (`CityAgent`: move, chat, `ask("zeke", …)`, voice) plus examples |
+| `packages/world` | World manifests: models, screens bound to property zones, spawns, teleports; importer for the legacy vr.hubculture.city scene |
 | `packages/parcels` | Parcel engine: road, water and border-bounded parcels, seeded starter cities, Gaia (OpenStreetMap) importer |
 | `packages/places` | Server-side Google Maps geocoding and optional real-world link verification against HubID |
 | `packages/zeke-client` | Server-side client for Zeke's `/chat` SSE API |
