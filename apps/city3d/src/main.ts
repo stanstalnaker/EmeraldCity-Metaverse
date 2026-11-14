@@ -65,6 +65,13 @@ async function main() {
   const terrainMeshes: AbstractMesh[] = [];
   const streamer = new WorldStreamer(scene, world, assetBase, {
     onLoaded(model, container) {
+      // Make the world solid. The legacy client did this per model in callbacks we don't run;
+      // without it, gravity drops you through the ground and you only see sky.
+      for (const mesh of container.meshes) {
+        if (mesh.getTotalVertices() === 0) continue;
+        mesh.checkCollisions = true;
+        if (/collider|collision/i.test(mesh.name)) mesh.isVisible = false;
+      }
       look.adopt(container.meshes);
       wireScreens(container.meshes);
       if (model.id === "terrain") terrainMeshes.push(...container.meshes);
@@ -81,7 +88,14 @@ async function main() {
   camera.applyGravity = false;
   await streamer.preload(camera.position);
   camera.applyGravity = !params.has("fly");
-  setInterval(() => streamer.update(camera.position), 500);
+  setInterval(() => {
+    streamer.update(camera.position);
+    // Safety net: if you ever fall out of the world, return to the spawn point.
+    if (camera.position.y < -150) {
+      camera.position.set(spawn.position.x, spawn.position.y + 1.7, spawn.position.z);
+      camera.rotation.y = spawn.rotationY;
+    }
+  }, 500);
 
   // Click a screen to see what it shows.
   scene.onPointerDown = (_evt, pick) => {
