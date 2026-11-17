@@ -15,7 +15,16 @@
       #panel h3 { margin: 0 0 6px; font-size: 15px; }
       #panel a { color: #8ff0cd; }
       #loading { position: fixed; bottom: 14px; left: 12px; }
-      #help { position: fixed; bottom: 14px; right: 12px; font-size: 12px; opacity: .85; }
+      #chat { position: fixed; left: 12px; bottom: 52px; width: min(380px, calc(100vw - 24px)); display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+      #chat > * { pointer-events: auto; }
+      #chat-log { max-height: 30vh; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+      #chat-log .line { background: #000a; backdrop-filter: blur(6px); padding: 4px 9px; border-radius: 7px; align-self: flex-start; max-width: 100%; }
+      #chat-log .system { opacity: .75; font-style: italic; }
+      #chat-log .zeke { background: #0b5d3bcc; }
+      #chat-form { display: flex; gap: 6px; }
+      #chat-form input { flex: 1; min-width: 0; font: inherit; padding: 7px 10px; border-radius: 7px; border: 0; background: #000b; color: #fff; }
+      #chat-mode { white-space: nowrap; background: #13201b; }
+      #help { position: fixed; bottom: 14px; right: 12px; max-width: 45vw; font-size: 12px; opacity: .85; }
       #compass { position: fixed; top: 58px; left: 50%; transform: translateX(-50%); width: 300px; height: 30px; overflow: hidden; border-radius: 8px; background: #000a; pointer-events: none; }
       #compass-strip { width: 100%; height: 100%; background-repeat: repeat-x; background-size: 600px 30px; }
       #compass::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #1fa37a; }
@@ -43,9 +52,12 @@
       <button id="look" title="Compare with the legacy look">Legacy look</button>
       <button id="map-btn" title="Map (M)">Map</button>
       <button id="fly-btn" title="Toggle fly / walk">Fly</button>
+      <button id="voice-btn" title="Talk with people nearby (spatial voice)">Voice</button>
       <span class="chip" id="stats"></span>
     </div>
     <div class="chip" id="loading">Loading…</div>
+    <div id="chat"><div id="chat-log"></div>
+      <form id="chat-form"><button type="button" id="chat-mode" title="Switch between everyone here and Zeke">Everyone here</button><input id="chat-input" maxlength="2000" autocomplete="off" placeholder="Say something to everyone here…"><button>Send</button></form></div>
     <div id="compass"><div id="compass-strip"></div></div>
     <div class="chip" id="help">WASD + mouse to move · click screens, lifts, kiosk, magazines, seats · M for map</div>
     <div class="overlay" id="map"><div class="box"><img id="map-image" alt="Emerald City map"><div id="map-stops"></div>

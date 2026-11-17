@@ -238,3 +238,11 @@ describe("optional link credentials", () => {
     expect(profileAddress({ address: "", city: "Davos" })).toBeNull();
   });
 });
+
+import { parseClientMessage as parseMsg } from "./presence";
+describe("presence: world rooms and heading", () => {
+  it("accepts moves with a heading in a 3D world", () => {
+    expect(parseMsg(JSON.stringify({ t: "move", room: "world:davos", pos: { local: { x: 1, y: 2, z: 3 }, heading: 1.5 } }))).toMatchObject({ t: "move", room: "world:davos" });
+    expect(parseMsg(JSON.stringify({ t: "move", room: "world:davos", pos: { local: { x: 1, y: 2, z: 3 }, heading: "north" } }))).toBeNull();
+  });
+});

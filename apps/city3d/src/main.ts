@@ -12,6 +12,7 @@ import { spawnFor } from "@emerald-city/world";
 import davosHeights from "@emerald-city/world/data/davos.r16?url";
 import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
 import { buildLandscape } from "./landscape";
+import { People } from "./people";
 import { setupInteractions } from "./interactions";
 import { setupHud } from "./hud";
 import { createEngine } from "./engine";
@@ -164,6 +165,10 @@ async function main() {
   // Click a screen to see what it shows.
   scene.onPointerDown = (_evt, pick) => {
     if (!pick?.hit || !pick.pickedMesh) return;
+    if (pick.pickedMesh.metadata?.zekeHost) {
+      openChat("zeke");
+      return;
+    }
     if (interactions.click(pick.pickedMesh, pick.pickedPoint)) return;
     const content = screens.get(pick.pickedMesh.name);
     if (content) showScreen(pick.pickedMesh.name, content);
@@ -234,8 +239,97 @@ async function main() {
   if (kill.has("sun")) scene.getLightByName("sun")!.intensity = 0;
   if (kill.has("fill")) scene.getLightByName("fill")!.intensity = 0;
   if (kill.has("pipe")) scene.postProcessRenderPipelineManager.supportedPipelines.forEach((pl) => scene.postProcessRenderPipelineManager.detachCamerasFromRenderPipeline(pl.name, camera));
-  if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions } });
+  const people = startPeople(scene, camera, world, worldSlug);
+  if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions, people } });
   (window as unknown as { __ready: boolean }).__ready = true;
+}
+
+/**
+ * People in the world (presence server). In production the HubID token arrives in the URL fragment
+ * (#token=…; fragments are never sent to servers) from the beta site, is kept for the tab only, and is
+ * removed from the address bar. Locally the dev presence server accepts test identities.
+ */
+function presenceToken(): string | null {
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const fromHash = hash.get("token");
+  if (fromHash) {
+    try {
+      sessionStorage.setItem("ec.token", fromHash);
+    } catch {
+      /* storage blocked: keep it for this page only */
+    }
+    history.replaceState(null, "", location.pathname + location.search);
+    return fromHash;
+  }
+  try {
+    const kept = sessionStorage.getItem("ec.token");
+    if (kept) return kept;
+  } catch {
+    /* ignore */
+  }
+  if (import.meta.env.DEV) {
+    const name = (params.get("name") ?? `Visitor ${Math.floor(Math.random() * 900 + 100)}`).replace(/:/g, " ");
+    return `human:${Math.floor(Math.random() * 1e6) + 1000}:${name}`;
+  }
+  return null;
+}
+
+let chatMode: "everyone" | "zeke" = "everyone";
+let people: People | null = null;
+
+function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManifest, slug: string): People | null {
+  const url = (import.meta.env.VITE_PRESENCE_URL as string | undefined) ?? (import.meta.env.DEV ? `ws://${location.hostname}:8787` : null);
+  const token = presenceToken();
+  const log = (line: string, kind: "chat" | "system" | "zeke" = "system") => {
+    const el = document.createElement("div");
+    el.className = `line ${kind}`;
+    el.textContent = line;
+    const box = $("chat-log");
+    box.appendChild(el);
+    while (box.children.length > 80) box.firstChild!.remove();
+    box.scrollTop = box.scrollHeight;
+  };
+  if (!url || !token || params.has("shot")) {
+    if (!params.has("shot")) log(url ? "Sign in on beta.hubculture.city to meet people here." : "Presence is not configured.");
+    return null;
+  }
+  const spawn = w.defaultSpawn.position;
+  const host = new Vector3(spawn.x + 3, spawn.y, spawn.z + 3);
+  people = new People({ scene, camera, worldSlug: slug, url, token, hostPosition: host, log });
+  const form = $<HTMLFormElement>("chat-form");
+  const input = $<HTMLInputElement>("chat-input");
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || !people) return;
+    input.value = "";
+    if (chatMode === "zeke") {
+      log(`You → Zeke: ${text}`, "chat");
+      log(`Zeke: ${await people.askZeke(text)}`, "zeke");
+    } else people.say(text);
+  };
+  $("chat-mode").onclick = () => openChat(chatMode === "zeke" ? "everyone" : "zeke");
+  $("voice-btn").onclick = async () => {
+    if (!people) return;
+    if (people.voiceOn) {
+      await people.stopVoice();
+      $("voice-btn").textContent = "Voice";
+    } else {
+      people.requestVoice();
+      $("voice-btn").textContent = "Voice on";
+    }
+  };
+  // Keys typed in chat must not walk the camera.
+  input.addEventListener("keydown", (e) => e.stopPropagation());
+  return people;
+}
+
+function openChat(mode: "everyone" | "zeke") {
+  chatMode = mode;
+  $("chat").classList.add("open");
+  $("chat-mode").textContent = mode === "zeke" ? "Asking Zeke" : "Everyone here";
+  $<HTMLInputElement>("chat-input").placeholder = mode === "zeke" ? "Ask Zeke anything about the city…" : "Say something to everyone here…";
+  $<HTMLInputElement>("chat-input").focus();
 }
 
 function esc(t: string) {

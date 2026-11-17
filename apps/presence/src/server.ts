@@ -33,7 +33,7 @@ export interface PresenceServerOptions {
   requestsPerMinute?: number;
 }
 
-const ROOM_PATTERN = /^(map|property:\d{1,10})$/;
+const ROOM_PATTERN = /^(map|property:\d{1,10}|world:[a-z0-9-]{1,32})$/;
 
 export function startPresenceServer(opts: PresenceServerOptions): WebSocketServer {
   const moveIntervalMs = opts.moveIntervalMs ?? 50;

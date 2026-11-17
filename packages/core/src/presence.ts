@@ -19,8 +19,10 @@ export interface Position {
   geo?: LngLat;
   /** Property (pavilion id) whose scene the actor is in. */
   propertyId?: number;
-  /** Position within the property scene, in metres from its origin. */
+  /** Position within the property scene (or 3D world), in metres from its origin. */
   local?: Vec3;
+  /** Facing in the 3D world, radians around the vertical axis. */
+  heading?: number;
 }
 
 /**
@@ -72,10 +74,11 @@ export type ServerMessage =
   | { t: "reply"; from: Actor; id: string; body: AgentReplyBody }
   | { t: "error"; code: string; message: string; id?: string };
 
-/** Room naming: one room per property, plus a global map room. */
+/** Room naming: one room per property, one per 3D world, plus a global map room. */
 export const rooms = {
   map: "map",
   property: (id: number) => `property:${id}`,
+  world: (slug: string) => `world:${slug}`,
 } as const;
 
 export const MAX_SAY_LENGTH = 2_000;
@@ -123,6 +126,7 @@ function isPosition(v: unknown): v is Position {
     if (!g || !isFiniteNum(g.lat) || !isFiniteNum(g.lng)) return false;
   }
   if (p.propertyId !== undefined && !isFiniteNum(p.propertyId)) return false;
+  if (p.heading !== undefined && !isFiniteNum(p.heading)) return false;
   if (p.local !== undefined) {
     const l = p.local as Record<string, unknown> | null;
     if (!l || !isFiniteNum(l.x) || !isFiniteNum(l.y) || !isFiniteNum(l.z)) return false;
