@@ -5,7 +5,7 @@ import {
 
 const city3y: BondTerms & { assetId: number } = {
   assetId: 900, kind: "city", ticker: "uEC3Y", title: "Emerald City Bond 3Y", issuerUserId: 7000,
-  faceValueVen: 100, couponRate: 0.05, termYears: 3, issueDate: "2026-12-01", supply: 1000, landCreditRedeemable: true,
+  faceValueVen: 100, couponRate: 0.05, termYears: 3, issueDate: "2026-12-01", supply: 1000,
 };
 
 describe("bond terms", () => {

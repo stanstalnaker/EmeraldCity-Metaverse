@@ -7,7 +7,8 @@
  * schedule and the payout plan. HubID runs it against `wallets` holdings and pays in Ven from the
  * bonds account (see docs/BONDS.md). Nothing here moves money.
  *
- * Agreed decisions (Nov 2026): face value fixed in Ven; any HubID member may buy (agents never);
+ * Agreed decisions (Nov 2026): everything in Ven: bought, paid and redeemed in Ven, no land credit
+ * or other payout forms; any HubID member may buy (agents never);
  * bonds trade on Ultra, and whoever holds a bond on a payment date receives that coupon; a
  * dedicated bonds account issues the city's bonds and pays coupons and principal.
  */
@@ -40,8 +41,6 @@ export interface BondTerms {
   issueDate: string;
   /** Number of bonds offered. */
   supply: number;
-  /** Principal can be taken as Emerald City land credit instead of Ven. */
-  landCreditRedeemable: boolean;
   /** Citizen project bonds: the City Council approval that allowed the issue. */
   councilApprovalRef?: string;
   /** Off by default; counsel can switch these on per issue without new code. */
