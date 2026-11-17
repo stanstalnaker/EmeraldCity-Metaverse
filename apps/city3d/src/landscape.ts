@@ -16,7 +16,7 @@ import {
   type AbstractMesh,
 } from "@babylonjs/core";
 import "@babylonjs/loaders/glTF";
-import { terrainHeight, type Placement, type Portal, type WorldManifest, type WorldMaterial } from "@emerald-city/world";
+import { terrainHeight, type GeneratedCity, type InstanceBatch, type Placement, type Portal, type WorldManifest, type WorldMaterial } from "@emerald-city/world";
 
 /**
  * Builds the landscape for worlds that have one (Davos, Bermuda, partner islands): terrain from a
@@ -197,10 +197,92 @@ export async function buildLandscape(scene: Scene, world: WorldManifest, heightm
     }),
   );
 
+  // ---- Generated cities (packages/worldgen): one thin-instanced mesh per batch, invisible colliders.
+  for (const city of world.generated ?? []) out.push(...generatedCity(scene, city));
+
   // ---- Portals to other worlds
   for (const p of world.portals ?? []) out.push(...portal(scene, p));
 
   return { meshes: out, groundAt, portals: world.portals ?? [] };
+}
+
+/** Unit shapes with their bottom at y = 0, matching InstanceBatch transforms. */
+function unitShape(scene: Scene, shape: InstanceBatch["shape"]): Mesh {
+  let m: Mesh;
+  switch (shape) {
+    case "box":
+      m = MeshBuilder.CreateBox("gen-box", { size: 1 }, scene);
+      m.bakeTransformIntoVertices(Matrix.Translation(0, 0.5, 0));
+      return m;
+    case "cylinder":
+      m = MeshBuilder.CreateCylinder("gen-cyl", { height: 1, diameter: 1, tessellation: 20 }, scene);
+      m.bakeTransformIntoVertices(Matrix.Translation(0, 0.5, 0));
+      return m;
+    case "cone":
+      m = MeshBuilder.CreateCylinder("gen-cone", { height: 1, diameterTop: 0, diameterBottom: 1, tessellation: 10 }, scene);
+      m.bakeTransformIntoVertices(Matrix.Translation(0, 0.5, 0));
+      return m;
+    case "dome":
+      return MeshBuilder.CreateSphere("gen-dome", { diameterX: 1, diameterY: 2, diameterZ: 1, slice: 0.5, segments: 20 }, scene);
+    case "gable": {
+      // Triangular prism: 1 wide (x), 1 high (y), 1 deep (z), ridge along z.
+      m = new Mesh("gen-gable", scene);
+      const p = [-0.5, 0, -0.5, 0.5, 0, -0.5, 0, 1, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5, 0, 1, 0.5];
+      const positions: number[] = [], indices: number[] = [];
+      const quad = (a: number, b: number, c: number, d: number) => {
+        const base = positions.length / 3;
+        for (const v of [a, b, c, d]) positions.push(p[v * 3]!, p[v * 3 + 1]!, p[v * 3 + 2]!);
+        indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+      };
+      const tri = (a: number, b: number, c: number) => {
+        const base = positions.length / 3;
+        for (const v of [a, b, c]) positions.push(p[v * 3]!, p[v * 3 + 1]!, p[v * 3 + 2]!);
+        indices.push(base, base + 1, base + 2);
+      };
+      tri(0, 2, 1); tri(3, 4, 5); quad(0, 3, 5, 2); quad(1, 2, 5, 4); quad(0, 1, 4, 3);
+      const normals: number[] = [];
+      VertexData.ComputeNormals(positions, indices, normals);
+      Object.assign(new VertexData(), { positions, indices, normals }).applyToMesh(m);
+      return m;
+    }
+  }
+}
+
+function generatedCity(scene: Scene, city: GeneratedCity): Mesh[] {
+  const out: Mesh[] = [];
+  for (const [i, b] of city.batches.entries()) {
+    const mesh = unitShape(scene, b.shape);
+    mesh.name = `gen-${city.spec}-${i}-${b.shape}`;
+    const mat = new StandardMaterial(`gen-${city.spec}-${i}`, scene);
+    mat.diffuseColor = new Color3(...b.material.color);
+    mat.specularColor = new Color3(0.06, 0.06, 0.06);
+    if (b.material.emissive) mat.emissiveColor = new Color3(...b.material.emissive);
+    mesh.material = mat;
+    const matrices = new Float32Array(b.transforms.length * 16);
+    const colors = new Float32Array(b.transforms.length * 4);
+    b.transforms.forEach((t, k) => {
+      Matrix.Compose(new Vector3(t[4], t[5], t[6]), Quaternion.RotationAxis(Vector3.Up(), t[3]!), new Vector3(t[0], t[1], t[2])).copyToArray(matrices, k * 16);
+      colors.set(t.length >= 10 ? [t[7]!, t[8]!, t[9]!, 1] : [1, 1, 1, 1], k * 4);
+    });
+    mesh.thinInstanceSetBuffer("matrix", matrices, 16, true);
+    mesh.thinInstanceSetBuffer("color", colors, 4, true);
+    mesh.isPickable = false;
+    mesh.alwaysSelectAsActiveMesh = true;
+    out.push(mesh);
+  }
+  // Buildings are solid: invisible boxes for walking collisions (never drawn).
+  const proto = MeshBuilder.CreateBox(`gen-${city.spec}-collider`, { size: 1 }, scene);
+  proto.isVisible = false;
+  proto.isPickable = false;
+  for (const [k, c] of city.colliders.entries()) {
+    const box = proto.createInstance(`gen-${city.spec}-collider-${k}`);
+    box.position.set(c[0]!, c[1]!, c[2]!);
+    box.scaling.set(c[3]!, c[4]!, c[5]!);
+    box.rotation.y = c[6]!;
+    box.checkCollisions = true;
+    box.isPickable = false;
+  }
+  return out;
 }
 
 function place(m: Mesh, p: Placement) {

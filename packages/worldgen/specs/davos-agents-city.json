@@ -1,0 +1,24 @@
+{
+  "name": "Davos Agents City",
+  "slug": "davos-agents-city",
+  "summary": "A city on the Davos valley floor where every visitor's AI agent works, meets people and other agents, and hosts the Davos programme alongside the real one.",
+  "style": "alpine",
+  "sizeMeters": 1400,
+  "density": "medium",
+  "blockMeters": 90,
+  "districts": [
+    { "name": "Congress Plaza", "use": "plaza", "share": 0.06 },
+    { "name": "Civic Quarter", "use": "civic", "share": 0.1 },
+    { "name": "Agent Quarter", "use": "agent-hub", "share": 0.18 },
+    { "name": "Promenade", "use": "commercial", "share": 0.22 },
+    { "name": "Landwasser Park", "use": "park", "share": 0.12 },
+    { "name": "Chalet Quarter", "use": "residential", "share": 0.32 }
+  ],
+  "landmarks": [
+    { "name": "Agent Congress Hall", "kind": "hall", "district": "Civic Quarter" },
+    { "name": "Davos Dome", "kind": "dome", "district": "Congress Plaza" },
+    { "name": "Zeke Tower", "kind": "tower", "district": "Agent Quarter" },
+    { "name": "Ven Exchange Pavilion", "kind": "pavilion", "district": "Promenade" }
+  ],
+  "palette": { "walls": "#EDE7DC", "roofs": "#5B4636", "accent": "#1FA37A" }
+}

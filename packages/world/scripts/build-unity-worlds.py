@@ -53,7 +53,14 @@ def write_r16(name, png, unity_scale=False):
 
 
 def write(name, manifest):
-    with open(os.path.join(data, f"{name}.world.json"), "w") as f:
+    # Keep cities built onto this world by packages/worldgen (and their teleports) across rebuilds.
+    path = os.path.join(data, f"{name}.world.json")
+    if os.path.exists(path):
+        old = json.load(open(path))
+        if old.get("generated"):
+            manifest["generated"] = old["generated"]
+            manifest["teleports"] = manifest["teleports"] + [t for t in old.get("teleports", []) if t["id"].startswith("gen:")]
+    with open(path, "w") as f:
         json.dump(manifest, f, separators=(",", ":"))
     print(name, {k: (len(v) if isinstance(v, list) else "…") for k, v in manifest.items() if isinstance(v, (list, dict))})
 

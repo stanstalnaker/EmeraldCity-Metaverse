@@ -102,7 +102,7 @@ async function main() {
   if (world.environment?.style === "alpine") scene.fogColor.set(0.7, 0.8, 0.92);
 
   // Landscape worlds (Davos, Bermuda): terrain, forest, water, imported shapes and models, portals.
-  const landscape = world.terrain || world.primitives?.length || world.portals?.length
+  const landscape = world.terrain || world.primitives?.length || world.portals?.length || world.generated?.length
     ? await buildLandscape(scene, params.has("lite") ? { ...world, trees: undefined, meshes: [] } : world, WORLDS[worldSlug]!.heights ?? null, unityBase)
     : null;
   if (landscape) {

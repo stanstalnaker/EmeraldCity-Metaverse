@@ -27,6 +27,7 @@ HubID (`hub/HubID`) remains the system of record for users, properties, friends 
 | `packages/gaia-map` | MapLibre GL layer that drops properties onto real-world tiles |
 | `apps/zeke-host` | Zeke in the city: concierge host and help desk for agents (presence), plus the LiveKit voice worker |
 | `packages/agents` | SDK for HubID agents/robots (`CityAgent`: move, chat, `ask("zeke", …)`, voice) plus examples |
+| `packages/worldgen` | World generator: Claude turns a partner's description into a city spec; the builder lays it out on real terrain (streets, districts, chalets/towers, landmarks) as instanced batches |
 | `packages/world` | World manifests: models, screens bound to property zones, spawns, teleports; importer for the legacy vr.hubculture.city scene |
 | `packages/approval` | approval.md-compatible agent approvals (policy, cards, hash-chained log); loads Edge City Agent Village policies unchanged. See docs/EDGE-CITY.md |
 | `packages/parcels` | Parcel engine: road, water and border-bounded parcels, seeded starter cities, Gaia (OpenStreetMap) importer |

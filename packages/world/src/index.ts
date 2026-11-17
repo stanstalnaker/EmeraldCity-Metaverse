@@ -134,6 +134,28 @@ export interface Portal {
   position: [number, number, number];
 }
 
+/**
+ * One instanced batch: the same shape and material repeated. Each transform is
+ * [x, y, z, rotationY, scaleX, scaleY, scaleZ, r, g, b]; y is the bottom of the shape and r, g, b
+ * (0-1) tint that instance (material.color is used when they are absent).
+ */
+export interface InstanceBatch {
+  shape: "box" | "gable" | "cylinder" | "cone" | "dome";
+  material: { color: [number, number, number]; roughness?: number; emissive?: [number, number, number] };
+  transforms: number[][];
+}
+
+export interface GeneratedCity {
+  name: string;
+  /** Spec it was built from (for rebuilds). */
+  spec: string;
+  batches: InstanceBatch[];
+  /** Invisible collision boxes for buildings: [cx, cy, cz, sx, sy, sz, rotationY]. */
+  colliders: number[][];
+  /** Named places for the teleport list. */
+  places: { name: string; position: [number, number, number] }[];
+}
+
 export interface WorldManifest {
   version: 1;
   slug: string;
@@ -149,6 +171,8 @@ export interface WorldManifest {
   primitives?: Primitive[];
   meshes?: PlacedMesh[];
   portals?: Portal[];
+  /** Generated cities (packages/worldgen), drawn as instanced batches. */
+  generated?: GeneratedCity[];
   models: WorldModel[];
   screens: WorldScreen[];
   zones: WorldZone[];
