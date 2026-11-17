@@ -13,6 +13,7 @@ import davosHeights from "@emerald-city/world/data/davos.r16?url";
 import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
 import { buildLandscape } from "./landscape";
 import { People } from "./people";
+import { chooseQuality, runBenchmark, startPerfOverlay } from "./perf";
 import { setupInteractions } from "./interactions";
 import { setupHud } from "./hud";
 import { createEngine } from "./engine";
@@ -43,7 +44,11 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 async function main() {
   world = (await WORLDS[worldSlug]!.load()).default as WorldManifest;
   const canvas = $<HTMLCanvasElement>("c");
+  const t0 = performance.now();
+  let readyAt: number | null = null;
   const { engine, kind } = await createEngine(canvas);
+  const q = chooseQuality(params.get("quality"));
+  engine.setHardwareScalingLevel(q.hardwareScaling);
   const scene = new Scene(engine);
   scene.collisionsEnabled = true;
   scene.gravity = new Vector3(0, -0.45, 0);
@@ -76,7 +81,8 @@ async function main() {
   const look = legacyLook
     ? setupLegacyLook(scene)
     : setupRealism(scene, camera, kind, {
-        shadows: !off.has("shadows"), ssao: !off.has("ssao"), detail: params.has("detail"),
+        shadows: q.shadows && !off.has("shadows"), ssao: q.ssao && !off.has("ssao"), detail: params.has("detail"),
+        shadowMapSize: q.shadowMapSize, cascades: q.cascades, msaa: q.msaa,
         // Mountains read best under a lower sun; the sky box must fit inside the larger far plane.
         // In Davos the winter sun is low in the south-southeast (north is +z); islands get a higher sun.
         ...(world.terrain
@@ -240,6 +246,11 @@ async function main() {
   if (kill.has("fill")) scene.getLightByName("fill")!.intensity = 0;
   if (kill.has("pipe")) scene.postProcessRenderPipelineManager.supportedPipelines.forEach((pl) => scene.postProcessRenderPipelineManager.detachCamerasFromRenderPipeline(pl.name, camera));
   const people = startPeople(scene, camera, world, worldSlug);
+  readyAt = performance.now() - t0;
+  if (params.has("perf") || params.has("bench")) {
+    const sample = startPerfOverlay(engine, scene, kind, q, () => readyAt);
+    if (params.has("bench")) runBenchmark(scene, camera, sample, { world: worldSlug, quality: q.quality, renderer: kind, assets: useGlb ? "glb" : "legacy", readyMs: Math.round(readyAt) });
+  }
   if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions, people } });
   (window as unknown as { __ready: boolean }).__ready = true;
 }

@@ -44,6 +44,9 @@ export interface RealismOptions {
   sunDirection?: Vector3;
   /** Size of the sky box; must stay inside the camera's far plane (default 9000). */
   skySize?: number;
+  shadowMapSize?: number;
+  cascades?: number;
+  msaa?: number;
 }
 
 export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" | "webgl", opts: RealismOptions = {}): Realism {
@@ -86,8 +89,8 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
   fill.groundColor = new Color3(0.25, 0.27, 0.22);
 
   // Cascaded shadows (stable across the large city).
-  const shadows = new CascadedShadowGenerator(2048, sun);
-  shadows.numCascades = 4;
+  const shadows = new CascadedShadowGenerator(opts.shadowMapSize ?? 2048, sun);
+  shadows.numCascades = opts.cascades ?? 4;
   shadows.stabilizeCascades = true;
   shadows.shadowMaxZ = 650;
   shadows.lambda = 0.85;
@@ -104,7 +107,7 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
 
   // Camera post-processing: HDR pipeline with ACES tone mapping, bloom, FXAA and a little sharpening.
   const pipeline = new DefaultRenderingPipeline("realism", true, scene, [camera]);
-  pipeline.samples = 4;
+  pipeline.samples = opts.msaa ?? 4;
   pipeline.fxaaEnabled = true;
   pipeline.imageProcessingEnabled = true;
   pipeline.imageProcessing.toneMappingEnabled = true;
