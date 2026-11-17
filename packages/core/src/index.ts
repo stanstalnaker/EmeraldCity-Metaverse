@@ -10,3 +10,4 @@ export * from "./anchors";
 export * from "./designs";
 export * from "./link-credentials";
 export * from "./bonds";
+export * from "./mandala";

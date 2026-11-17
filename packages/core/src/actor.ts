@@ -1,3 +1,4 @@
+import type { SigilIdentity } from "./mandala";
 /**
  * Anyone who can be present in the city: a human HubID profile or an agent.
  *
@@ -13,6 +14,11 @@ export interface ActorBase {
   hubId: number;
   displayName: string;
   avatarUrl: string | null;
+  /**
+   * Identity the actor's Mandala sigil is drawn from (MIP1, see mandala.ts): set by the server, never
+   * by the client. Agents use their OAI hash when HubID provides it.
+   */
+  sigil?: SigilIdentity;
 }
 
 export interface HumanActor extends ActorBase {

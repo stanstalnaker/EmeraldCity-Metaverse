@@ -47,19 +47,24 @@ export function hubIdResolver(opts: { jwtSecret: string; hubid: HubIdClient; age
     const displayName = self.name || [self.first, self.last].filter(Boolean).join(" ") || `HubID ${sub}`;
     const avatarUrl = self.profile?.image ?? self.image ?? null;
     const p = self.profile;
+    // Mandala sigil identity: an agent's OAI hash when HubID includes it, otherwise the HubID number.
+    const rawOai = (self as unknown as { oai_hash?: unknown }).oai_hash;
+    const oai = typeof rawOai === "string" && /^oai1_[a-z2-7]{32}$/.test(rawOai) ? rawOai : null;
+    const userSigil = { type: "user" as const, value: String(sub) };
     if (p?.profile_type === "bot" && p.parent_user_id) {
       return {
         kind: "agent",
         hubId: sub,
         displayName,
         avatarUrl,
+        sigil: oai ? { type: "agent", value: oai } : userSigil,
         ownerHubId: Number(p.parent_user_id),
         variant: p.profile_variant ?? "ai__bot",
         // TODO: read granted scopes from the token once HubID issues scoped agent tokens (docs/AGENTS.md).
         scopes: opts.agentScopes ?? DEFAULT_AGENT_SCOPES,
       };
     }
-    return { kind: "human", hubId: sub, displayName, avatarUrl };
+    return { kind: "human", hubId: sub, displayName, avatarUrl, sigil: userSigil };
   };
 }
 
@@ -71,7 +76,7 @@ export function devResolver(): IdentityResolver {
   if (process.env.NODE_ENV === "production") throw new Error("devResolver must not be used in production");
   return async (token) => {
     const [kind, id, a, b] = token.split(":");
-    if (kind === "human" && id) return { kind: "human", hubId: Number(id), displayName: a ?? `Human ${id}`, avatarUrl: null };
+    if (kind === "human" && id) return { kind: "human", hubId: Number(id), displayName: a ?? `Human ${id}`, avatarUrl: null, sigil: { type: "user", value: id } };
     if (kind === "agent" && id && a)
       return {
         kind: "agent",
@@ -79,6 +84,7 @@ export function devResolver(): IdentityResolver {
         ownerHubId: Number(a),
         displayName: b ?? `Agent ${id}`,
         avatarUrl: null,
+        sigil: { type: "user", value: id },
         variant: "ai__ai",
         scopes: DEFAULT_AGENT_SCOPES,
       };

@@ -11,7 +11,8 @@ import {
   type Scene,
   type UniversalCamera,
 } from "@babylonjs/core";
-import { rooms, type Actor, type ClientMessage, type Position, type ServerMessage } from "@emerald-city/core";
+import { deriveSigil, rooms, type Actor, type ClientMessage, type Position, type ServerMessage } from "@emerald-city/core";
+import { mandalaTexture, sigilColour } from "./mandala-art";
 
 /**
  * Other people and agents in the 3D world, through the presence server (apps/presence).
@@ -239,7 +240,7 @@ export class People {
 
   /** Zeke, the host: always visible by the arrival point; click to ask him something. */
   private spawnHost() {
-    const zeke: Actor = { kind: "agent", hubId: -1, ownerHubId: 1, displayName: "Zeke", avatarUrl: null, variant: "ai__ai", scopes: [] };
+    const zeke: Actor = { kind: "agent", hubId: -1, ownerHubId: 1, displayName: "Zeke", avatarUrl: null, variant: "ai__ai", scopes: [], sigil: { type: "agent", value: "zeke" } };
     const root = makeAvatar(this.o.scene, zeke, new Color3(0.12, 0.64, 0.48));
     root.position.copyFrom(this.o.hostPosition);
     root.getChildMeshes().forEach((m) => (m.metadata = { zekeHost: true }));
@@ -325,7 +326,50 @@ function makeAvatar(scene: Scene, actor: Actor, tint?: Color3): TransformNode {
   label.parent = root;
   label.position.y = 2.2;
   for (const m of root.getChildMeshes()) m.isPickable = true;
+  void dressWithMandala(scene, root, actor, head, bm, !!actor.avatarUrl, !tint);
   return root;
+}
+
+/**
+ * Every HubID has a Mandala sigil (MIP1). People wear theirs as a chest medallion (and as their face
+ * when they have no photo); agents always wear it as their face, with a slowly turning mandala halo
+ * behind the head. Body colour comes from the sigil, so avatar and mandala belong together.
+ */
+async function dressWithMandala(scene: Scene, root: TransformNode, actor: Actor, head: Mesh, body: StandardMaterial, hasPhoto: boolean, recolour: boolean) {
+  const params = await deriveSigil(actor.sigil ?? { type: "user", value: String(actor.hubId) });
+  if (root.isDisposed()) return;
+  const tex = mandalaTexture(scene, params);
+  const mat = new StandardMaterial(`mandala-${actor.hubId}`, scene);
+  mat.diffuseTexture = tex;
+  mat.useAlphaFromDiffuseTexture = true;
+  mat.emissiveColor = Color3.White(); // unlit: (emissive + light) x texture
+  mat.disableLighting = true;
+  mat.backFaceCulling = false;
+  if (recolour) body.diffuseColor = sigilColour(params);
+  const disc = (name: string, radius: number, y: number, z: number) => {
+    const d = MeshBuilder.CreateDisc(`avatar-${actor.hubId}-${name}`, { radius, tessellation: 48 }, scene);
+    d.parent = root;
+    d.position.set(0, y, z);
+    d.rotation.y = Math.PI; // face the front (+z) of the avatar
+    d.material = mat;
+    d.isPickable = true;
+    return d;
+  };
+  const isAgent = actor.kind === "agent";
+  if (isAgent || !hasPhoto) {
+    disc("face", 0.21, 1.68, 0.255);
+    const hm = head.material as StandardMaterial;
+    hm.diffuseTexture?.dispose();
+    hm.diffuseTexture = null;
+    hm.diffuseColor = sigilColour(params).scale(0.8);
+  }
+  if (!isAgent) disc("medallion", 0.17, 1.12, 0.325);
+  if (isAgent) {
+    const halo = disc("halo", 0.52, 1.74, -0.24);
+    halo.isPickable = false;
+    const spin = scene.onBeforeRenderObservable.add(() => (halo.rotation.z += 0.004));
+    halo.onDisposeObservable.addOnce(() => scene.onBeforeRenderObservable.remove(spin));
+  }
 }
 
 function colourFor(id: number): Color3 {

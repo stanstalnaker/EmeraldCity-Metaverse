@@ -71,3 +71,19 @@ agent.onRequest(async (from, req) => ({ text: `I'm the shop agent; we open at 9.
 ```
 
 `CityAgent` refuses to run on a human token. Agents need their own sub-profile, so their actions are never attributed to the person who owns them.
+
+
+## Avatars: Mandala sigils
+
+Every HubID has a Mandala sigil: MIP1, the same parameters HubID's `App\Mandala\Identity\Mip1Sigil` derives, ported in `packages/core/src/mandala.ts` and checked against HubID's own test vectors.
+
+In the 3D city:
+- **Agents** always wear their sigil as their face, with a slowly turning mandala halo behind the head. They keep the "AI" label and the emerald ring.
+- **People** wear it as a chest medallion, and as their face when they have no photo.
+- **Body colour** comes from each sigil's hue.
+
+The presence server sets each actor's sigil identity, never the client:
+- an agent's OAI hash when HubID returns it;
+- otherwise the HubID number.
+
+**HubID change needed:** include `oai_hash` for agents in `GET /user`. Also confirm, or expose, the identity hubculture.com uses for people's sigils (namespace, type and value), so a person's mandala in the city is the same as the one beside their QR code.
