@@ -144,6 +144,16 @@ export interface HubAnchor {
   distance_m?: number;
 }
 
+export interface ZoneContent {
+  zoneId: number;
+  name: string;
+  type: string;
+  /** URLs for the zone's media screens, newest first. */
+  media: string[];
+  /** URLs for the zone's file screens, newest first. */
+  files: string[];
+}
+
 export class HubIdClient {
   private readonly opts: HubIdClientOptions;
   private readonly fetchImpl: typeof fetch;
@@ -187,6 +197,26 @@ export class HubIdClient {
       if (page.items.length < limit || out.length >= Number(page.total)) break;
     }
     return out;
+  }
+
+  /**
+   * The media and files property owners upload to each zone (GET /pavilions/{id}), as the in-world
+   * screens show them: media-url items feed the "media" screens, file items the "file" screens, newest
+   * first (the legacy VR client's order). Server-side only: uses the private key.
+   */
+  async zoneContent(id: number): Promise<ZoneContent[]> {
+    const pav = await this.request<HubPavilion>("GET", `/pavilions/${encodeURIComponent(id)}`, { key: "private" });
+    const urlOf = (d: unknown) => (d && typeof d === "object" && typeof (d as { url?: unknown }).url === "string" ? (d as { url: string }).url : null);
+    return (pav.zones ?? []).map((z) => {
+      const items = [...(z.zone_contents ?? [])].reverse();
+      return {
+        zoneId: z.id,
+        name: z.name,
+        type: z.type,
+        media: items.filter((i) => i.type === "media-url").map((i) => urlOf(i.data)).filter((u): u is string => !!u),
+        files: items.filter((i) => i.type === "file").map((i) => urlOf(i.data)).filter((u): u is string => !!u),
+      };
+    });
   }
 
   /** GET /pavilions/{id}: a single public property. */

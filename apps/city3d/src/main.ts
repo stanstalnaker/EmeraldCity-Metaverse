@@ -14,6 +14,8 @@ import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
 import { buildLandscape } from "./landscape";
 import { People } from "./people";
 import { chooseQuality, runBenchmark, startPerfOverlay } from "./perf";
+import { Screens } from "./screens";
+import { loadSplats } from "./splats";
 import { setupInteractions } from "./interactions";
 import { setupHud } from "./hud";
 import { createEngine } from "./engine";
@@ -115,6 +117,11 @@ async function main() {
     mode: scene.fogMode, density: scene.fogDensity, color: scene.fogColor.clone(),
   });
 
+  // Live screens in the world (images, video, YouTube stills, title cards). The beta site serves zone
+  // content and proxies media; without it (local dev) screens show title cards.
+  const cityApi = (import.meta.env.VITE_CITY_API as string | undefined) ?? null;
+  const liveScreens = legacyLook ? null : new Screens(scene, camera, cityApi);
+
   // Screens: mesh name → what it shows.
   const screens = new Map(world.screens.map((s) => [s.mesh, s.content]));
   const wireScreens = (meshes: AbstractMesh[]) => {
@@ -133,11 +140,13 @@ async function main() {
       }
       look.adopt(container.meshes);
       interactions.adopt(container.meshes);
+      liveScreens?.adopt(container.meshes, screens); // after look.adopt, so the realism pass leaves screen materials alone
       wireScreens(container.meshes);
       if (model.id === "terrain") terrainMeshes.push(...container.meshes);
     },
     onUnloaded(_model, container) {
       look.release(container.meshes);
+      liveScreens?.release(container.meshes);
     },
     onProgress(loading, loaded) {
       $("loading").textContent = loading ? `Loading ${loading} building${loading > 1 ? "s" : ""}… (${loaded} loaded)` : `${loaded} buildings loaded`;
@@ -176,8 +185,9 @@ async function main() {
       return;
     }
     if (interactions.click(pick.pickedMesh, pick.pickedPoint)) return;
-    const content = screens.get(pick.pickedMesh.name);
-    if (content) showScreen(pick.pickedMesh.name, content);
+    const name = (pick.pickedMesh.metadata?.screenOf as string | undefined) ?? pick.pickedMesh.name;
+    const content = screens.get(name);
+    if (content) showScreen(name, content);
   };
   scene.onBeforeRenderObservable.add(() => interactions.tick());
   // Stand on the terrain (cheaper than mesh collisions on a 260k-vertex ground).
@@ -245,6 +255,12 @@ async function main() {
   if (kill.has("sun")) scene.getLightByName("sun")!.intensity = 0;
   if (kill.has("fill")) scene.getLightByName("fill")!.intensity = 0;
   if (kill.has("pipe")) scene.postProcessRenderPipelineManager.supportedPipelines.forEach((pl) => scene.postProcessRenderPipelineManager.detachCamerasFromRenderPipeline(pl.name, camera));
+  // Gaussian splats from the world, plus ?splat=<url> to try a capture in front of you.
+  const trySplat = params.get("splat");
+  void loadSplats(scene, [
+    ...(world.splats ?? []),
+    ...(trySplat ? [{ url: trySplat, label: "Test capture", position: camera.position.add(camera.getDirection(Vector3.Forward()).scale(6)).asArray() as [number, number, number] }] : []),
+  ]).then((n) => look.adopt(n));
   const people = startPeople(scene, camera, world, worldSlug);
   readyAt = performance.now() - t0;
   if (params.has("perf") || params.has("bench")) {

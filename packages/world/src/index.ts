@@ -171,6 +171,11 @@ export interface WorldManifest {
   primitives?: Primitive[];
   meshes?: PlacedMesh[];
   portals?: Portal[];
+  /**
+   * Gaussian splats: photoreal captures of real places (.splat, .ply or .spz), e.g. a landmark
+   * scanned from phone video. position is where the capture's origin goes.
+   */
+  splats?: { url: string; label?: string; position: [number, number, number]; rotationY?: number; scale?: number }[];
   /** Generated cities (packages/worldgen), drawn as instanced batches. */
   generated?: GeneratedCity[];
   models: WorldModel[];

@@ -66,6 +66,16 @@ portals all work.
 - Models stream in by distance and **unload** when you leave (the legacy client only ever loaded).
 - The legacy island's boundary wall stays solid but invisible, opening the horizon.
 
+## Live screens and splats
+
+- **Screens:** every property screen shows live content on its own surface:
+  - the zone's uploaded image, or a muted video that plays when you're within 30 m (from the beta site's `/api/zones/{id}`);
+  - a YouTube video's still;
+  - otherwise an emerald title card ("Plaza · Live · click to join").
+
+  Images and video come through the beta site's allow-listed `/api/media` proxy, which adds the CORS headers WebGL needs. Set `VITE_CITY_API` to the beta site (for example `https://beta.hubculture.city`). Without it, screens show title cards.
+- **Gaussian splats:** photoreal captures (.splat, .ply, .spz) go in a world's `splats` list with a position, rotation and scale. Try one in front of you with `?splat=<url>`.
+
 ## Compressed models (CDN)
 
 `packages/world/scripts/convert-legacy.mjs` turns the legacy `.babylon` models into compressed GLB:
