@@ -9,3 +9,4 @@ export * from "./market";
 export * from "./anchors";
 export * from "./designs";
 export * from "./link-credentials";
+export * from "./bonds";
