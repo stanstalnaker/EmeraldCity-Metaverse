@@ -14,9 +14,12 @@
     "@babylonjs/core": "^9.36.0",
     "@babylonjs/loaders": "^9.36.0",
     "@babylonjs/materials": "^9.36.0",
-    "@emerald-city/world": "workspace:*"
+    "@emerald-city/core": "workspace:*",
+    "@emerald-city/world": "workspace:*",
+    "livekit-client": "^2.23.0"
   },
   "devDependencies": {
+    "@babylonjs/serializers": "^9.37.0",
     "vite": "^6.0.0"
   }
 }

@@ -142,6 +142,24 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
 
   const upgraded = new Map<Material, Material>();
   const upgrade = (m: Material | null, meshName = ""): Material | null => {
+    // Converted (GLB) models already carry PBR materials: only give their water and glass the same treatment.
+    if (m instanceof PBRMaterial && !upgraded.has(m)) {
+      if (/ocean|water|sea|pool/i.test(`${m.name} ${meshName}`)) {
+        m.albedoColor = new Color3(0.03, 0.12, 0.16);
+        m.roughness = 0.06;
+        m.metallic = 0;
+        m.indexOfRefraction = 1.33;
+      } else if (/glass|window/i.test(m.name)) {
+        m.roughness = 0.05;
+        m.indexOfRefraction = 1.5;
+      } else if (!m.albedoTexture) {
+        // Same colour correction as legacy materials (the exporter keeps the old, too-dark flat colours),
+        // done in gamma space because glTF colours are linear.
+        m.albedoColor = realisticAlbedo(m.albedoColor.toGammaSpace()).toLinearSpace();
+      }
+      upgraded.set(m, m);
+      return m;
+    }
     if (!m || !(m instanceof StandardMaterial)) return m;
     const hit = upgraded.get(m);
     if (hit) return hit;

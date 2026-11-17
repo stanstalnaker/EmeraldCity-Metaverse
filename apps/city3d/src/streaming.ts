@@ -21,6 +21,8 @@ export class WorldStreamer {
     private readonly assetBase: string,
     private readonly events: StreamEvents,
     private readonly hysteresis = 1.3,
+    /** Load the compressed .glb conversion instead of the legacy .babylon file. */
+    private readonly glb = false,
   ) {}
 
   update(at: Vector3): void {
@@ -44,7 +46,8 @@ export class WorldStreamer {
     if (this.loaded.has(m.id) || this.loading.has(m.id)) return;
     this.loading.add(m.id);
     try {
-      const container = await LoadAssetContainerAsync(`${this.assetBase}${m.file}`, this.scene);
+      const file = this.glb ? m.file.replace(/\.babylon$/, ".glb") : m.file;
+      const container = await LoadAssetContainerAsync(`${this.assetBase}${file}`, this.scene);
       if (m.transform) {
         // Place the whole model with one parent transform (legacy newCoords placement).
         const root = new TransformNode(`${m.id}~placement`, this.scene);

@@ -29,6 +29,13 @@ let world: WorldManifest;
 /** Models and textures of the 2017-18 Unity worlds, converted (served like /legacy/, not committed). */
 const unityBase = (import.meta.env.VITE_UNITY_ASSET_BASE as string | undefined) ?? "/unity/";
 const assetBase = (import.meta.env.VITE_ASSET_BASE as string | undefined) ?? "/legacy/";
+/**
+ * Compressed city models (convert-legacy.mjs: GLB, meshopt geometry, WebP textures; about 12x
+ * smaller). On with VITE_ASSET_FORMAT=glb or ?assets=glb; images (magazines, map, slideshow) still
+ * come from assetBase.
+ */
+const useGlb = params.get("assets") === "glb" || (import.meta.env.VITE_ASSET_FORMAT as string | undefined) === "glb";
+const modelBase = useGlb ? ((import.meta.env.VITE_MODEL_BASE as string | undefined) ?? "/unity/legacy/") : assetBase;
 const legacyLook = params.get("look") === "legacy";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -108,7 +115,7 @@ async function main() {
   };
 
   const terrainMeshes: AbstractMesh[] = [];
-  const streamer = new WorldStreamer(scene, world, assetBase, {
+  const streamer = new WorldStreamer(scene, world, modelBase, {
     onLoaded(model, container) {
       // Make the world solid. The legacy client did this per model in callbacks we don't run;
       // without it, gravity drops you through the ground and you only see sky.
@@ -128,7 +135,7 @@ async function main() {
     onProgress(loading, loaded) {
       $("loading").textContent = loading ? `Loading ${loading} building${loading > 1 ? "s" : ""}… (${loaded} loaded)` : `${loaded} buildings loaded`;
     },
-  });
+  }, 1.3, useGlb);
 
   // Load what's around the spawn before showing the first frame (avoids falling through terrain).
   camera.applyGravity = false;

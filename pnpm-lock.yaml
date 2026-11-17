@@ -32,10 +32,19 @@ importers:
       '@babylonjs/materials':
         specifier: ^9.36.0
         version: 9.36.0(@babylonjs/core@9.36.0)
+      '@emerald-city/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@emerald-city/world':
         specifier: workspace:*
         version: link:../../packages/world
+      livekit-client:
+        specifier: ^2.23.0
+        version: 2.23.0(@types/dom-mediacapture-record@1.0.22)
     devDependencies:
+      '@babylonjs/serializers':
+        specifier: ^9.37.0
+        version: 9.37.0(@babylonjs/core@9.36.0)(babylonjs-gltf2interface@9.36.0)
       vite:
         specifier: ^6.0.0
         version: 6.4.5(@types/node@22.20.5)(tsx@4.23.15)(yaml@2.9.1)
@@ -275,6 +284,12 @@ packages:
     resolution: {integrity: sha512-VxJ0KWLzmchzFz2CIb/+ESUFcD26xzkX9//V2gO1LXLD/0Um8eLlcm713RHAU/ke4afM1Y1XbbGMqUZosctgrQ==}
     peerDependencies:
       '@babylonjs/core': ^9.0.0
+
+  '@babylonjs/serializers@9.37.0':
+    resolution: {integrity: sha512-tfh9LJkuxZ/FpbdBaHOFU30yL07CKHaAovVq69h/C6lQCoK38tmI0lPZRAneDhoqx5HbSR4p5QCwq8AO92kslw==}
+    peerDependencies:
+      '@babylonjs/core': ^9.0.0
+      babylonjs-gltf2interface: ^9.0.0
 
   '@bufbuild/protobuf@1.10.1':
     resolution: {integrity: sha512-wJ8ReQbHxsAfXhrf9ixl0aYbZorRuOWpBNzm8pL8ftmSxQx/wnJD5Eg861NwJU/czy2VXFIebCeZnZrI9rktIQ==}
@@ -2411,6 +2426,11 @@ snapshots:
   '@babylonjs/materials@9.36.0(@babylonjs/core@9.36.0)':
     dependencies:
       '@babylonjs/core': 9.36.0
+
+  '@babylonjs/serializers@9.37.0(@babylonjs/core@9.36.0)(babylonjs-gltf2interface@9.36.0)':
+    dependencies:
+      '@babylonjs/core': 9.36.0
+      babylonjs-gltf2interface: 9.36.0
 
   '@bufbuild/protobuf@1.10.1': {}
 

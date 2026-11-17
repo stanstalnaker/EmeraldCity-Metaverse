@@ -66,6 +66,24 @@ portals all work.
 - Models stream in by distance and **unload** when you leave (the legacy client only ever loaded).
 - The legacy island's boundary wall stays solid but invisible, opening the horizon.
 
+## Compressed models (CDN)
+
+`packages/world/scripts/convert-legacy.mjs` turns the legacy `.babylon` models into compressed GLB:
+- export in headless Chromium with Babylon's exporter (`convert.html`, dev only);
+- then gltf-transform: meshopt geometry, WebP textures up to 2048 px.
+
+Mesh names are kept, so screens, lifts and interactions still match. The 19 city models go from
+772 MB (plus separately loaded textures) to about 51 MB with textures embedded.
+
+```bash
+# with the dev server running; gltf-transform from npm (@gltf-transform/cli)
+node packages/world/scripts/convert-legacy.mjs ../vr-hubculture-web/legacy
+```
+
+Use them locally with `?assets=glb`. In production set `VITE_ASSET_FORMAT=glb` and
+`VITE_MODEL_BASE` to the CDN folder. Images that interactions use (magazines, map, slideshow) stay on
+`VITE_ASSET_BASE`.
+
 ## Next
 
 - Convert the assets to compressed GLB/KTX2 with LODs, hosted on a CDN, and re-author key materials per building.
