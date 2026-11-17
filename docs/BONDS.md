@@ -1,6 +1,6 @@
 # Emerald City Bonds as Ultra assets
 
-**Status: design plus core logic** (`packages/core/src/bonds.ts`, tested). The HubID side below is not built yet. It needs authorisation to change HubID and Ultra code, then review by the HubID team. No bond may be sold before legal sign-off (see "Before sale").
+**Status: built.** The core logic is in `packages/core/src/bonds.ts` (tested). The HubID implementation is on `hub/HubID` branch `feature/ultra-bonds`, awaiting review, a staging run and legal sign-off before any sale: schema, payout command, routes and purchase checks. Ultra's TRADER level (its KYC gate) still applies to bond purchases.
 
 ## What exists
 
@@ -46,7 +46,7 @@
 
 `lifetimeObligation()` gives the most an issue can cost: for 1,000 bonds of 100 Ven at 5% over 3 years, that's 15,000 Ven in coupons plus 100,000 Ven principal. Admins see it before approving.
 
-## HubID changes (to build after authorisation)
+## HubID implementation (`feature/ultra-bonds`)
 
 - **Tables** (SQL, ported to `Hub/db-migrations`):
   - `ultra_bond_terms`: `asset_id` (PK), `kind`, `issuer_user_id`, `face_value_ven`, `coupon_rate`, `term_years`, `issue_date`, `maturity_date`, `council_approval_ref`, `allow_list_only`, `blocked_jurisdictions`, `status`.
