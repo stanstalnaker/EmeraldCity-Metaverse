@@ -1,5 +1,7 @@
 import {
   Color3,
+  Color4,
+  ParticleSystem,
   DynamicTexture,
   LoadAssetContainerAsync,
   Matrix,
@@ -244,6 +246,10 @@ function unitShape(scene: Scene, shape: InstanceBatch["shape"]): Mesh {
       const normals: number[] = [];
       VertexData.ComputeNormals(positions, indices, normals);
       Object.assign(new VertexData(), { positions, indices, normals }).applyToMesh(m);
+      // Faces must point outwards (the last quad is the floor, so its normal must point down);
+      // inward faces render black under any light.
+      const n = m.getVerticesData("normal")!;
+      if (n[n.length - 2]! > 0) m.flipFaces(true);
       return m;
     }
   }
@@ -282,6 +288,7 @@ function generatedCity(scene: Scene, city: GeneratedCity): Mesh[] {
     box.rotation.y = c[6]!;
     box.checkCollisions = true;
     box.isPickable = false;
+    box.isVisible = false; // instances don't inherit the source's isVisible; without this they draw as black slabs
   }
   return out;
 }
@@ -398,40 +405,180 @@ function makePalm(scene: Scene): Mesh {
   return palm;
 }
 
-/** A glowing ring with a label; walking through it opens the other world. */
+/** Each destination's colour, so a portal hints where it goes before you read the label. */
+const PORTAL_TINT: Record<string, [string, string]> = {
+  "emerald-city": ["#17c38b", "#7dffcf"],
+  davos: ["#6fb8ff", "#e6f4ff"],
+  bermuda: ["#19c6c0", "#ffd2a6"],
+};
+
+/**
+ * A gateway to another world: an upright emerald ring with the Hub ring's three colours orbiting
+ * it, a swirling veil tinted for the destination, a faceted plinth, rising sparks and a label.
+ * Walk through it (or click it) to travel. All unlit, so it glows the same in any light.
+ */
 function portal(scene: Scene, p: Portal): Mesh[] {
+  const [tint, light] = PORTAL_TINT[p.to] ?? ["#17c38b", "#e9fff6"];
   const root = new TransformNode(`portal-${p.to}`, scene);
   root.position.set(p.position[0], p.position[1], p.position[2]);
   root.rotation.y = p.rotationY ?? 0;
-  const ring = MeshBuilder.CreateTorus(`portal-${p.to}-ring`, { diameter: 4.2, thickness: 0.28, tessellation: 48 }, scene);
+  const unlit = (name: string, color: Color3, alpha = 1) => {
+    const m = new StandardMaterial(name, scene);
+    m.emissiveColor = color;
+    m.diffuseColor = Color3.Black();
+    m.specularColor = Color3.Black();
+    m.disableLighting = true;
+    m.alpha = alpha;
+    return m;
+  };
+  const CY = 2.4; // centre of the opening
+
+  // Ring: upright (a torus lies flat by default), emerald.
+  const ring = MeshBuilder.CreateTorus(`portal-${p.to}-ring`, { diameter: 4.3, thickness: 0.22, tessellation: 64 }, scene);
   ring.parent = root;
-  ring.position.y = 2.3;
-  const glow = new StandardMaterial(`portal-${p.to}-mat`, scene);
-  glow.emissiveColor = new Color3(0.15, 0.95, 0.65);
-  glow.disableLighting = true;
-  ring.material = glow;
-  const disc = MeshBuilder.CreateDisc(`portal-${p.to}-veil`, { radius: 1.95, tessellation: 48, sideOrientation: Mesh.DOUBLESIDE }, scene);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = CY;
+  ring.material = unlit(`portal-${p.to}-mat`, Color3.FromHexString("#17c38b").scale(1.6));
+
+  // The Hub ring's magenta, indigo and cyan as three fine rings orbiting just outside it.
+  const arcs: Mesh[] = [];
+  ["#e6007e", "#5a4fd6", "#009ee3"].forEach((hex, k) => {
+    const arc = MeshBuilder.CreateTorus(`portal-${p.to}-arc${k}`, { diameter: 4.7 + k * 0.14, thickness: 0.03, tessellation: 64 }, scene);
+    arc.parent = root;
+    arc.rotation.x = Math.PI / 2;
+    arc.position.y = CY;
+    arc.material = unlit(`portal-${p.to}-arc${k}-mat`, Color3.FromHexString(hex).scale(1.4), 0.85);
+    arc.isPickable = false;
+    arcs.push(arc);
+  });
+
+  // Veil: a soft vortex in the destination's colour, slowly turning.
+  const vt = new DynamicTexture(`portal-${p.to}-swirl`, { width: 256, height: 256 }, scene, true);
+  {
+    const ctx = vt.getContext() as CanvasRenderingContext2D;
+    const g = ctx.createRadialGradient(128, 128, 4, 128, 128, 128);
+    g.addColorStop(0, light);
+    g.addColorStop(0.35, tint + "cc");
+    g.addColorStop(0.85, tint + "55");
+    g.addColorStop(1, tint + "00");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = light + "40";
+    ctx.lineWidth = 3;
+    for (let arm = 0; arm < 5; arm++) {
+      ctx.beginPath();
+      for (let t = 0; t < 1; t += 0.02) {
+        const a = arm * ((Math.PI * 2) / 5) + t * 5.5;
+        const r = 8 + t * 116;
+        ctx.lineTo(128 + Math.cos(a) * r, 128 + Math.sin(a) * r);
+      }
+      ctx.stroke();
+    }
+    vt.hasAlpha = true;
+    vt.update();
+  }
+  const disc = MeshBuilder.CreateDisc(`portal-${p.to}-veil`, { radius: 2.05, tessellation: 64, sideOrientation: Mesh.DOUBLESIDE }, scene);
   disc.parent = root;
-  disc.position.y = 2.3;
-  const veil = new StandardMaterial(`portal-${p.to}-veil-mat`, scene);
-  veil.emissiveColor = new Color3(0.1, 0.6, 0.45);
-  veil.alpha = 0.35;
-  veil.disableLighting = true;
+  disc.position.y = CY;
+  const veil = unlit(`portal-${p.to}-veil-mat`, Color3.White(), 0.9);
+  veil.diffuseTexture = vt;
+  veil.emissiveTexture = vt;
+  veil.opacityTexture = vt;
+  veil.backFaceCulling = false;
   disc.material = veil;
-  const label = MeshBuilder.CreatePlane(`portal-${p.to}-label`, { width: 4, height: 0.9 }, scene);
+
+  // Plinth: a low hexagonal step with a glowing rim, so the portal stands on something.
+  const plinth = MeshBuilder.CreateCylinder(`portal-${p.to}-plinth`, { height: 0.25, diameterTop: 3.6, diameterBottom: 4.0, tessellation: 6 }, scene);
+  plinth.parent = root;
+  plinth.position.y = 0.125;
+  const stone = new StandardMaterial(`portal-${p.to}-stone`, scene); // lit; realism makes it PBR stone
+  stone.diffuseColor = new Color3(0.16, 0.19, 0.23);
+  plinth.material = stone;
+  const rim = MeshBuilder.CreateTorus(`portal-${p.to}-rim`, { diameter: 3.65, thickness: 0.05, tessellation: 6 }, scene);
+  rim.parent = root;
+  rim.position.y = 0.26;
+  rim.rotation.y = Math.PI / 6;
+  rim.material = unlit(`portal-${p.to}-rim-mat`, Color3.FromHexString(tint).scale(1.3));
+  rim.isPickable = false;
+
+  // Sparks rising through the opening.
+  const spark = new DynamicTexture(`portal-${p.to}-spark`, { width: 32, height: 32 }, scene, false);
+  {
+    const ctx = spark.getContext() as CanvasRenderingContext2D;
+    const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0, "#ffffffff");
+    g.addColorStop(1, "#ffffff00");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 32, 32);
+    spark.hasAlpha = true;
+    spark.update();
+  }
+  const ps = new ParticleSystem(`portal-${p.to}-sparks`, 90, scene);
+  ps.particleTexture = spark;
+  ps.emitter = plinth; // follows the portal if it is moved onto the floor later
+  ps.minEmitBox = new Vector3(-1.4, 0, -0.3);
+  ps.maxEmitBox = new Vector3(1.4, 0, 0.3);
+  ps.color1 = Color4.FromHexString(light + "ff");
+  ps.color2 = Color4.FromHexString(tint + "ff");
+  ps.colorDead = new Color4(0, 0, 0, 0);
+  ps.minSize = 0.05;
+  ps.maxSize = 0.14;
+  ps.minLifeTime = 1.2;
+  ps.maxLifeTime = 2.6;
+  ps.emitRate = 30;
+  ps.direction1 = new Vector3(-0.15, 1, -0.15);
+  ps.direction2 = new Vector3(0.15, 1.6, 0.15);
+  ps.minEmitPower = 0.6;
+  ps.maxEmitPower = 1.2;
+  ps.gravity = new Vector3(0, -0.15, 0);
+  ps.blendMode = ParticleSystem.BLENDMODE_ADD;
+  ps.start();
+
+  // Label: small "PORTAL TO" over the destination's name, always facing you.
+  const label = MeshBuilder.CreatePlane(`portal-${p.to}-label`, { width: 4.4, height: 1.3 }, scene);
   label.parent = root;
-  label.position.y = 5.1;
+  label.position.y = CY + 3.1;
   label.billboardMode = Mesh.BILLBOARDMODE_Y;
-  const tex = new DynamicTexture(`portal-${p.to}-text`, { width: 512, height: 116 }, scene, true);
-  tex.hasAlpha = true;
-  tex.drawText(p.label, null, 80, "bold 64px system-ui, sans-serif", "#e9fff6", "transparent", true);
-  const lm = new StandardMaterial(`portal-${p.to}-label-mat`, scene);
+  const tex = new DynamicTexture(`portal-${p.to}-text`, { width: 704, height: 208 }, scene, true);
+  {
+    const ctx = tex.getContext() as CanvasRenderingContext2D;
+    ctx.clearRect(0, 0, 704, 208);
+    ctx.textAlign = "center";
+    ctx.fillStyle = light;
+    ctx.font = "600 34px Montserrat, system-ui, sans-serif";
+    (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "10px";
+    ctx.fillText("PORTAL TO", 352, 52);
+    ctx.fillStyle = "#ffffff";
+    (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "6px";
+    let size = 92; // shrink long names to fit
+    do ctx.font = `800 ${size}px Montserrat, system-ui, sans-serif`;
+    while (ctx.measureText(p.label.toUpperCase()).width > 640 && (size -= 4) > 40);
+    ctx.shadowColor = tint;
+    ctx.shadowBlur = 18;
+    ctx.fillText(p.label.toUpperCase(), 352, 150);
+    tex.hasAlpha = true;
+    tex.update();
+  }
+  const lm = unlit(`portal-${p.to}-label-mat`, Color3.White());
   lm.diffuseTexture = tex;
-  lm.emissiveColor = Color3.White();
-  lm.disableLighting = true;
   lm.useAlphaFromDiffuseTexture = true;
+  lm.emissiveTexture = tex;
   label.material = lm;
-  for (const m of [ring, disc, label]) m.metadata = { portal: p.to };
-  scene.onBeforeRenderObservable.add(() => (ring.rotation.z += 0.004));
-  return [ring, disc, label];
+
+  const parts = [ring, disc, label, plinth];
+  for (const m of [...parts, ...arcs, rim]) m.metadata = { portal: p.to };
+  let t = 0;
+  scene.onBeforeRenderObservable.add(() => {
+    const dt = scene.getEngine().getDeltaTime() / 1000;
+    t += dt;
+    if (veil.diffuseTexture) (veil.diffuseTexture as DynamicTexture).wAng = -t * 0.6;
+    // Gyroscope: each ring tilts gently around a different axis.
+    arcs.forEach((a, k) => {
+      a.rotation.x = Math.PI / 2 + Math.sin(t * (0.5 + k * 0.17) + k * 2.1) * 0.22;
+      a.rotation.y = Math.cos(t * (0.4 + k * 0.13) + k) * 0.22;
+    });
+    veil.alpha = 0.8 + Math.sin(t * 2.2) * 0.1;
+  });
+  return [...parts, ...arcs, rim];
 }

@@ -4,6 +4,9 @@
  * materials, ambient occlusion, ACES tone mapping, bloom and atmospheric haze.
  */
 import {
+  DynamicTexture,
+  Texture,
+  MultiMaterial,
   Color3,
   Color4,
   CascadedShadowGenerator,
@@ -112,7 +115,7 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
   pipeline.imageProcessingEnabled = true;
   pipeline.imageProcessing.toneMappingEnabled = true;
   pipeline.imageProcessing.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
-  pipeline.imageProcessing.exposure = 1.05;
+  pipeline.imageProcessing.exposure = 0.9; // expose for bright plazas and snow (like a camera would)
   pipeline.imageProcessing.contrast = 1.12;
   pipeline.imageProcessing.vignetteEnabled = true;
   pipeline.imageProcessing.vignetteWeight = 0.6;
@@ -143,6 +146,29 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
   detail.uScale = 1;
   detail.vScale = 1;
 
+  let turfTex: Texture | null = null;
+  const turf = () => {
+    if (turfTex) return turfTex;
+    // Painted once: soft mottling at two scales, tiled across the lawns.
+    const t = new DynamicTexture("turf", { width: 512, height: 512 }, scene, true);
+    const ctx = t.getContext() as CanvasRenderingContext2D;
+    ctx.fillStyle = "#737373";
+    ctx.fillRect(0, 0, 512, 512);
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 900; i++) {
+      const r = 6 + rnd() * 40, x = rnd() * 512, y = rnd() * 512, v = Math.round(90 + rnd() * 50);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(${v},${v},${v},0.35)`);
+      g.addColorStop(1, `rgba(${v},${v},${v},0)`);
+      ctx.fillStyle = g;
+      for (const [dx, dy] of [[0, 0], [512, 0], [-512, 0], [0, 512], [0, -512]]) ctx.fillRect(x + dx! - r, y + dy! - r, r * 2, r * 2);
+    }
+    t.update();
+    t.wrapU = t.wrapV = Texture.WRAP_ADDRESSMODE;
+    t.uScale = t.vScale = 90;
+    return (turfTex = t);
+  };
   const upgraded = new Map<Material, Material>();
   const upgrade = (m: Material | null, meshName = ""): Material | null => {
     // Converted (GLB) models already carry PBR materials: only give their water and glass the same treatment.
@@ -163,16 +189,30 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
       upgraded.set(m, m);
       return m;
     }
+    // Most legacy city meshes carry a MultiMaterial: upgrade each part (cached, shared like the parts).
+    if (m instanceof MultiMaterial) {
+      const hit = upgraded.get(m);
+      if (hit) return hit;
+      const mm = new MultiMaterial(`${m.name}~pbr`, scene);
+      mm.subMaterials = m.subMaterials.map((sub) => upgrade(sub, meshName));
+      upgraded.set(m, mm);
+      return mm;
+    }
     if (!m || !(m instanceof StandardMaterial)) return m;
+    // Unlit on purpose (portals, labels, signs, screens): leave as authored.
+    if (m.disableLighting) return m;
     const hit = upgraded.get(m);
     if (hit) return hit;
     const p = new PBRMaterial(`${m.name}~pbr`, scene);
     p.albedoTexture = m.diffuseTexture;
-    p.albedoColor = m.diffuseTexture ? Color3.White() : realisticAlbedo(m.diffuseColor);
+    // Textures are mostly light bakes painted near white; at full strength they clip under the sun.
+    p.albedoColor = m.diffuseTexture ? new Color3(0.8, 0.8, 0.8) : realisticAlbedo(m.diffuseColor);
     p.bumpTexture = m.bumpTexture;
     p.opacityTexture = m.opacityTexture;
     p.emissiveTexture = m.emissiveTexture;
-    p.emissiveColor = m.emissiveColor;
+    // Legacy emissive stood in for lighting in the flat old look (whole lawns glowed green). Under the
+    // sun it only needs to read as an accent glow.
+    p.emissiveColor = m.emissiveColor.scale(m.emissiveTexture ? 1 : 0.3);
     p.alpha = m.alpha;
     p.backFaceCulling = m.backFaceCulling;
     p.metallic = 0;
@@ -211,6 +251,12 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
           continue;
         }
         if (mesh.material) mesh.material = upgrade(mesh.material, mesh.name);
+        // The island's lawns: one flat colour over kilometres. Give them turf colour and variation.
+        if (/^terrain_\d/.test(mesh.name) && mesh.material instanceof PBRMaterial && !mesh.material.albedoTexture) {
+          mesh.material.albedoColor = new Color3(0.24, 0.42, 0.12); // × the noise below averages ~(0.09, 0.16, 0.05): real grass
+          mesh.material.albedoTexture = turf();
+          mesh.material.roughness = 0.95;
+        }
         mesh.receiveShadows = useShadows;
         if (useShadows && mesh instanceof Mesh && mesh.getBoundingInfo().boundingSphere.radiusWorld < 200) shadows.addShadowCaster(mesh, false);
       }
@@ -239,8 +285,18 @@ export function realisticAlbedo(c: Color3): Color3 {
   const max = Math.max(c.r, c.g, c.b);
   const min = Math.min(c.r, c.g, c.b);
   const saturation = max === 0 ? 0 : (max - min) / max;
-  if (saturation < 0.35 || max >= 0.32 || max === 0) return c.clone();
-  const scale = 0.32 / max;
+  if (max === 0) return c.clone();
+  // Nothing real is a perfect reflector: legacy pure whites clip to flat white under the sun.
+  // Fresh white paint reflects ~80%, so cap there (gamma space).
+  if (max > 0.8) return realisticAlbedo(c.scale(0.8 / max));
+  // Neon greens and other loud, bright colours (the legacy lawns) read as plastic. Real grass and
+  // painted surfaces are darker and less saturated.
+  if (saturation > 0.5 && max > 0.5) {
+    const lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+    return Color3.Lerp(c, new Color3(lum, lum, lum), 0.22).scale(0.5 / max + 0.25);
+  }
+  if (saturation < 0.35 || max >= 0.22) return c.clone();
+  const scale = 0.22 / max;
   const lifted = new Color3(c.r * scale, c.g * scale, c.b * scale);
   // Mix a quarter toward grey of the same luminance: the legacy lights washed colours out, so a
   // straight lift reads more saturated than the art ever looked.
