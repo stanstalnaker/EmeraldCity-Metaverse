@@ -9,6 +9,7 @@ export async function Header() {
       <strong>
         <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>Emerald City</Link>
       </strong>
+      <Link href="/archipelago">Archipelago</Link>
       <Link href="/map">Gaia map</Link>
       <Link href="/properties">Properties</Link>
       <Link href="/cities">Cities</Link>

@@ -20,6 +20,7 @@ HubID (`hub/HubID`) remains the system of record for users, properties, friends 
 |---|---|
 | `apps/web` | Next.js city site: properties, property pages, Gaia map, public GeoJSON API |
 | `apps/city3d` | **New 3D client (Babylon.js 9, WebGPU/WebXR)** rendering world manifests with realistic lighting; Emerald City imported from the live VR site |
+| `packages/archipelago` | The archipelago: islands geolinked to Gaia cells, their DIRT territories and Ven markets, Andromeda archipelagos, and the mandates agents act under (docs/ARCHIPELAGO.md) |
 | `apps/beta-gate` | HubID sign-in in front of every `*.beta.hubculture.city` site: admins and Beta Testers get in, one sign-in for all beta sites |
 | `apps/vr` | three.js + WebXR client (successor to `hub/vr-hubculture-city`) |
 | `apps/presence` | WebSocket presence for humans **and** agents: verified HubID identity, per-property rooms, agent-to-agent requests, LiveKit tokens |

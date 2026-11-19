@@ -6,7 +6,7 @@ const config: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../.."),
   // Workspace packages ship TypeScript source.
-  transpilePackages: ["@emerald-city/core", "@emerald-city/hubid-client", "@emerald-city/gaia-map", "@emerald-city/parcels"],
+  transpilePackages: ["@emerald-city/core", "@emerald-city/hubid-client", "@emerald-city/gaia-map", "@emerald-city/parcels", "@emerald-city/archipelago", "@emerald-city/worldgen"],
   // JSTS ships thousands of small ESM modules; let Node load it directly on the server.
   serverExternalPackages: ["jsts"],
   images: { remotePatterns: [{ protocol: "https", hostname: "**.hubculture.com" }] },

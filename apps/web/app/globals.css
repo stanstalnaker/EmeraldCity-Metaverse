@@ -52,3 +52,50 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); fon
 .sphere { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #b8f5d6, #1fa37a 60%, #0b5a42); box-shadow: 0 0 18px #1fa37a88; flex: none; }
 .nearby-item { display: flex; gap: 14px; align-items: center; }
 .stack label { display: grid; gap: 6px; font-weight: 500; }
+
+/* ---- The archipelago (Hub Culture's language: night navy, emerald, the Hub ring, gaia.club violet) ---- */
+.arch { position: fixed; inset: 57px 0 0 0; display: grid; grid-template-columns: 1fr 420px; background: #040a1c; color: #eaf2ff; font-family: Inter, system-ui, sans-serif; }
+.arch-map { position: relative; }
+.arch-panel { overflow-y: auto; padding: 26px 24px 40px; background: linear-gradient(180deg, #081634, #040a1c); border-left: 1px solid rgba(154,171,207,.16); }
+.arch-kicker { margin: 0; font: 700 11px/1 Montserrat, system-ui, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #6ff5c6; }
+.arch h1 { margin: 10px 0 8px; font: 800 30px/1.1 Montserrat, system-ui, sans-serif; letter-spacing: -.01em; }
+.arch-sub { margin: 0 0 18px; color: #9aabcf; font-size: 14px; line-height: 1.5; }
+.arch-tabs { display: flex; gap: 4px; padding: 4px; border: 1px solid rgba(154,171,207,.16); border-radius: 12px; margin-bottom: 16px; }
+.arch-tabs button { flex: 1; border: 0; background: transparent; color: #9aabcf; padding: 9px; border-radius: 9px; font: 600 13px Montserrat, system-ui, sans-serif; cursor: pointer; }
+.arch-tabs button.on { background: rgba(23,195,139,.16); color: #6ff5c6; }
+.arch-list { display: grid; gap: 10px; }
+.arch-card { padding: 14px 16px; border-radius: 14px; background: rgba(12,31,69,.7); border: 1px solid rgba(154,171,207,.16); cursor: pointer; }
+.arch-card.sel { border-color: rgba(23,195,139,.6); }
+.arch-card header { display: flex; align-items: center; gap: 9px; }
+.arch-card header b { font: 700 15px Montserrat, system-ui, sans-serif; flex: 1; }
+.arch-card header small, .arch-src, .arch-card dt { color: #9aabcf; font-size: 12px; }
+.arch-card p { margin: 8px 0; color: #c3cfe8; font-size: 13.5px; line-height: 1.5; }
+.arch-card dl { display: grid; gap: 4px; margin: 8px 0 12px; }
+.arch-card dl div { display: grid; grid-template-columns: 86px 1fr; gap: 8px; font-size: 13px; }
+.arch-card dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arch-card footer { display: flex; flex-wrap: wrap; gap: 6px; }
+.arch-dot { width: 12px; height: 12px; background: linear-gradient(135deg, #6ff5c6, #17c38b); clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+.arch-dot.mine { background: linear-gradient(135deg, #ff7fc0, #e6007e); }
+.arch-btn { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(154,171,207,.3); color: #eaf2ff; background: rgba(255,255,255,.04); font: 700 11.5px Montserrat, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+.arch-btn:hover { background: rgba(255,255,255,.1); }
+.arch-btn.primary { border: 0; color: #03241a; background: linear-gradient(90deg, #6ff5c6, #17c38b); }
+.arch-btn.ghost { opacity: .6; cursor: default; }
+.arch-btn:disabled { opacity: .6; }
+.arch-note { margin: 0 0 6px; font-size: 13px; line-height: 1.55; color: #c3cfe8; }
+.arch-note code { color: #6be1fb; }
+.arch-row { display: grid; grid-template-columns: 72px 70px 1fr auto; align-items: center; gap: 8px; padding: 9px 10px; border: 0; border-radius: 10px; background: transparent; color: #eaf2ff; text-align: left; font: 14px Inter, system-ui, sans-serif; cursor: pointer; }
+.arch-row:hover, .arch-row.sel { background: rgba(255,255,255,.06); }
+.arch-row b { font: 800 13px Montserrat, system-ui, sans-serif; color: #b98cff; }
+.arch-row small { color: #9aabcf; }
+.arch-pill { font: 700 10.5px Montserrat, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: rgba(114,9,183,.25); color: #d4b5ff; text-align: center; }
+.arch-pill.live { background: rgba(23,195,139,.22); color: #6ff5c6; }
+.arch-gen { display: grid; gap: 12px; }
+.arch-gen label { display: grid; gap: 6px; font-size: 13px; color: #c3cfe8; }
+.arch-gen input[type=text], .arch-gen input:not([type]) { height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid #22355f; background: #071230; color: #eaf2ff; font: inherit; }
+.arch-gen input[type=range] { accent-color: #17c38b; }
+.arch-anchor { margin: 0; font-size: 13px; color: #6be1fb; }
+.arch-err { margin: 0; color: #ff7fc0; font-size: 13px; }
+.arch-gem { display: flex; align-items: center; gap: 6px; border: 0; background: none; cursor: pointer; padding: 0; }
+.arch-gem span { width: 22px; height: 22px; background: linear-gradient(135deg, #7dffd2, #17c38b 55%, #064d36); clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); filter: drop-shadow(0 0 8px #17c38b); }
+.arch-gem b { font: 700 12px Montserrat, system-ui, sans-serif; color: #fff; text-shadow: 0 1px 4px #000, 0 0 10px #040a1c; white-space: nowrap; }
+@media (max-width: 860px) { .arch { grid-template-columns: 1fr; grid-template-rows: 46vh 1fr; } .arch-panel { border-left: 0; border-top: 1px solid rgba(154,171,207,.16); } }

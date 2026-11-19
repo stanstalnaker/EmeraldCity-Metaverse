@@ -1,0 +1,24 @@
+{
+  "generator": "thisisdirt launchpad export-gaia",
+  "addressing": "H3 (h3o); MIP1|GAIA|CELL|{h3index} per the Gaia addressing spec",
+  "fetched_at": 1794727593,
+  "layers": [
+    {
+      "id": "dirt-territories",
+      "name": "DIRT territories",
+      "description": "Places with their own DIRT token, a Solana SPL token minted at 1 DIRT per mapped area. Each carries its wave, status, supply, polygon hash and, once live, its mint.",
+      "geometry": "MultiPolygon",
+      "h3_resolutions": [
+        9,
+        6
+      ],
+      "attribution": [
+        "DIRT territory registry (hub-culture/thisisdirt): territory outlines, waves, status and supply.",
+        "Boundaries © OpenStreetMap contributors, available under the Open Database License (ODbL).",
+        "Outlines with boundarySource \"approximate-outline\" are hand-drawn approximations pending OSM relation or Gaia polygon-API boundaries."
+      ],
+      "features": 22,
+      "file": "dirt-territories.geojson"
+    }
+  ]
+}

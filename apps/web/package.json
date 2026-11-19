@@ -19,7 +19,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1",
-    "@emerald-city/parcels": "workspace:*"
+    "@emerald-city/parcels": "workspace:*",
+    "@emerald-city/archipelago": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
