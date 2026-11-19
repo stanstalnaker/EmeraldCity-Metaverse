@@ -22,6 +22,7 @@ import { createEngine } from "./engine";
 import { setupLegacyLook, setupRealism } from "./realism";
 import { WorldStreamer } from "./streaming";
 import { crossesPortal, setupMovement } from "./movement";
+import { setButton, setMember, setupUi, splash } from "./ui";
 
 const params = new URLSearchParams(location.search);
 const WORLDS: Record<string, { load: () => Promise<{ default: unknown }>; heights?: string }> = {
@@ -48,6 +49,7 @@ async function main() {
   // Behind the beta gate, cross-site media (screens) must carry the beta session cookie.
   if (import.meta.env.VITE_GATE_URL) Tools.CorsBehavior = "use-credentials";
   world = (await WORLDS[worldSlug]!.load()).default as WorldManifest;
+  const intro = splash(worldSlug, world.name);
   const canvas = $<HTMLCanvasElement>("c");
   const t0 = performance.now();
   let readyAt: number | null = null;
@@ -57,7 +59,7 @@ async function main() {
   const scene = new Scene(engine);
   scene.collisionsEnabled = true;
   scene.gravity = new Vector3(0, -0.45, 0);
-  if (params.has("shot")) document.querySelectorAll<HTMLElement>("#hud, #loading").forEach((e) => (e.style.display = "none"));
+  if (params.has("shot")) document.querySelectorAll<HTMLElement>("#hud, #loading, #dock, #chat, #help, #compass, #splash").forEach((e) => (e.style.display = "none"));
 
   // First-person camera at the requested property (or the world default).
   const spawn = spawnFor(world, params.get("pavilion_id"));
@@ -148,7 +150,10 @@ async function main() {
       liveScreens?.release(container.meshes);
     },
     onProgress(loading, loaded) {
-      $("loading").textContent = loading ? `Loading ${loading} building${loading > 1 ? "s" : ""}… (${loaded} loaded)` : `${loaded} buildings loaded`;
+      const text = loading ? `Loading ${loading} building${loading > 1 ? "s" : ""}… ${loaded} ready` : "";
+      intro.status(text || "Almost there…");
+      $("loading").textContent = text;
+      $("loading").style.display = text ? "" : "none";
     },
   }, 1.3, useGlb);
 
@@ -193,38 +198,38 @@ async function main() {
   const mover = setupMovement(scene, camera, { groundAt: landscape?.groundAt ?? null, flying: params.has("fly") });
   // Portals: walk (or fly) through one, or click it, to travel to that world.
   let travelling = false;
-  const travel = (p: Portal) => {
+  const travelTo = (slug: string, label: string) => {
     if (travelling) return;
     travelling = true;
     const q = new URLSearchParams(location.search);
     for (const k of ["pos", "yaw", "pitch", "pavilion_id"]) q.delete(k);
-    if (p.to === "emerald-city") q.delete("world");
-    else q.set("world", p.to);
-    $("travel-to").textContent = p.label;
+    if (slug === "emerald-city") q.delete("world");
+    else q.set("world", slug);
+    $("travel-to").textContent = label;
     $("travel").classList.add("on");
     setTimeout(() => (location.search = q.toString()), 650);
   };
+  const travel = (p: Portal) => travelTo(p.to, p.label);
   mover.onMove((from, to) => {
     for (const p of landscape?.portals ?? []) if (crossesPortal(from, to, p)) return travel(p);
   });
   setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly"), onFly: (on) => mover.setFlying(on), map: worldSlug === "emerald-city" });
 
-  // Teleports: arrival kiosk destinations plus property spawns.
-  const select = $<HTMLSelectElement>("teleport");
-  const opts: { label: string; pos: Vector3; yaw?: number }[] = [
-    ...world.teleports.filter((t) => t.group === "kiosk").map((t) => ({ label: `Kiosk · ${t.label}`, pos: new Vector3(t.position.x, t.position.y, t.position.z) })),
-    ...Object.entries(world.spawns).map(([id, s]) => ({ label: `Property ${id || "Lotus"}`, pos: new Vector3(s.position.x, s.position.y, s.position.z), yaw: s.rotationY })),
-  ];
-  select.innerHTML = `<option value="">Teleport…</option>` + opts.map((o, i) => `<option value="${i}">${o.label}</option>`).join("");
-  select.onchange = () => {
-    const o = opts[Number(select.value)];
-    if (!o) return;
-    camera.position.copyFrom(o.pos.add(new Vector3(0, 1.7, 0)));
-    if (o.yaw !== undefined) camera.rotation.y = o.yaw;
+  // Places to go in this world: arrival kiosk destinations and property entrances.
+  const goTo = (pos: Vector3, yaw?: number) => {
+    camera.position.copyFrom(pos.add(new Vector3(0, 1.7, 0)));
+    if (yaw !== undefined) camera.rotation.y = yaw;
     streamer.update(camera.position);
-    select.value = "";
-    canvas.focus();
   };
+  setupUi({
+    worldSlug,
+    travel: travelTo,
+    gateUrl: (import.meta.env.VITE_GATE_URL as string | undefined) ?? null,
+    places: [
+      ...world.teleports.filter((t) => t.group === "kiosk").map((t) => ({ label: t.label, group: "Landmark", go: () => goTo(new Vector3(t.position.x, t.position.y, t.position.z)) })),
+      ...Object.entries(world.spawns).map(([id, sp]) => ({ label: id ? (/^\d+$/.test(id) ? `Property ${id}` : id[0]!.toUpperCase() + id.slice(1)) : "Lotus", group: /^\d+$/.test(id) ? "Property" : "Place", go: () => goTo(new Vector3(sp.position.x, sp.position.y, sp.position.z), sp.rotationY) })),
+    ],
+  });
 
   $<HTMLButtonElement>("look").textContent = legacyLook ? "Realistic look" : "Legacy look";
   $<HTMLButtonElement>("look").onclick = () => {
@@ -243,10 +248,12 @@ async function main() {
     }
   }
 
-  $("title").textContent = `${world.name} · ${kind === "webgpu" ? "WebGPU" : "WebGL2"}${legacyLook ? " · legacy look" : ""}`;
+  $("title").textContent = `${world.name}${legacyLook ? " · legacy look" : ""}`;
+  $("title").title = kind === "webgpu" ? "Rendering with WebGPU" : "Rendering with WebGL2";
+  let frame = 0;
   engine.runRenderLoop(() => {
     scene.render();
-    $("stats").textContent = `${engine.getFps().toFixed(0)} fps`;
+    if (++frame % 30 === 0) $("stats").textContent = `${engine.getFps().toFixed(0)} fps · ${kind === "webgpu" ? "WebGPU" : "WebGL2"}`;
   });
   window.addEventListener("resize", () => engine.resize());
   // Debug switches for lighting: ?kill=fog,ibl,sun,fill,pipe
@@ -262,6 +269,7 @@ async function main() {
     ...(world.splats ?? []),
     ...(trySplat ? [{ url: trySplat, label: "Test capture", position: camera.position.add(camera.getDirection(Vector3.Forward()).scale(6)).asArray() as [number, number, number] }] : []),
   ]).then((n) => look.adopt(n));
+  intro.done();
   const people = await startPeople(scene, camera, world, worldSlug);
   readyAt = performance.now() - t0;
   if (params.has("perf") || params.has("bench")) {
@@ -282,14 +290,20 @@ async function presenceToken(): Promise<string | null> {
   if (gate) {
     try {
       const r = await fetch(`${gate}/_gate/token`, { credentials: "include" });
-      if (r.ok) return ((await r.json()) as { token: string }).token;
+      if (r.ok) {
+        const me = (await r.json()) as { token: string; name: string };
+        setMember({ name: me.name }, gate);
+        return me.token;
+      }
     } catch {
       /* fall through */
     }
+    setMember(null, gate);
     return null;
   }
   if (import.meta.env.DEV) {
     const name = (params.get("name") ?? `Visitor ${Math.floor(Math.random() * 900 + 100)}`).replace(/:/g, " ");
+    setMember({ name }, null);
     return `human:${Math.floor(Math.random() * 1e6) + 1000}:${name}`;
   }
   return null;
@@ -334,10 +348,10 @@ async function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManife
     if (!people) return;
     if (people.voiceOn) {
       await people.stopVoice();
-      $("voice-btn").textContent = "Voice";
+      setButton("voice-btn", "Voice", false);
     } else {
       people.requestVoice();
-      $("voice-btn").textContent = "Voice on";
+      setButton("voice-btn", "Voice on", true);
     }
   };
   // Keys typed in chat must not walk the camera.
@@ -387,5 +401,7 @@ function showScreen(mesh: string, c: ScreenContent) {
 
 main().catch((err) => {
   console.error(err);
-  $("loading").textContent = `Failed to start: ${err instanceof Error ? err.message : String(err)}`;
+  const msg = `Couldn't start: ${err instanceof Error ? err.message : String(err)}`;
+  $("splash-status").textContent = msg;
+  $("loading").textContent = msg;
 });

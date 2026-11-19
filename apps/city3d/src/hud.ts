@@ -1,4 +1,5 @@
 import { FreeCameraVirtualJoystickInput, Vector3, type UniversalCamera } from "@babylonjs/core";
+import { setButton } from "./ui";
 
 /**
  * HUD controls ported from the live client (helpers/ui.js): full-screen map with the 14 teleport
@@ -51,23 +52,33 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
     camera.applyGravity = !fly;
     camera.checkCollisions = !fly;
     o.onFly?.(fly);
-    flyBtn.textContent = fly ? "Walk" : "Fly";
+    setButton("fly-btn", fly ? "Flying" : "Fly", fly);
   };
   setFly(o.fly);
   flyBtn.onclick = () => setFly(camera.applyGravity);
 
-  // Compass: tiles shift with heading (ui.js:753).
+  // Compass: a strip of headings every 15° (3 turns long, so it can wrap), slid under a fixed pointer.
   const strip = $("compass-strip");
+  const STEP = 30; // px per 15°
+  const names: Record<number, string> = { 0: "N", 45: "NE", 90: "E", 135: "SE", 180: "S", 225: "SW", 270: "W", 315: "NW" };
+  let html = "";
+  for (let turn = 0; turn < 3; turn++)
+    for (let d = 0; d < 360; d += 15) html += names[d] ? `<span class="${d % 90 === 0 ? "c" : ""}">${names[d]}</span>` : `<span class="t">|</span>`;
+  strip.innerHTML = html;
+  const compass = $("compass");
+  let lastX = NaN;
   setInterval(() => {
-    const rot = ((camera.rotation.y % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    strip.style.backgroundPositionX = `${-(rot * 600) / (2 * Math.PI) + 300}px`;
-  }, 50);
-  strip.style.backgroundImage = `url(${ui("compass.png")})`;
+    const deg = ((((camera.rotation.y * 180) / Math.PI) % 360) + 360) % 360;
+    // Centre of the heading's tick under the pointer; start in the middle turn.
+    const x = compass.clientWidth / 2 - (360 / 15) * STEP - (deg / 15) * STEP - STEP / 2;
+    if (Math.abs(x - lastX) > 0.2) strip.style.transform = `translateX(${x.toFixed(1)}px)`;
+    lastX = x;
+  }, 33);
 
   // Touch devices: virtual joysticks (the live site used VirtualJoysticksCamera).
   if ("ontouchstart" in window) {
     camera.inputs.add(new FreeCameraVirtualJoystickInput());
-    $("help").textContent = "Left stick moves · right stick looks · tap screens and buttons";
+    $("help").innerHTML = "<span>Left stick moves</span><span>right stick looks</span><span>tap screens, portals and buttons</span>";
   }
 
   // Screen panel

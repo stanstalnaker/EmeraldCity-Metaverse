@@ -2,75 +2,229 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Emerald City 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#050b1f" />
+    <title>Emerald City</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #0c1411; font-family: system-ui, sans-serif; color: #e6efeb; }
+      /* Hub Culture: night navy, the Hub ring (magenta · indigo · cyan), Emerald City's emerald, faceted glass. */
+      :root {
+        --night: #050b1f; --navy: #0a1736; --glass: rgba(8, 18, 44, .72); --glass-strong: rgba(8, 18, 44, .9);
+        --line: rgba(147, 164, 200, .18); --ink: #e8f0ff; --muted: #93a4c8;
+        --emerald: #17c38b; --emerald-hi: #5ff2c0; --magenta: #e6007e; --indigo: #5a4fd6; --cyan: #009ee3;
+        --ring: linear-gradient(90deg, var(--magenta), var(--indigo) 50%, var(--cyan));
+        --r: 14px; --gut: max(14px, env(safe-area-inset-left));
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font: 14px/1.45 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
       canvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
-      #hud { position: fixed; top: 10px; left: 10px; right: 10px; display: flex; gap: 10px; align-items: center; pointer-events: none; }
+      button, select, input { font: inherit; color: inherit; }
+      button { cursor: pointer; }
+      .glass { background: var(--glass); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 10px 40px #0006; }
+      .hair { position: relative; }
+      .hair::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--ring); opacity: .7;
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+      .kicker { font: 600 10.5px/1 Montserrat, sans-serif; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
+      .btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.04); font-weight: 600; font-size: 13px; transition: background .15s, border-color .15s, transform .1s; white-space: nowrap; }
+      .btn:hover { background: rgba(255,255,255,.09); border-color: rgba(147,164,200,.35); }
+      .btn:active { transform: translateY(1px); }
+      .btn.on { background: rgba(23,195,139,.16); border-color: rgba(23,195,139,.6); color: var(--emerald-hi); }
+      .btn.primary { background: linear-gradient(90deg, #0f9e70, var(--emerald)); border: 0; color: #fff; }
+      .btn svg { width: 17px; height: 17px; flex: none; }
+      .icon { width: 38px; padding: 0; justify-content: center; }
+      kbd { font: 600 11px/1 Inter, sans-serif; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,.08); border: 1px solid var(--line); color: var(--ink); }
+
+      /* Top bar */
+      #hud { position: fixed; top: max(12px, env(safe-area-inset-top)); left: var(--gut); right: var(--gut); display: flex; align-items: flex-start; gap: 10px; pointer-events: none; z-index: 5; }
       #hud > * { pointer-events: auto; }
-      .chip { background: #000a; backdrop-filter: blur(6px); padding: 7px 11px; border-radius: 8px; font-size: 13px; }
-      select, button { font: inherit; background: #1fa37a; color: #fff; border: 0; border-radius: 7px; padding: 7px 10px; cursor: pointer; }
-      #panel { position: fixed; right: 12px; top: 56px; width: 320px; max-height: 70vh; overflow: auto; display: none; }
-      #panel h3 { margin: 0 0 6px; font-size: 15px; }
-      #panel a { color: #8ff0cd; }
-      #loading { position: fixed; bottom: 14px; left: 12px; }
-      #chat { position: fixed; left: 12px; bottom: 52px; width: min(380px, calc(100vw - 24px)); display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+      #brand { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 10px; }
+      #brand .gem { width: 30px; height: 30px; flex: none; }
+      #brand .word { font: 800 13px/1 Montserrat, sans-serif; letter-spacing: .22em; text-transform: uppercase; }
+      #title { margin-top: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 34vw; }
+      #hud .spacer { flex: 1; }
+      #tools { display: flex; gap: 6px; padding: 6px; }
+      #me { display: flex; align-items: center; gap: 9px; padding: 6px 12px 6px 6px; text-decoration: none; color: inherit; }
+      #me .dot { width: 26px; height: 26px; border-radius: 50%; background: conic-gradient(var(--magenta), var(--indigo), var(--cyan), var(--emerald), var(--magenta)); display: grid; place-items: center; font: 800 11px Montserrat, sans-serif; color: #fff; }
+      #me-name { font-weight: 600; font-size: 13px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* Compass */
+      #compass { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: min(320px, 34vw); height: 34px; overflow: hidden; pointer-events: none; z-index: 4;
+        -webkit-mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); }
+      #compass-strip { position: absolute; top: 0; left: 0; height: 100%; display: flex; align-items: center; will-change: transform; }
+      #compass-strip span { flex: none; width: 30px; text-align: center; font: 600 11px Montserrat, sans-serif; color: var(--muted); }
+      #compass-strip span.c { color: var(--ink); font-weight: 800; font-size: 13px; }
+      #compass-strip span.t { color: rgba(147,164,200,.45); }
+      #compass::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 0; height: 0; transform: translateX(-50%); border: 5px solid transparent; border-bottom-color: var(--emerald); }
+
+      /* Bottom dock */
+      #dock { position: fixed; bottom: max(14px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; z-index: 5; }
+      #dock .sep { width: 1px; background: var(--line); margin: 6px 2px; }
+
+      /* Chat */
+      #chat { position: fixed; left: var(--gut); bottom: max(14px, env(safe-area-inset-bottom)); width: min(360px, calc(100vw - 28px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; z-index: 5; }
       #chat > * { pointer-events: auto; }
-      #chat-log { max-height: 30vh; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
-      #chat-log .line { background: #000a; backdrop-filter: blur(6px); padding: 4px 9px; border-radius: 7px; align-self: flex-start; max-width: 100%; }
-      #chat-log .system { opacity: .75; font-style: italic; }
-      #chat-log .zeke { background: #0b5d3bcc; }
-      #chat-form { display: flex; gap: 6px; }
-      #chat-form input { flex: 1; min-width: 0; font: inherit; padding: 7px 10px; border-radius: 7px; border: 0; background: #000b; color: #fff; }
-      #chat-mode { white-space: nowrap; background: #13201b; }
-      #help { position: fixed; bottom: 14px; right: 12px; max-width: 45vw; font-size: 12px; opacity: .85; }
-      #compass { position: fixed; top: 58px; left: 50%; transform: translateX(-50%); width: 300px; height: 30px; overflow: hidden; border-radius: 8px; background: #000a; pointer-events: none; }
-      #compass-strip { width: 100%; height: 100%; background-repeat: repeat-x; background-size: 600px 30px; }
-      #compass::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #1fa37a; }
-      .overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #000c; z-index: 20; }
-      #map .box { position: relative; display: flex; gap: 16px; max-width: 95vw; max-height: 90vh; }
-      #map-image { max-height: 86vh; max-width: 60vw; border-radius: 10px; }
+      #chat-log { max-height: 28vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 13px; scrollbar-width: none; -webkit-mask: linear-gradient(transparent, #000 24px); mask: linear-gradient(transparent, #000 24px); }
+      #chat-log .line { background: var(--glass); backdrop-filter: blur(10px); padding: 6px 11px; border-radius: 11px; align-self: flex-start; max-width: 100%; border: 1px solid var(--line); }
+      #chat-log .system { color: var(--muted); font-size: 12px; background: transparent; border-color: transparent; backdrop-filter: none; padding: 2px 4px; }
+      #chat-log .zeke { border-color: rgba(23,195,139,.5); background: rgba(11,93,59,.55); }
+      #chat-form { display: flex; gap: 6px; padding: 6px; border-radius: 13px; }
+      #chat-form input { flex: 1; min-width: 0; padding: 0 10px; height: 36px; border-radius: 9px; border: 0; background: transparent; outline: none; }
+      #chat-form input::placeholder { color: var(--muted); }
+      #chat-mode { height: 36px; font-size: 12px; }
+      #chat:not(.open) #chat-form { opacity: .82; }
+
+      /* Status, help */
+      #loading { position: fixed; right: var(--gut); bottom: max(68px, calc(env(safe-area-inset-bottom) + 58px)); font-size: 12px; color: var(--muted); padding: 6px 11px; z-index: 4; pointer-events: none; }
+      #help { position: fixed; right: var(--gut); bottom: max(14px, env(safe-area-inset-bottom)); max-width: min(420px, 40vw); font-size: 12px; color: var(--muted); padding: 10px 14px; z-index: 4; transition: opacity .8s; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+      #help.faded { opacity: 0; pointer-events: none; }
+      #help span { white-space: nowrap; }
+
+      /* Popovers and panels */
+      .pop { position: fixed; z-index: 15; display: none; padding: 16px; width: min(360px, calc(100vw - 28px)); }
+      .pop.open { display: block; animation: rise .18s ease-out; }
+      @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+      .pop h3 { margin: 4px 0 12px; font: 800 15px/1.2 Montserrat, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+      #worlds { top: 72px; right: var(--gut); width: min(420px, calc(100vw - 28px)); }
+      .world { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 10px; border-radius: 12px; border: 1px solid transparent; background: rgba(255,255,255,.03); margin-bottom: 8px; width: 100%; text-align: left; }
+      .world:hover { border-color: var(--line); background: rgba(255,255,255,.06); }
+      .world.here { border-color: rgba(23,195,139,.5); }
+      .world .thumb { width: 54px; height: 54px; border-radius: 10px; }
+      .world b { font: 700 14px Montserrat, sans-serif; letter-spacing: .04em; display: block; }
+      .world small { color: var(--muted); font-size: 12px; }
+      .world .go { font: 600 11px Montserrat, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--emerald-hi); }
+      #goto { bottom: 74px; left: 50%; transform: translateX(-50%); max-height: 60vh; overflow: auto; }
+      #goto.open { animation: none; }
+      #goto-list { display: grid; gap: 4px; }
+      #goto-list button { text-align: left; padding: 9px 11px; border-radius: 9px; border: 0; background: transparent; display: flex; justify-content: space-between; gap: 12px; }
+      #goto-list button:hover { background: rgba(255,255,255,.07); }
+      #goto-list button small { color: var(--muted); }
+      #settings { top: 72px; right: var(--gut); width: min(300px, calc(100vw - 28px)); }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+      .row:first-of-type { border-top: 0; }
+      .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+      .seg button { border: 0; background: transparent; padding: 6px 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
+      .seg button.on { background: rgba(23,195,139,.18); color: var(--emerald-hi); }
+      #stats { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; }
+
+      /* Overlays */
+      .overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(3,7,20,.78); backdrop-filter: blur(6px); z-index: 20; padding: 16px; }
+      #map .box { position: relative; display: flex; gap: 16px; max-width: 96vw; max-height: 90vh; padding: 16px; }
+      #map-image { max-height: 82vh; max-width: 60vw; border-radius: 10px; }
       #map-stops { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: center; }
-      #map-stops button { background: #fff1; padding: 6px; }
+      #map-stops button { background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 10px; padding: 7px; }
       #map-stops img { height: 26px; display: block; }
-      #screen .box { width: min(1100px, 94vw); height: min(680px, 86vh); display: flex; flex-direction: column; background: #0c1411; border-radius: 12px; overflow: hidden; }
-      #screen header { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: #13201b; }
-      #screen header span { flex: 1; font-size: 14px; }
-      #screen header a { color: #8ff0cd; font-size: 13px; }
-      #screen-body { flex: 1; display: flex; align-items: center; justify-content: center; }
+      .close { position: absolute; top: 10px; right: 10px; }
+      #screen .box { width: min(1100px, 96vw); height: min(680px, 86vh); display: flex; flex-direction: column; overflow: hidden; }
+      #screen header { display: flex; gap: 10px; align-items: center; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--line); }
+      #screen header span { flex: 1; font: 700 14px Montserrat, sans-serif; letter-spacing: .04em; }
+      #screen header a { color: var(--cyan); font-size: 13px; text-decoration: none; }
+      #screen-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #02060f; }
       #screen-body iframe { width: 100%; height: 100%; border: 0; background: #fff; }
       #screen-body img { max-width: 100%; max-height: 100%; }
-      #screen-body .empty { max-width: 520px; padding: 24px; line-height: 1.5; }
+      #screen-body .empty { max-width: 520px; padding: 24px; line-height: 1.6; color: var(--muted); }
+      #screen-body .empty b { color: var(--ink); }
+
+      /* Splash: shown until the world is ready */
+      #splash { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background:
+          radial-gradient(1100px 700px at 75% -10%, rgba(18,58,107,.55), transparent 60%), radial-gradient(900px 600px at -10% 110%, rgba(11,93,59,.5), transparent 60%), var(--night);
+        transition: opacity .8s ease, visibility .8s; text-align: center; padding: 24px; }
+      #splash.gone { opacity: 0; visibility: hidden; }
+      #splash .gem { width: 76px; height: 76px; animation: float 3.2s ease-in-out infinite; filter: drop-shadow(0 10px 30px rgba(23,195,139,.35)); }
+      @keyframes float { 50% { transform: translateY(-6px) rotate(4deg); } }
+      #splash h1 { margin: 18px 0 6px; font: 800 clamp(26px, 5vw, 44px)/1.05 Montserrat, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+      #splash p { margin: 0; color: var(--muted); max-width: 440px; }
+      #splash .bar { width: min(280px, 70vw); height: 3px; border-radius: 3px; background: rgba(255,255,255,.08); margin: 26px auto 12px; overflow: hidden; }
+      #splash .bar i { display: block; height: 100%; width: 40%; background: var(--ring); border-radius: 3px; animation: slide 1.4s ease-in-out infinite; }
+      @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+      #splash-status { font-size: 12px; color: var(--muted); min-height: 18px; }
+
       #travel { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: none; opacity: 0; transition: opacity .6s ease;
-        background: radial-gradient(circle at 50% 50%, #17c38b55, #050b1f 70%); }
+        background: radial-gradient(circle at 50% 50%, rgba(23,195,139,.35), var(--night) 70%); }
       #travel.on { opacity: 1; }
-      #travel p { font: 600 13px/1 system-ui, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #93a4c8; margin: 0 0 10px; text-align: center; }
-      #travel b { display: block; font: 800 40px/1 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #e8f0ff; text-align: center; }
+      #travel b { display: block; font: 800 clamp(30px, 6vw, 48px)/1 Montserrat, sans-serif; letter-spacing: .14em; text-transform: uppercase; margin-top: 12px; }
+
+      /* Phones: compact bar, dock above chat, no keyboard help */
+      @media (max-width: 720px) {
+        #brand .word { display: none; } #title { max-width: 42vw; margin: 0; }
+        #compass { display: none; }
+        #dock { bottom: auto; top: 64px; left: auto; right: var(--gut); transform: none; flex-direction: column; }
+        #dock .sep { width: auto; height: 1px; margin: 2px 6px; }
+        #dock .label, #tools .label { display: none; }
+        #tools .btn { width: 38px; padding: 0; justify-content: center; }
+        #brand { padding: 6px 12px 6px 8px; } #hud { gap: 6px; }
+        #help { display: none; }
+        #me-name { display: none; }
+        #worlds, #settings { top: 64px; }
+        #goto { bottom: auto; top: 64px; left: var(--gut); transform: none; }
+        #map .box { flex-direction: column; } #map-image { max-width: 88vw; max-height: 50vh; }
+      }
     </style>
   </head>
   <body>
     <canvas id="c"></canvas>
+
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <linearGradient id="gem-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ff2c0" /><stop offset=".55" stop-color="#17c38b" /><stop offset="1" stop-color="#0b5d3b" /></linearGradient>
+        <symbol id="gem" viewBox="0 0 64 64"><path d="M20 6h24l14 14v24L44 58H20L6 44V20z" fill="url(#gem-g)" /><path d="M20 6l12 14 12-14M6 20h52M32 20v38M6 44l26-24 26 24" fill="none" stroke="#e8fff6" stroke-opacity=".45" stroke-width="1.2" /></symbol>
+      </defs>
+    </svg>
+
+    <div id="splash"><div>
+      <svg class="gem"><use href="#gem" /></svg>
+      <div class="kicker" style="margin-top:18px">Hub Culture</div>
+      <h1 id="splash-world">Emerald City</h1>
+      <p id="splash-tag">A city for the Hub Culture community, its members and their agents.</p>
+      <div class="bar"><i></i></div>
+      <div id="splash-status">Preparing the world…</div>
+    </div></div>
+
     <div id="hud">
-      <span class="chip" id="title">Emerald City</span>
-      <select id="teleport" title="Teleport"></select>
-      <button id="look" title="Compare with the legacy look">Legacy look</button>
-      <button id="map-btn" title="Map (M)">Map</button>
-      <button id="fly-btn" title="Toggle fly / walk">Fly</button>
-      <button id="voice-btn" title="Talk with people nearby (spatial voice)">Voice</button>
-      <span class="chip" id="stats"></span>
+      <div id="brand" class="glass hair"><svg class="gem"><use href="#gem" /></svg><div><div class="word">Emerald City</div><div id="title">Emerald City</div></div></div>
+      <div class="spacer"></div>
+      <div id="tools" class="glass">
+        <button class="btn" id="worlds-btn" title="Travel to another world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" /></svg><span class="label">Worlds</span></button>
+        <button class="btn icon" id="map-btn" title="Map (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" /></svg></button>
+        <button class="btn icon" id="settings-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg></button>
+      </div>
+      <a id="me" class="glass" href="#" title="Your HubID"><span class="dot" id="me-dot">·</span><span id="me-name">Guest</span></a>
     </div>
-    <div class="chip" id="loading">Loading…</div>
-    <div id="chat"><div id="chat-log"></div>
-      <form id="chat-form"><button type="button" id="chat-mode" title="Switch between everyone here and Zeke">Everyone here</button><input id="chat-input" maxlength="2000" autocomplete="off" placeholder="Say something to everyone here…"><button>Send</button></form></div>
+
     <div id="compass"><div id="compass-strip"></div></div>
-    <div class="chip" id="help">WASD to move · Shift run · Space jump · F fly · drag to look · walk through or click a portal to travel · click screens, lifts, kiosk, magazines, seats · M for map</div>
-    <div class="overlay" id="map"><div class="box"><img id="map-image" alt="Emerald City map"><div id="map-stops"></div>
-      <button id="map-close" style="position:absolute;top:-10px;right:-10px">✕</button></div></div>
-    <div class="overlay" id="screen"><div class="box"><header><span id="screen-title"></span>
-      <a id="screen-open" target="_blank" rel="noopener">Open in new tab</a><button id="screen-close">Close</button></header>
+
+    <div id="dock" class="glass hair">
+      <button class="btn" id="goto-btn" title="Go to a place in this world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg><span class="label">Go to</span></button>
+      <button class="btn" id="fly-btn" title="Fly or walk (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 16l20-8-8 12-2-6-10 2z" /></svg><span class="label">Fly</span></button>
+      <div class="sep"></div>
+      <button class="btn" id="voice-btn" title="Talk with people nearby (spatial voice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg><span class="label">Voice</span></button>
+      <button class="btn icon" id="help-btn" title="Controls (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01" /></svg></button>
+    </div>
+
+    <div class="glass" id="loading" style="display:none"></div>
+    <div id="chat"><div id="chat-log"></div>
+      <form id="chat-form" class="glass"><button type="button" class="btn" id="chat-mode" title="Switch between everyone here and Zeke">Everyone here</button><input id="chat-input" maxlength="2000" autocomplete="off" placeholder="Say something to everyone here…" /><button class="btn primary icon" title="Send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l16-8-6 16-2-6-8-2z" /></svg></button></form></div>
+    <div class="glass" id="help">
+      <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</span><span><kbd>Shift</kbd> run</span><span><kbd>Space</kbd> jump</span><span><kbd>F</kbd> fly</span><span>drag to look</span><span><kbd>M</kbd> map</span><span>walk through a portal to travel</span>
+    </div>
+
+    <div class="pop glass hair" id="worlds"><div class="kicker">The archipelago</div><h3>Worlds</h3><div id="worlds-list"></div></div>
+    <div class="pop glass hair" id="goto"><div class="kicker">In this world</div><h3>Go to</h3><div id="goto-list"></div></div>
+    <div class="pop glass hair" id="settings"><div class="kicker">This device</div><h3>Settings</h3>
+      <div class="row"><span>Quality</span><span class="seg" id="quality-seg"><button data-q="low">Low</button><button data-q="medium">Medium</button><button data-q="high">High</button></span></div>
+      <div class="row"><span>Lighting</span><button class="btn" id="look" title="Compare with the legacy look">Legacy look</button></div>
+      <div class="row"><span>Frame rate</span><span id="stats"></span></div>
+      <div class="row"><span>Sign out of beta</span><a class="btn" id="signout" href="#">Sign out</a></div>
+    </div>
+
+    <div class="overlay" id="map"><div class="box glass hair"><img id="map-image" alt="Emerald City map" /><div id="map-stops"></div>
+      <button class="btn icon close" id="map-close" aria-label="Close">✕</button></div></div>
+    <div class="overlay" id="screen"><div class="box glass hair"><header><span id="screen-title"></span>
+      <a id="screen-open" target="_blank" rel="noopener">Open in new tab ↗</a><button class="btn" id="screen-close">Close</button></header>
       <div id="screen-body"></div></div></div>
-    <div id="travel"><div><p>Travelling to</p><b id="travel-to"></b></div></div>
+    <div id="travel"><div><div class="kicker">Travelling to</div><b id="travel-to"></b></div></div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
