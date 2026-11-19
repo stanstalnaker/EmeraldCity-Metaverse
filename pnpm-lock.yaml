@@ -21,6 +21,22 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@22.20.5)(tsx@4.23.15)(yaml@2.9.1)
 
+  apps/beta-gate:
+    dependencies:
+      '@emerald-city/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@emerald-city/hubid-client':
+        specifier: workspace:*
+        version: link:../../packages/hubid-client
+      jose:
+        specifier: ^5.9.0
+        version: 5.10.0
+    devDependencies:
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.15
+
   apps/city3d:
     dependencies:
       '@babylonjs/core':

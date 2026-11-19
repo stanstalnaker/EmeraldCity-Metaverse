@@ -14,6 +14,15 @@ services:
     ports: ["8787:8787"]
     restart: unless-stopped
 
+  # HubID sign-in for every *.beta.hubculture.city site (Caddy forward_auth -> :8790/verify).
+  # Admins and Beta Testers get in; replaces per-site passwords. Needs GATE_SECRET.
+  beta-gate:
+    build: { context: .., dockerfile: deploy/services.Dockerfile }
+    env_file: ../.env
+    command: ["apps/beta-gate/node_modules/.bin/tsx", "apps/beta-gate/src/main.ts"]
+    ports: ["127.0.0.1:8790:8790"]
+    restart: unless-stopped
+
   zeke-host:
     build: { context: .., dockerfile: deploy/services.Dockerfile }
     env_file: ../.env

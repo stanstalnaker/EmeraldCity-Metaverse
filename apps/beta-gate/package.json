@@ -1,0 +1,19 @@
+{
+  "name": "@emerald-city/beta-gate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HubID sign-in in front of every *.beta.hubculture.city site: admins and Beta Testers get in, everyone else doesn't. Replaces one-off passwords.",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@emerald-city/core": "workspace:*",
+    "@emerald-city/hubid-client": "workspace:*",
+    "jose": "^5.9.0"
+  },
+  "devDependencies": { "tsx": "^4.19.0" }
+}

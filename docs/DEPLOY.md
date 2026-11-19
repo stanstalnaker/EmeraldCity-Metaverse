@@ -33,6 +33,50 @@ Put a TLS reverse proxy in front (Caddy, nginx, or a load balancer):
 
 Set `NEXT_PUBLIC_PRESENCE_URL=wss://presence.beta.hubculture.city` and `VITE_PRESENCE_URL` for the VR app.
 
+## Beta access: HubID, not passwords
+
+Every `*.beta.hubculture.city` site is behind one HubID sign-in (`apps/beta-gate`):
+- **Who gets in:** HubID super administrators, general administrators and Beta Testers (level 8). `GATE_LEVELS` adds more level names.
+- **How it works:** one sign-in covers every beta site, through an encrypted, HttpOnly session cookie for `.beta.hubculture.city`, valid for 12 hours by default. The 3D city gets the member's HubID token from the gate, for presence.
+
+Caddy (replace the `basic_auth` blocks):
+
+```
+(beta_gate) {
+  forward_auth 127.0.0.1:8790 {
+    uri /verify
+    copy_headers X-Hub-User-Id X-Hub-User-Name
+  }
+}
+beta.hubculture.city {
+  handle /_gate/* { reverse_proxy 127.0.0.1:8790 }
+  handle { import beta_gate
+           reverse_proxy 127.0.0.1:8080 }
+}
+gaia.beta.hubculture.city { import beta_gate
+                            reverse_proxy 127.0.0.1:3000 }
+city.beta.hubculture.city { import beta_gate
+  handle_path /legacy/* { root * /srv/vr-hubculture-city/src
+                          file_server }
+  handle_path /unity/*  { root * /srv/unity
+                          file_server }
+  handle { root * /srv/emerald-city-beta/apps/city3d/dist
+           file_server } }
+# Presence checks the HubID token itself; no gate (browsers can't send cookies or passwords on WebSockets cross-site).
+presence.beta.hubculture.city { reverse_proxy 127.0.0.1:8787 }
+```
+
+Environment:
+- **Gate:** `GATE_SECRET` (32 or more random characters), `GATE_DOMAIN=beta.hubculture.city`, and the usual `HUBID_*` pointing at staging HubID.
+- **3D city build:** `VITE_GATE_URL=https://beta.hubculture.city`.
+- **Land app:** `CITY3D_ORIGIN=https://city.beta.hubculture.city`, so the screens' requests carry the session cookie.
+
+Check:
+- signed out, any beta address goes to the HubID sign-in page;
+- a Beta Tester gets in everywhere with one sign-in;
+- a member without beta access sees "doesn't have beta access";
+- `/_gate/logout` signs out of every beta site.
+
 ## Environment
 
 | Variable | Used by | Notes |

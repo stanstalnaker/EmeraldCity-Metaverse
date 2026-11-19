@@ -6,7 +6,7 @@
  * ?world=davos|bermuda  other worlds (default Emerald City) · ?look=legacy  flat legacy lighting for comparison · ?renderer=webgl  force WebGL2 · ?shot  no HUD
  * ?off=ssao,shadows,detail  switch individual effects off (debugging) · ?fly&pos=x,y,z&yaw=&pitch=  camera
  */
-import { Scene, UniversalCamera, Vector3, type AbstractMesh } from "@babylonjs/core";
+import { Scene, Tools, UniversalCamera, Vector3, type AbstractMesh } from "@babylonjs/core";
 import type { ScreenContent, WorldManifest } from "@emerald-city/world";
 import { spawnFor } from "@emerald-city/world";
 import davosHeights from "@emerald-city/world/data/davos.r16?url";
@@ -44,6 +44,8 @@ const legacyLook = params.get("look") === "legacy";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 async function main() {
+  // Behind the beta gate, cross-site media (screens) must carry the beta session cookie.
+  if (import.meta.env.VITE_GATE_URL) Tools.CorsBehavior = "use-credentials";
   world = (await WORLDS[worldSlug]!.load()).default as WorldManifest;
   const canvas = $<HTMLCanvasElement>("c");
   const t0 = performance.now();
@@ -261,7 +263,7 @@ async function main() {
     ...(world.splats ?? []),
     ...(trySplat ? [{ url: trySplat, label: "Test capture", position: camera.position.add(camera.getDirection(Vector3.Forward()).scale(6)).asArray() as [number, number, number] }] : []),
   ]).then((n) => look.adopt(n));
-  const people = startPeople(scene, camera, world, worldSlug);
+  const people = await startPeople(scene, camera, world, worldSlug);
   readyAt = performance.now() - t0;
   if (params.has("perf") || params.has("bench")) {
     const sample = startPerfOverlay(engine, scene, kind, q, () => readyAt);
@@ -272,27 +274,20 @@ async function main() {
 }
 
 /**
- * People in the world (presence server). In production the HubID token arrives in the URL fragment
- * (#token=…; fragments are never sent to servers) from the beta site, is kept for the tab only, and is
- * removed from the address bar. Locally the dev presence server accepts test identities.
+ * People in the world (presence server). On beta, the member signed in once with HubID at the beta
+ * gate; the 3D city asks the gate for their HubID token (VITE_GATE_URL, cookie for
+ * *.beta.hubculture.city). Locally the dev presence server accepts test identities.
  */
-function presenceToken(): string | null {
-  const hash = new URLSearchParams(location.hash.slice(1));
-  const fromHash = hash.get("token");
-  if (fromHash) {
+async function presenceToken(): Promise<string | null> {
+  const gate = import.meta.env.VITE_GATE_URL as string | undefined;
+  if (gate) {
     try {
-      sessionStorage.setItem("ec.token", fromHash);
+      const r = await fetch(`${gate}/_gate/token`, { credentials: "include" });
+      if (r.ok) return ((await r.json()) as { token: string }).token;
     } catch {
-      /* storage blocked: keep it for this page only */
+      /* fall through */
     }
-    history.replaceState(null, "", location.pathname + location.search);
-    return fromHash;
-  }
-  try {
-    const kept = sessionStorage.getItem("ec.token");
-    if (kept) return kept;
-  } catch {
-    /* ignore */
+    return null;
   }
   if (import.meta.env.DEV) {
     const name = (params.get("name") ?? `Visitor ${Math.floor(Math.random() * 900 + 100)}`).replace(/:/g, " ");
@@ -304,9 +299,9 @@ function presenceToken(): string | null {
 let chatMode: "everyone" | "zeke" = "everyone";
 let people: People | null = null;
 
-function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManifest, slug: string): People | null {
+async function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManifest, slug: string): Promise<People | null> {
   const url = (import.meta.env.VITE_PRESENCE_URL as string | undefined) ?? (import.meta.env.DEV ? `ws://${location.hostname}:8787` : null);
-  const token = presenceToken();
+  const token = await presenceToken();
   const log = (line: string, kind: "chat" | "system" | "zeke" = "system") => {
     const el = document.createElement("div");
     el.className = `line ${kind}`;
@@ -317,7 +312,7 @@ function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManifest, sl
     box.scrollTop = box.scrollHeight;
   };
   if (!url || !token || params.has("shot")) {
-    if (!params.has("shot")) log(url ? "Sign in on beta.hubculture.city to meet people here." : "Presence is not configured.");
+    if (!params.has("shot")) log(url ? "Sign in with your HubID to meet people here." : "Presence is not configured.");
     return null;
   }
   const spawn = w.defaultSpawn.position;

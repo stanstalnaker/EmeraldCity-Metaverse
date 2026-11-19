@@ -158,7 +158,7 @@ export class Screens {
   private zones(pavilionId: number): Promise<ZoneData[]> {
     let p = this.zoneCache.get(pavilionId);
     if (!p) {
-      p = fetch(`${this.api}/api/zones/${pavilionId}`)
+      p = fetch(`${this.api}/api/zones/${pavilionId}`, { credentials: import.meta.env.VITE_GATE_URL ? "include" : "same-origin" })
         .then((r) => (r.ok ? r.json() : { zones: [] }))
         .then((j: { zones: ZoneData[] }) => j.zones ?? [])
         .catch(() => []);

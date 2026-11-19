@@ -9,7 +9,7 @@ export const revalidate = 60;
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ pavilionId: string }> }) {
   const id = Number((await ctx.params).pavilionId);
-  const headers = { "Access-Control-Allow-Origin": process.env.CITY3D_ORIGIN ?? "*", "Cache-Control": "public, max-age=60" };
+  const headers = { "Access-Control-Allow-Origin": process.env.CITY3D_ORIGIN ?? "*", ...(process.env.CITY3D_ORIGIN ? { "Access-Control-Allow-Credentials": "true", Vary: "Origin" } : {}), "Cache-Control": "public, max-age=60" };
   if (!Number.isInteger(id) || id <= 0) return Response.json({ error: "bad_id" }, { status: 400, headers });
   try {
     return Response.json({ pavilionId: id, zones: await hubid.zoneContent(id) }, { headers });

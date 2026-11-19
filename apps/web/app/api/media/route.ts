@@ -14,7 +14,7 @@ const ALLOWED_HOSTS = [
 const MAX_BYTES = 25 * 1024 * 1024;
 
 export async function GET(req: Request) {
-  const cors = { "Access-Control-Allow-Origin": process.env.CITY3D_ORIGIN ?? "*" };
+  const cors = { "Access-Control-Allow-Origin": process.env.CITY3D_ORIGIN ?? "*", ...(process.env.CITY3D_ORIGIN ? { "Access-Control-Allow-Credentials": "true", Vary: "Origin" } : {}) };
   let target: URL;
   try {
     target = new URL(new URL(req.url).searchParams.get("url") ?? "");
