@@ -42,6 +42,11 @@
       #screen-body iframe { width: 100%; height: 100%; border: 0; background: #fff; }
       #screen-body img { max-width: 100%; max-height: 100%; }
       #screen-body .empty { max-width: 520px; padding: 24px; line-height: 1.5; }
+      #travel { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: none; opacity: 0; transition: opacity .6s ease;
+        background: radial-gradient(circle at 50% 50%, #17c38b55, #050b1f 70%); }
+      #travel.on { opacity: 1; }
+      #travel p { font: 600 13px/1 system-ui, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #93a4c8; margin: 0 0 10px; text-align: center; }
+      #travel b { display: block; font: 800 40px/1 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #e8f0ff; text-align: center; }
     </style>
   </head>
   <body>
@@ -59,12 +64,13 @@
     <div id="chat"><div id="chat-log"></div>
       <form id="chat-form"><button type="button" id="chat-mode" title="Switch between everyone here and Zeke">Everyone here</button><input id="chat-input" maxlength="2000" autocomplete="off" placeholder="Say something to everyone here…"><button>Send</button></form></div>
     <div id="compass"><div id="compass-strip"></div></div>
-    <div class="chip" id="help">WASD + mouse to move · click screens, lifts, kiosk, magazines, seats · M for map</div>
+    <div class="chip" id="help">WASD to move · Shift run · Space jump · F fly · drag to look · walk through or click a portal to travel · click screens, lifts, kiosk, magazines, seats · M for map</div>
     <div class="overlay" id="map"><div class="box"><img id="map-image" alt="Emerald City map"><div id="map-stops"></div>
       <button id="map-close" style="position:absolute;top:-10px;right:-10px">✕</button></div></div>
     <div class="overlay" id="screen"><div class="box"><header><span id="screen-title"></span>
       <a id="screen-open" target="_blank" rel="noopener">Open in new tab</a><button id="screen-close">Close</button></header>
       <div id="screen-body"></div></div></div>
+    <div id="travel"><div><p>Travelling to</p><b id="travel-to"></b></div></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

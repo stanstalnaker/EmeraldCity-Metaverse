@@ -16,7 +16,7 @@ import {
   type AbstractMesh,
 } from "@babylonjs/core";
 import "@babylonjs/loaders/glTF";
-import { terrainHeight, type GeneratedCity, type InstanceBatch, type Placement, type Portal, type WorldManifest, type WorldMaterial } from "@emerald-city/world";
+import { portalFacing, terrainHeight, type GeneratedCity, type InstanceBatch, type Placement, type Portal, type WorldManifest, type WorldMaterial } from "@emerald-city/world";
 
 /**
  * Builds the landscape for worlds that have one (Davos, Bermuda, partner islands): terrain from a
@@ -201,9 +201,10 @@ export async function buildLandscape(scene: Scene, world: WorldManifest, heightm
   for (const city of world.generated ?? []) out.push(...generatedCity(scene, city));
 
   // ---- Portals to other worlds
-  for (const p of world.portals ?? []) out.push(...portal(scene, p));
+  const portals = (world.portals ?? []).map((p) => ({ ...p, rotationY: portalFacing(p, world.defaultSpawn.position) }));
+  for (const p of portals) out.push(...portal(scene, p));
 
-  return { meshes: out, groundAt, portals: world.portals ?? [] };
+  return { meshes: out, groundAt, portals };
 }
 
 /** Unit shapes with their bottom at y = 0, matching InstanceBatch transforms. */
@@ -401,6 +402,7 @@ function makePalm(scene: Scene): Mesh {
 function portal(scene: Scene, p: Portal): Mesh[] {
   const root = new TransformNode(`portal-${p.to}`, scene);
   root.position.set(p.position[0], p.position[1], p.position[2]);
+  root.rotation.y = p.rotationY ?? 0;
   const ring = MeshBuilder.CreateTorus(`portal-${p.to}-ring`, { diameter: 4.2, thickness: 0.28, tessellation: 48 }, scene);
   ring.parent = root;
   ring.position.y = 2.3;

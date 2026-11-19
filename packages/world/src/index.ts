@@ -132,6 +132,14 @@ export interface Portal {
   to: string;
   label: string;
   position: [number, number, number];
+  /** Which way the opening faces (radians about y; 0 = facing ±z). Default: towards the world's arrival point. */
+  rotationY?: number;
+}
+
+/** A portal's facing: its own, or turned towards where people arrive so they walk straight in. */
+export function portalFacing(p: Portal, arrival: { x: number; z: number }): number {
+  if (p.rotationY !== undefined) return p.rotationY;
+  return Math.atan2(arrival.x - p.position[0], arrival.z - p.position[2]);
 }
 
 /**

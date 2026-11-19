@@ -21,7 +21,7 @@ const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; y
   { icon: "childrens", label: "Children's House", pos: [-835, 11.3, -1360], yaw: 0 },
 ];
 
-export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; map: boolean }) {
+export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; onFly?: (on: boolean) => void; map: boolean }) {
   const { camera, assetBase } = o;
   const $ = (id: string) => document.getElementById(id)!;
   const ui = (f: string) => `${assetBase}models/ui/${f}`;
@@ -50,6 +50,7 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
   const setFly = (fly: boolean) => {
     camera.applyGravity = !fly;
     camera.checkCollisions = !fly;
+    o.onFly?.(fly);
     flyBtn.textContent = fly ? "Walk" : "Fly";
   };
   setFly(o.fly);
@@ -75,7 +76,10 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
     $("screen-body").innerHTML = "";
   };
   window.addEventListener("keydown", (e) => {
+    const t = e.target as HTMLElement | null;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
     if ((e.key === "m" || e.key === "M") && o.map) $("map-btn").click();
+    if (e.key === "f" || e.key === "F") flyBtn.click();
     if (e.key === "Escape") {
       map.style.display = "none";
       $("screen-close").click();

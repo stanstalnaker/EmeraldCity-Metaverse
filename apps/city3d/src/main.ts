@@ -6,8 +6,8 @@
  * ?world=davos|bermuda  other worlds (default Emerald City) · ?look=legacy  flat legacy lighting for comparison · ?renderer=webgl  force WebGL2 · ?shot  no HUD
  * ?off=ssao,shadows,detail  switch individual effects off (debugging) · ?fly&pos=x,y,z&yaw=&pitch=  camera
  */
-import { Scene, Tools, UniversalCamera, Vector3, type AbstractMesh } from "@babylonjs/core";
-import type { ScreenContent, WorldManifest } from "@emerald-city/world";
+import { Ray, Scene, Tools, UniversalCamera, Vector3, type AbstractMesh } from "@babylonjs/core";
+import type { Portal, ScreenContent, WorldManifest } from "@emerald-city/world";
 import { spawnFor } from "@emerald-city/world";
 import davosHeights from "@emerald-city/world/data/davos.r16?url";
 import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
@@ -21,6 +21,7 @@ import { setupHud } from "./hud";
 import { createEngine } from "./engine";
 import { setupLegacyLook, setupRealism } from "./realism";
 import { WorldStreamer } from "./streaming";
+import { crossesPortal, setupMovement } from "./movement";
 
 const params = new URLSearchParams(location.search);
 const WORLDS: Record<string, { load: () => Promise<{ default: unknown }>; heights?: string }> = {
@@ -64,12 +65,8 @@ async function main() {
   camera.rotation.y = spawn.rotationY;
   camera.minZ = 0.2;
   camera.maxZ = world.terrain ? 24000 : 9000;
-  camera.speed = 1.1;
-  camera.angularSensibility = 2500;
-  camera.keysUp.push(87); // W
-  camera.keysDown.push(83); // S
-  camera.keysLeft.push(65); // A
-  camera.keysRight.push(68); // D
+  camera.angularSensibility = 2200;
+  camera.inertia = 0.5; // mouse look settles quickly; movement easing lives in movement.ts
   camera.ellipsoid = new Vector3(0.6, 0.9, 0.6);
   camera.checkCollisions = true;
   camera.applyGravity = !params.has("fly");
@@ -111,8 +108,8 @@ async function main() {
     : null;
   if (landscape) {
     look.adopt(landscape.meshes);
-    camera.speed = 1.6;
-    scene.gravity = Vector3.Zero(); // falling onto the terrain is handled below
+    // Heightmap worlds stand you on the terrain in movement.ts; the city keeps collision gravity.
+    if (world.terrain) scene.gravity = Vector3.Zero();
   }
 
   const interactions = setupInteractions(scene, camera, world, assetBase, () => streamer.update(camera.position), {
@@ -159,20 +156,17 @@ async function main() {
   camera.applyGravity = false;
   await streamer.preload(camera.position);
   if (landscape) terrainMeshes.push(...landscape.meshes.filter((m) => m.name === "terrain"));
+  // City portals stand on the real floor under them (the city's ground is its models, known only now).
+  if (!world.terrain)
+    for (const p of landscape?.portals ?? []) {
+      const hit = scene.pickWithRay(new Ray(new Vector3(p.position[0], p.position[1] + 20, p.position[2]), Vector3.Down(), 60), (m) => m.checkCollisions && m.isEnabled() && !m.name.startsWith("portal-"));
+      const root = scene.getTransformNodeByName(`portal-${p.to}`);
+      if (hit?.pickedPoint && root) root.position.y = p.position[1] = hit.pickedPoint.y;
+    }
   camera.applyGravity = !params.has("fly");
   setInterval(() => {
     streamer.update(camera.position);
     // Safety net: if you ever fall out of the world, return to the spawn point.
-    // Portals: walk into one to travel to that world.
-    for (const p of landscape?.portals ?? []) {
-      if (Math.hypot(camera.position.x - p.position[0], camera.position.z - p.position[2]) < 1.8 && Math.abs(camera.position.y - p.position[1] - 2) < 3) {
-        const q = new URLSearchParams(location.search);
-        q.delete("pos");
-        if (p.to === "emerald-city") q.delete("world");
-        else q.set("world", p.to);
-        location.search = q.toString();
-      }
-    }
     if (camera.position.y < -150) {
       camera.position.set(spawn.position.x, spawn.position.y + 1.7, spawn.position.z);
       camera.rotation.y = spawn.rotationY;
@@ -186,29 +180,34 @@ async function main() {
       openChat("zeke");
       return;
     }
+    const portalTo = pick.pickedMesh.metadata?.portal as string | undefined;
+    const portal = landscape?.portals.find((p) => p.to === portalTo);
+    if (portal) return travel(portal);
     if (interactions.click(pick.pickedMesh, pick.pickedPoint)) return;
     const name = (pick.pickedMesh.metadata?.screenOf as string | undefined) ?? pick.pickedMesh.name;
     const content = screens.get(name);
     if (content) showScreen(name, content);
   };
   scene.onBeforeRenderObservable.add(() => interactions.tick());
-  // Stand on the terrain (cheaper than mesh collisions on a 260k-vertex ground).
-  if (landscape) {
-    let vy = 0;
-    scene.onBeforeRenderObservable.add(() => {
-      const g = landscape.groundAt(camera.position.x, camera.position.z);
-      if (g === null || !camera.applyGravity) return;
-      const eye = g + 1.7;
-      if (camera.position.y <= eye + 0.05) {
-        camera.position.y = eye;
-        vy = 0;
-      } else {
-        vy = Math.min(vy + 0.02, 2);
-        camera.position.y = Math.max(eye, camera.position.y - vy);
-      }
-    });
-  }
-  setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly"), map: worldSlug === "emerald-city" });
+  // Walk, run, jump, fly; terrain worlds stand on the heightmap (cheaper than 260k-vertex collisions).
+  const mover = setupMovement(scene, camera, { groundAt: landscape?.groundAt ?? null, flying: params.has("fly") });
+  // Portals: walk (or fly) through one, or click it, to travel to that world.
+  let travelling = false;
+  const travel = (p: Portal) => {
+    if (travelling) return;
+    travelling = true;
+    const q = new URLSearchParams(location.search);
+    for (const k of ["pos", "yaw", "pitch", "pavilion_id"]) q.delete(k);
+    if (p.to === "emerald-city") q.delete("world");
+    else q.set("world", p.to);
+    $("travel-to").textContent = p.label;
+    $("travel").classList.add("on");
+    setTimeout(() => (location.search = q.toString()), 650);
+  };
+  mover.onMove((from, to) => {
+    for (const p of landscape?.portals ?? []) if (crossesPortal(from, to, p)) return travel(p);
+  });
+  setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly"), onFly: (on) => mover.setFlying(on), map: worldSlug === "emerald-city" });
 
   // Teleports: arrival kiosk destinations plus property spawns.
   const select = $<HTMLSelectElement>("teleport");
