@@ -1,6 +1,6 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import type { HubIdClient } from "@emerald-city/hubid-client";
+import { HubIdError, type HubIdClient } from "@emerald-city/hubid-client";
 import { hasBetaAccess, openSession, parseCookies, safeNext, sealSession, type Member } from "./gate";
 import { loginPage } from "./page";
 
@@ -99,12 +99,26 @@ export function startGate(o: GateOptions) {
         const ip = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "").split(",")[0]!.trim();
         if (limited(ip)) return again("Too many attempts. Please wait a few minutes.", 429);
         let token: string;
+        let self: Record<string, unknown>;
         try {
           ({ token } = await o.hubid.login(email, form.get("password") ?? ""));
-        } catch {
-          return again("That email and password don't match a HubID.");
+        } catch (err) {
+          // Only a refusal from HubID means the password is wrong; anything else is the gate's or HubID's problem.
+          const status = err instanceof HubIdError ? err.status : 0;
+          if ([400, 401, 403, 404, 422].includes(status)) {
+            const code = err instanceof HubIdError ? JSON.stringify(err.body)?.slice(0, 160) : "";
+            console.info(`beta-gate: HubID refused a sign-in (${status} ${code})`);
+            return again("That email and password don't match a HubID.");
+          }
+          console.error(`beta-gate: HubID sign-in failed (${status || "no response"}): ${err instanceof Error ? err.message : String(err)}`);
+          return again("HubID couldn't check your sign-in just now. Please try again in a minute.", 502);
         }
-        const self = await o.hubid.withToken(token).getSelf<Record<string, unknown>>();
+        try {
+          self = await o.hubid.withToken(token).getSelf<Record<string, unknown>>();
+        } catch (err) {
+          console.error(`beta-gate: HubID profile read failed: ${err instanceof Error ? err.message : String(err)}`);
+          return again("You're signed in, but HubID didn't return your profile. Please try again in a minute.", 502);
+        }
         const member: Member = {
           hubId: Number(self.id),
           name: String(self.name ?? ([self.first, self.last].filter(Boolean).join(" ") || "Member")),
@@ -113,6 +127,7 @@ export function startGate(o: GateOptions) {
           sadmin: self.sadmin === true,
         };
         if (!hasBetaAccess(member, o.extraLevels)) {
+          console.info(`beta-gate: HubID ${member.hubId} has no beta level (memberships: ${member.memberships.join(", ") || "none"}; sadmin: ${member.sadmin === true})`);
           return again("Your HubID doesn't have beta access yet. Ask Hub Culture for Beta Tester membership.", 403);
         }
         const jwe = await sealSession({ hubId: member.hubId, name: member.name, picture: member.picture, token }, o.secret, ttl);

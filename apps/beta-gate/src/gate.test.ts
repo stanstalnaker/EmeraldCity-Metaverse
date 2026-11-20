@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { HubIdClient } from "@emerald-city/hubid-client";
+import { HubIdError, type HubIdClient } from "@emerald-city/hubid-client";
 import { hasBetaAccess, openSession, safeNext, sealSession } from "./gate";
 import { COOKIE, startGate } from "./server";
 
@@ -12,7 +12,8 @@ const users: Record<string, { pw: string; self: Record<string, unknown> }> = {
 const fakeHubId = {
   async login(email: string, pw: string) {
     const u = users[email];
-    if (!u || u.pw !== pw) throw new Error("invalid");
+    if (email === "down@hub.test") throw new Error("connect ECONNREFUSED");
+    if (!u || u.pw !== pw) throw new HubIdError("invalid_credentials", 401, { error: "invalid_credentials" });
     return { token: `tok-${email}`, userId: Number(u.self.id) };
   },
   withToken(token: string) {
@@ -95,6 +96,10 @@ describe("gate", () => {
     expect(member.status).toBe(403);
     expect(await member.text()).toContain("doesn&#39;t have beta access");
     expect((await signIn("tester@hub.test", "nope")).status).toBe(401);
+    // HubID unreachable or misconfigured is not "wrong password".
+    const down = await signIn("down@hub.test", "pw");
+    expect(down.status).toBe(502);
+    expect(await down.text()).toContain("HubID couldn");
   });
 
   it("refuses a sign-in without the form's own token, and signs out everywhere", async () => {

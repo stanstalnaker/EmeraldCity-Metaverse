@@ -67,7 +67,9 @@ presence.beta.hubculture.city { reverse_proxy 127.0.0.1:8787 }
 ```
 
 Environment:
-- **Gate:** `GATE_SECRET` (32 or more random characters), `GATE_DOMAIN=beta.hubculture.city`, and the usual `HUBID_*` pointing at staging HubID.
+- **Gate:** `GATE_SECRET` (32 or more random characters), `GATE_DOMAIN=beta.hubculture.city`, and the usual `HUBID_*`.
+- **Which HubID people sign in with:** access should come from members' real HubID levels (admins, Beta Testers), but beta runs on staging HubID, where people's normal logins and levels may not exist. Point the gate alone at the real HubID with `GATE_HUBID_API_URL=https://id.hubculture.com`, `GATE_HUBID_PUBLIC_KEY` and `GATE_HUBID_PRIVATE_KEY` (an app key pair for the gate). It only signs people in and reads their profile and levels. The rest of beta stays on staging. Without them, the gate uses `HUBID_*`.
+- **If sign-in fails:** the gate's log says why. "HubID refused a sign-in (401 …)" means a wrong password, or an account that doesn't exist on that HubID. "HubID sign-in failed" means HubID was unreachable or the keys are wrong. "has no beta level" lists the member's levels.
 - **3D city build:** `VITE_GATE_URL=https://beta.hubculture.city`.
 - **Land app:** `CITY3D_ORIGIN=https://city.beta.hubculture.city`, so the screens' requests carry the session cookie.
 
