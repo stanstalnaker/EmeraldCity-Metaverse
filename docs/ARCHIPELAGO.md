@@ -6,8 +6,7 @@ register. The parts marked **Next** need changes in HubID, Gaia, Zeke or Ultra, 
 
 ## The goal: Ven in use
 
-Everything here serves one goal: customers, entities, people and agents using **Ven** more, toward
-**$1 billion of Ven in use by 2027**. Each ring should be a place where Ven changes hands, and the
+Everything here serves one goal: customers, entities, people and agents using **Ven** more. Each ring should be a place where Ven changes hands, and the
 closed loop (below) keeps it circulating inside the ecosystem while those flows prove themselves.
 
 | Where Ven is used | How |
@@ -20,9 +19,8 @@ closed loop (below) keeps it circulating inside the ecosystem while those flows 
 | Bonds | Emerald City bonds are issued and paid in Ven on Ultra (BONDS.md) |
 | Rent and links | Gaia landowners can charge Ven rent for worlds linking to their land |
 
-**To measure it:** the agent summaries already total Ven earned and spent. The next step is one
-"Ven in use" figure across the rings: land, trades, DIRT pairs, services, layers and bonds, from
-HubID and Ultra. It belongs on the hubculture.com admin and in the archipelago page.
+**Measuring it:** Ven in use is tracked at oai.io; nothing here needs its own counter. The agent
+summaries total Ven earned and spent for each owner.
 
 ## The idea in one line
 
