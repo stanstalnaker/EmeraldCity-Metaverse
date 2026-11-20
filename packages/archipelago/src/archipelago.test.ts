@@ -73,6 +73,20 @@ describe("agents: mandates, contributions and DIRT", () => {
     expect(authorize(m, { kind: "trade", side: "buy", ticker: "udKAUAI", ven: 10 }, { venSpent: 0 }).allowed).toBe(false);
     expect(authorize({ ...m, markets: ["ud*"] }, { kind: "trade", side: "buy", ticker: "udKAUAI", ven: 10 }, { venSpent: 0 }).allowed).toBe(true);
   });
+  it("while the economy is a closed loop, agents keep holdings in Ultra", () => {
+    const w = { kind: "withdraw", asset: "udIBIZA", to: "solana:SomeWallet", amount: 10 } as const;
+    expect(authorize({ ...m, scopes: [...m.scopes, "ven:send"] }, w, { venSpent: 0 }).allowed).toBe(false);
+    // Once Hub Culture opens the loop: allowed within limits, always with the owner's approval.
+    const open = { closedLoop: false };
+    expect(authorize({ ...m, scopes: [...m.scopes, "ven:send"] }, w, { venSpent: 0 }, open)).toMatchObject({ allowed: true, needsOwnerApproval: true });
+    expect(authorize(m, w, { venSpent: 0 }, open).allowed).toBe(false); // needs ven:send
+    expect(authorize({ ...m, scopes: [...m.scopes, "ven:send"] }, { ...w, amount: 500 }, { venSpent: 0 }, open).allowed).toBe(false);
+  });
+  it("Emerald City's placeholder is in Acre, Brazil", () => {
+    const g = island("emerald-city").geolink!;
+    expect(g.lat).toBeCloseTo(-8.95, 1);
+    expect(g.lng).toBeCloseTo(-72.83, 1);
+  });
   it("brokering needs its own scope", () => {
     expect(authorize(m, { kind: "world", island: "davos", act: "broker", ref: "pav-7" }, { venSpent: 0 }).allowed).toBe(false);
   });

@@ -4,6 +4,26 @@
 (`apps/web` `/archipelago`, `GET|POST /api/archipelago`) are built and tested against the real DIRT
 register. The parts marked **Next** need changes in HubID, Gaia, Zeke or Ultra, listed at the end.
 
+## The goal: Ven in use
+
+Everything here serves one goal: customers, entities, people and agents using **Ven** more, toward
+**$1 billion of Ven in use by 2027**. Each ring should be a place where Ven changes hands, and the
+closed loop (below) keeps it circulating inside the ecosystem while those flows prove themselves.
+
+| Where Ven is used | How |
+|---|---|
+| Land | Gaia plots and city parcels are priced in Ven; each parcel past a membership's 3 costs 10 VEN (PARCELS.md) |
+| Property trade | Brokered transfers pay 1% in Ven to the broker, a person or an agent |
+| DIRT | Every territory's Ultra market is `ud<SYMBOL>`/**Ven**: buying a place's token means buying with Ven |
+| Agents | Services between members, properties and agents are paid in Ven; agents hold and trade in Ven on Ultra |
+| Data | Paid Gaia layers charge access in Ven (the layer marketplace's demand sink) |
+| Bonds | Emerald City bonds are issued and paid in Ven on Ultra (BONDS.md) |
+| Rent and links | Gaia landowners can charge Ven rent for worlds linking to their land |
+
+**To measure it:** the agent summaries already total Ven earned and spent. The next step is one
+"Ven in use" figure across the rings: land, trades, DIRT pairs, services, layers and bonds, from
+HubID and Ultra. It belongs on the hubculture.com admin and in the archipelago page.
+
 ## The idea in one line
 
 > **island** (a metaverse world) → **geolink** (lat/long) → **Gaia cell** (`MIP1|GAIA|CELL|{h3}`)
@@ -32,7 +52,7 @@ deliberately small: **a place is an H3 cell**, the same one Gaia, DIRT, QEM and 
 
 ## Two ways in
 
-1. **Explore Hub Culture's archipelago.** These islands are ready-built: Emerald City, Davos and Bermuda. Ibiza is generated from a spec on the first live DIRT territory. Davos sits inside `$DAVOS` (wave 1, not minted). Ibiza sits inside `$IBIZA` (live; its Hub needs confirming before `udIBIZA` opens). Bermuda and Emerald City sit in no territory yet.
+1. **Explore Hub Culture's archipelago.** These islands are ready-built: Emerald City, Davos and Bermuda. Ibiza is generated from a spec on the first live DIRT territory. Davos sits inside `$DAVOS` (wave 1, not minted). Ibiza sits inside `$IBIZA` (live; its Hub needs confirming before `udIBIZA` opens). Bermuda and Emerald City (placeholder in Acre, Brazil) sit in no territory yet.
 2. **Generate your own (Andromeda).** Name it, give it a seed and pin it to a place (`generateArchipelago()`):
    - The first island takes the anchor's parcel cell, and the others take the neighbouring cells. Every island has its own Gaia address, and all of them resolve to the same territory and Hub.
    - Each island is a full worldgen city spec (style, size, districts, landmarks, palette), so the 3D client can build it.
@@ -134,4 +154,7 @@ The same loop covers many other journeys: an agent brokering properties to other
 
 1. **Geolinks on DIRT land:** may anyone's archipelago geolink inside a DIRT territory, or does the territory's Hub curate links? The default here follows PARCELS.md: links are open unless the land owner curates or charges rent. This is simple to change per territory.
 2. **Reward rates:** the reward rate per cell and the per-contribution cap (default 25 DIRT per cell, capped at 25,000). They're paid from the territory's 25% Gaia bucket, so each territory's council could set its own.
-3. **Agent holdings:** may agents hold DIRT on Solana directly, or only through Ultra custodial wallets? The default is Ultra only: agents never hold Solana keys.
+## Decided
+
+- **Closed loop for agents, for now (20 November 2026):** agents hold Ven, DIRT and bonds in Ultra custodial wallets and trade on Ultra; they don't hold Solana keys or move value out. This is a policy we observe while the flows between worlds, Gaia, DIRT and Ultra prove themselves, not a permanent rule. It's one platform switch (`EconomyPolicy.closedLoop`, on by default) that Hub Culture controls. Switched off, agents may withdraw within their mandate's limits (`ven:send`), always with their owner's approval. People can always withdraw from their own Ultra wallets.
+- **Emerald City's place (placeholder):** the Brazilian Amazon in Acre, on the Rio Amônia near Marechal Thaumaturgo, close to (not on) the Asháninka lands of Kampa do Rio Amônia. It moves to the restoration land once that is mapped.

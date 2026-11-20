@@ -41,7 +41,24 @@ export type AgentAction =
   | { kind: "negotiate"; withAgentHubId: number; terms: string; venValue?: number }
   | { kind: "service"; forHubId: number; what: string; venEarned: number }
   | { kind: "contribute"; layer: string; cells: string[]; source: string; records: number }
-  | { kind: "trade"; side: "buy" | "sell"; ticker: string; ven: number };
+  | { kind: "trade"; side: "buy" | "sell"; ticker: string; ven: number }
+  /** Moving value out of Ultra (to a Solana wallet, a bank, anywhere). Off while the economy is a closed loop. */
+  | { kind: "withdraw"; asset: string; to: string; amount: number };
+
+/**
+ * The agent economy's platform-wide setting, set by Hub Culture (not by owners or agents).
+ *
+ * closedLoop (on for now, 20 November 2026): agents hold Ven, DIRT and bonds in Ultra custodial
+ * wallets, trade on Ultra and don't move value out. It's a policy we observe while the flows between
+ * worlds, Gaia, DIRT and Ultra prove themselves, not a permanent rule: switch it off and agents may
+ * withdraw, within their mandate's limits and always with their owner's approval. People can always
+ * withdraw from their own Ultra wallets.
+ */
+export interface EconomyPolicy {
+  closedLoop: boolean;
+}
+
+export const DEFAULT_ECONOMY: EconomyPolicy = { closedLoop: true };
 
 /** What the owner lets the agent do. Nothing outside it ever happens. */
 export interface Mandate {
@@ -79,13 +96,15 @@ const NEEDS: Record<AgentAction["kind"], Scope> = {
   service: "ven:earn",
   contribute: "gaia:contribute",
   trade: "ultra:trade",
+  withdraw: "ven:send",
 };
 
 const deny = (reason: string): Decision => ({ allowed: false, needsOwnerApproval: false, reason });
 const ok = (reason = "Within the mandate."): Decision => ({ allowed: true, needsOwnerApproval: false, reason });
 
 /** Check an action against the mandate and what's been spent today. */
-export function authorize(m: Mandate, a: AgentAction, today: DayLedger): Decision {
+export function authorize(m: Mandate, a: AgentAction, today: DayLedger, economy: EconomyPolicy = DEFAULT_ECONOMY): Decision {
+  if (a.kind === "withdraw" && economy.closedLoop) return deny("The agent economy is a closed loop for now: agents keep their holdings in Ultra.");
   const scope = a.kind === "world" && a.act === "broker" ? "property:broker" : NEEDS[a.kind];
   if (!m.scopes.includes(scope)) return deny(`The owner hasn't granted "${scope}".`);
   if (a.kind === "converse" && !m.channels.includes(a.channel)) return deny(`The agent isn't allowed on ${a.channel}.`);
@@ -94,6 +113,12 @@ export function authorize(m: Mandate, a: AgentAction, today: DayLedger): Decisio
     if (!a.cells.length) return deny("A contribution must say which Gaia cells it covers.");
     if (!/^https?:\/\//.test(a.source)) return deny("A contribution must cite where its data comes from (Gaia requires attribution).");
     return ok();
+  }
+  if (a.kind === "withdraw") {
+    if (!(a.amount > 0)) return deny("Amount must be positive.");
+    if (a.amount > m.venPerTrade) return deny(`${a.amount} is over the ${m.venPerTrade} limit per transfer.`);
+    if (today.venSpent + a.amount > m.venPerDay) return deny(`That would pass today's ${m.venPerDay} limit (${today.venSpent} spent).`);
+    return { allowed: true, needsOwnerApproval: true, reason: "Moving value out of Ultra: the owner approves every withdrawal." };
   }
   if (a.kind === "trade" || (a.kind === "negotiate" && a.venValue)) {
     const ven = a.kind === "trade" ? a.ven : a.venValue!;

@@ -32,9 +32,10 @@ export interface Island {
 /** Hub Culture's archipelago. Davos and Ibiza sit inside DIRT territories; Bermuda doesn't (yet). */
 export const HUB_ARCHIPELAGO: Island[] = [
   { slug: "emerald-city", name: "Emerald City", kind: "ready-built", world: "emerald-city", archipelago: "hub",
-    summary: "The island city: pavilions, plazas, screens and Zeke at arrival. Its land work is the Amazon restoration in Peru.",
-    // Placeholder: a point in the Peruvian Amazon (Madre de Dios) until the restoration land is mapped.
-    geolink: geolink({ lat: -12.5933, lng: -69.1891 }) },
+    summary: "The island city: pavilions, plazas, screens and Zeke at arrival. Its land work is rainforest restoration in the Brazilian Amazon.",
+    // Placeholder until the restoration land is mapped: the Brazilian Amazon in Acre, on the Rio Amônia
+    // near Marechal Thaumaturgo, close to (not on) the Asháninka lands of Kampa do Rio Amônia.
+    geolink: geolink({ lat: -8.95, lng: -72.83 }) },
   { slug: "davos", name: "Davos", kind: "ready-built", world: "davos", archipelago: "hub",
     summary: "Real Alpine terrain above Davos Platz, the chalet and the agents' town.", geolink: geolink({ lat: 46.8027, lng: 9.836 }) },
   { slug: "bermuda", name: "Bermuda", kind: "ready-built", world: "bermuda", archipelago: "hub",
