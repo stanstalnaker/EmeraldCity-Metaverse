@@ -48,6 +48,56 @@ deliberately small: **a place is an H3 cell**, the same one Gaia, DIRT, QEM and 
 - **Territory → Hub:** each territory's governing Hub is a HubID **Pavilion**, and so is every Emerald City property. A territory's Hub is the natural anchor property of its island in the metaverse: where its Propel meets, its news shows on the screens, and its agents live.
 - **Territory → market:** the same mint is listed on Ultra as `ud<SYMBOL>` against Ven, once the token is live, its Hub is confirmed and its Propel has ruled (`venMarket()`). Before that it trades on Raydium (DIRT/SOL), or not at all.
 
+## Island → plot
+
+Every geolink sits on a real **Gaia plot**: a land plot (cut along roads, water and borders) or an
+ocean plot (an H3 resolution-8 cell). The archipelago shows that plot and sends the member to
+gaia.club to buy it when it's free. Ownership, buying and money stay in Gaia and Ven: this repo
+stores no plot ownership and takes no payments.
+
+- **Lookup:** `GET /api/plots/at?lat=&lng=` here proxies gaia-api's `GET /gaia/plots/at`
+  (`{GAIA_API_URL}/plots/at`, with a 6 s timeout, cached for about 30 s). The browser never calls
+  Gaia directly. The answer is gaia-api's: `found` (`plot`, `pending` or `none`), the plot Feature,
+  `buyable`, `buy_url` (gaia.club `/account?plot=<id>`) and `where` (the point, its cell and Gaia
+  address). Plot properties are cut down to the public ones (id, kind, size, price, status,
+  listing, tier, region, seller, buyable, reason), so **who owns a plot is never shown**.
+- **Showing it** (`plotView()` in `packages/archipelago/src/plots.ts`), in each island card's
+  "Land here" block, on the clicked point in "Your own", and on a generated archipelago's islands:
+
+  | Plot | Shows |
+  |---|---|
+  | free (and Gaia says buyable) | "Free: buy on gaia.club for X Ven" and **Buy this plot** (opens `buy_url` in a new tab) |
+  | free ocean plot | the same, plus "100% of ocean plot sales go to the Ocean Climate Fund" |
+  | for sale | "Listed for X Ven", with a link to the listing |
+  | owned | "Owned: links are open" |
+  | reserved | "Being bought" |
+  | pending | "Being mapped" (asked again after `retry_after_secs`) |
+  | none, or an ocean cell that can't be bought | no buy button (and the reason, for ocean) |
+  | gaia-api answers 404 | "Plot lookup isn't live yet" (the route is on gaia-api `feat/ocean-basket`, hub-culture/gaiaclub#30) |
+
+- **Light:** plots are looked up one at a time, when an island is selected or the map is clicked,
+  never for every island on load.
+- **Links stay open:** an island's geolink is a reference, not ownership. Many worlds can link to
+  one plot, whoever owns it, unless the land owner curates links ([PARCELS.md](PARCELS.md)).
+
+### Launch-link parameters (for the hubculture.city launch flow)
+
+"Launch a property" links to `LAUNCH_PROPERTY_URL` (hubculture.city's Laravel launch flow, not in
+this repo) with these query parameters, so the launch can record where the property sits:
+
+| Parameter | Value | Example |
+|---|---|---|
+| `city` | the island's slug | `ibiza` |
+| `lat`, `lng` | the island's geolink point | `38.9089`, `1.4329` |
+| `geolink` | the island's resolution-9 H3 cell; its Gaia address is `MIP1\|GAIA\|CELL\|{geolink}` | `893951ceccbffff` |
+| `gaia_plot` | the Gaia plot id under it (`land-…` or `ocean-…`), once it has been looked up; absent otherwise | `land-3f9c…` |
+
+The launch flow should treat `gaia_plot` and `geolink` as a reference, like the island's geolink:
+store them on the Pavilion (for example in the `real_world_link` JSON of [PARCELS.md](PARCELS.md),
+`{kind: "gaia-parcel", gaia_parcel_id, h3}`), and re-check the plot with gaia-api rather than
+trusting the link's values for anything about ownership or price. It may offer the same "Buy this
+plot" link out to gaia.club; buying never happens on hubculture.city.
+
 ## Two ways in
 
 1. **Explore Hub Culture's archipelago.** These islands are ready-built: Emerald City, Davos and Bermuda. Ibiza is generated from a spec on the first live DIRT territory. Davos sits inside `$DAVOS` (wave 1, not minted). Ibiza sits inside `$IBIZA` (live; its Hub needs confirming before `udIBIZA` opens). Bermuda and Emerald City (placeholder in Acre, Brazil) sit in no territory yet.
@@ -115,13 +165,16 @@ The same loop covers many other journeys: an agent brokering properties to other
   - Hub Culture's islands;
   - Andromeda generation;
   - agent mandates, authorization, DIRT rewards and day summaries.
-  - 13 tests run against the real register (`data/`, a public snapshot with attribution).
+  - the Gaia plot client and its display model (`plots.ts`: `plotAt()`, `plotView()`, `launchLink()`);
+  - tests run against the real register (`data/`, a public snapshot with attribution), and the plot client against a mocked gaia-api.
 - **`apps/web` `/archipelago`:**
   - the map of DIRT territories (live in emerald, waves in violet) and the islands;
   - "Enter in 3D", "Launch a property" and Ven market state per island;
+  - "Land here": the Gaia plot under each island (and the clicked point, and generated islands), with "Buy this plot" out to gaia.club when it's free, and the plot on the launch link;
   - the DIRT register;
   - "Your own" archipelago generation.
   - `GET /api/archipelago` serves the same data to the 3D client, agents and gaia.club. `POST` is the Andromeda preview.
+  - `GET /api/plots/at?lat=&lng=` is the cached plot lookup, proxied from gaia-api (`GAIA_API_URL`).
 
 ## Next (by system)
 
@@ -132,6 +185,7 @@ The same loop covers many other journeys: an agent brokering properties to other
 - **Confirm DIRT Hubs:** `launchpad hub <slug> --confirm --propel <ref>`, so `udIBIZA` and `udKAUAI` can open.
 
 **Gaia**
+- **Deploy plots/at:** merge and deploy gaia-api's `GET /gaia/plots/at` (`feat/ocean-basket`, hub-culture/gaiaclub#30). Until then the archipelago shows "Plot lookup isn't live yet".
 - **Attribution:** layer contributions record the contributing HubID (an agent's or a member's).
 - **Rewards:** on acceptance, Gaia emits a reward event for each territory and cell count, paid from the territory's Gaia vault.
 - **Islands:** add an `islands` layer (from `GET /api/archipelago`), so the metaverse appears on gaia.club alongside QEM, ven.vc and DIRT.

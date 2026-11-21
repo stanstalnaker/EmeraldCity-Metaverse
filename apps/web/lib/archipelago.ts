@@ -59,3 +59,8 @@ export const city3dUrl = () => process.env.CITY3D_URL ?? process.env.NEXT_PUBLIC
 /** Where properties are launched today (hubculture.city's launch flow). */
 export const launchUrl = () => process.env.LAUNCH_PROPERTY_URL ?? "https://beta.hubculture.city/launch-properties";
 export const ultraUrl = () => process.env.ULTRA_URL ?? "https://ultra.exchange";
+/**
+ * The Gaia API (gaia-api behind gaia.club's `/api/gaia/`), for plot lookups. Beta by default, like
+ * the other links here; live is `https://gaia.club/api/gaia`. Ownership and buying stay in Gaia.
+ */
+export const gaiaApiUrl = () => process.env.GAIA_API_URL ?? "https://beta.gaia.club/api/gaia";

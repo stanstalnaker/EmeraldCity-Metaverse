@@ -91,6 +91,8 @@ Check:
 | `ZEKE_API_URL`, `ZEKE_SYSTEM_TOKEN`, `ZEKE_HUBID_TOKEN`, `PRESENCE_SERVICES=zeke:<Zeke's HubID id>` | zeke-host, presence | Zeke in the world. |
 | `ANTHROPIC_API_KEY`, `DEEPGRAM_API_KEY`, `CARTESIA_API_KEY`, `ZEKE_VOICE_MODEL` | zeke-voice | Optional voice. |
 | `GOOGLE_MAPS_API_KEY` | (web, places) | Server-only, restricted to the Geocoding API. |
+| `GAIA_API_URL` | web | The Gaia API for plot lookups (`/api/plots/at`). Default `https://beta.gaia.club/api/gaia`; live is `https://gaia.club/api/gaia`. |
+| `LAUNCH_PROPERTY_URL` | web | hubculture.city's launch flow. Default `https://beta.hubculture.city/launch-properties`; gets `city`, `lat`, `lng`, `geolink` and `gaia_plot` (docs/ARCHIPELAGO.md). |
 
 HubID itself needs (in `config/emeraldcity.php` / its `.env`):
 
