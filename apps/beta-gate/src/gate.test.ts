@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { HubIdError, type HubIdClient } from "@emerald-city/hubid-client";
 import { hasBetaAccess, openSession, safeNext, sealSession } from "./gate";
 import { COOKIE, startGate } from "./server";
+import { loginPage } from "./page";
 
 const SECRET = "x".repeat(40);
 const users: Record<string, { pw: string; self: Record<string, unknown> }> = {
@@ -107,5 +108,13 @@ describe("gate", () => {
     expect(forged.status).toBe(400);
     const out = await fetch(`${base}/_gate/logout`, { redirect: "manual" });
     expect(out.headers.get("set-cookie")).toMatch(/Max-Age=0/);
+  });
+});
+
+describe("sign-in page", () => {
+  it("its decorative border never covers the form (clicks must reach the fields and button)", () => {
+    const html = loginPage({ next: "https://beta.hubculture.city/", csrf: "x" });
+    const rule = html.match(/\.card:before\{[^}]*\}/)?.[0] ?? "";
+    expect(rule).toContain("pointer-events:none");
   });
 });

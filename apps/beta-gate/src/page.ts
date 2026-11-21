@@ -16,7 +16,7 @@ body{font:16px/1.5 Inter,system-ui,sans-serif;color:var(--ink);background:radial
  conic-gradient(from 210deg at 70% 30%,#0b5d3b 0 12%,transparent 12% 30%,#0a3d6b 30% 41%,transparent 41% 60%,#17c38b 60% 66%,transparent 66%),
  conic-gradient(from 30deg at 20% 80%,#0a3d6b 0 15%,transparent 15% 45%,#0b5d3b 45% 52%,transparent 52%)}
 .card{position:relative;width:min(420px,100%);padding:36px 32px 28px;border-radius:20px;background:linear-gradient(180deg,#0e1f47ee,#0a1736ee);box-shadow:0 30px 80px #0008,inset 0 1px 0 #ffffff14}
-.card:before{content:"";position:absolute;inset:0;border-radius:20px;padding:1.5px;background:linear-gradient(135deg,var(--magenta),var(--indigo) 50%,var(--cyan));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.card:before{content:"";position:absolute;inset:0;border-radius:20px;padding:1.5px;background:linear-gradient(135deg,var(--magenta),var(--indigo) 50%,var(--cyan));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 .gem{width:58px;height:58px;margin:0 auto 14px;display:block}
 h1{font:800 22px/1.2 Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;text-align:center;margin:0}
 .sub{color:var(--muted);text-align:center;margin:8px 0 26px;font-size:14px}
