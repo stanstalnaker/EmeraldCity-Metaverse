@@ -1,4 +1,4 @@
-import { jwtVerify } from "jose";
+import { decodeJwt, jwtVerify } from "jose";
 import type { Actor, AgentScope } from "@emerald-city/core";
 import type { HubIdClient } from "@emerald-city/hubid-client";
 
@@ -40,32 +40,57 @@ export function hubIdResolver(opts: { jwtSecret: string; hubid: HubIdClient; age
     const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
     const sub = Number(payload.sub);
     if (!Number.isInteger(sub) || sub <= 0) throw new Error("token has no valid subject");
-
     const self = await opts.hubid.withToken(token).getSelf<HubSelf>();
-    if (Number(self.id) !== sub) throw new Error("token subject does not match profile");
-
-    const displayName = self.name || [self.first, self.last].filter(Boolean).join(" ") || `HubID ${sub}`;
-    const avatarUrl = self.profile?.image ?? self.image ?? null;
-    const p = self.profile;
-    // Mandala sigil identity: an agent's OAI hash when HubID includes it, otherwise the HubID number.
-    const rawOai = (self as unknown as { oai_hash?: unknown }).oai_hash;
-    const oai = typeof rawOai === "string" && /^oai1_[a-z2-7]{32}$/.test(rawOai) ? rawOai : null;
-    const userSigil = { type: "user" as const, value: String(sub) };
-    if (p?.profile_type === "bot" && p.parent_user_id) {
-      return {
-        kind: "agent",
-        hubId: sub,
-        displayName,
-        avatarUrl,
-        sigil: oai ? { type: "agent", value: oai } : userSigil,
-        ownerHubId: Number(p.parent_user_id),
-        variant: p.profile_variant ?? "ai__bot",
-        // TODO: read granted scopes from the token once HubID issues scoped agent tokens (docs/AGENTS.md).
-        scopes: opts.agentScopes ?? DEFAULT_AGENT_SCOPES,
-      };
-    }
-    return { kind: "human", hubId: sub, displayName, avatarUrl, sigil: userSigil };
+    return actorFrom(self, sub, opts.agentScopes);
   };
+}
+
+/**
+ * Verifies a HubID token by asking HubID itself (`GET /user` with the token), without holding
+ * HubID's JWT signing secret. HubID refuses invalid or expired tokens; the profile it returns must
+ * match the token's subject. Used when presence checks tokens from a HubID whose signing secret
+ * must not leave it, such as the real HubID behind the beta gate.
+ */
+export function hubIdRemoteResolver(opts: { hubid: HubIdClient; agentScopes?: AgentScope[] }): IdentityResolver {
+  return async (token) => {
+    let payload: ReturnType<typeof decodeJwt>;
+    try {
+      payload = decodeJwt(token);
+    } catch {
+      throw new Error("not a HubID token");
+    }
+    const sub = Number(payload.sub);
+    if (!Number.isInteger(sub) || sub <= 0) throw new Error("token has no valid subject");
+    if (typeof payload.exp === "number" && payload.exp * 1000 < Date.now()) throw new Error("token expired");
+    const self = await opts.hubid.withToken(token).getSelf<HubSelf>(); // HubID validates the token here
+    return actorFrom(self, sub, opts.agentScopes);
+  };
+}
+
+/** Human or agent, from the profile HubID returned for the token's subject. */
+function actorFrom(self: HubSelf, sub: number, agentScopes?: AgentScope[]): Actor {
+  if (Number(self.id) !== sub) throw new Error("token subject does not match profile");
+  const displayName = self.name || [self.first, self.last].filter(Boolean).join(" ") || `HubID ${sub}`;
+  const avatarUrl = self.profile?.image ?? self.image ?? null;
+  const p = self.profile;
+  // Mandala sigil identity: an agent's OAI hash when HubID includes it, otherwise the HubID number.
+  const rawOai = (self as unknown as { oai_hash?: unknown }).oai_hash;
+  const oai = typeof rawOai === "string" && /^oai1_[a-z2-7]{32}$/.test(rawOai) ? rawOai : null;
+  const userSigil = { type: "user" as const, value: String(sub) };
+  if (p?.profile_type === "bot" && p.parent_user_id) {
+    return {
+      kind: "agent",
+      hubId: sub,
+      displayName,
+      avatarUrl,
+      sigil: oai ? { type: "agent", value: oai } : userSigil,
+      ownerHubId: Number(p.parent_user_id),
+      variant: (p.profile_variant ?? "ai__bot") as Extract<Actor, { kind: "agent" }>["variant"],
+      // TODO: read granted scopes from the token once HubID issues scoped agent tokens (docs/AGENTS.md).
+      scopes: agentScopes ?? DEFAULT_AGENT_SCOPES,
+    };
+  }
+  return { kind: "human", hubId: sub, displayName, avatarUrl, sigil: userSigil };
 }
 
 /**
