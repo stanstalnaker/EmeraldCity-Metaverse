@@ -6,6 +6,7 @@ import { setButton } from "./ui";
  * destinations, compass bar, fly/walk toggle, mobile joysticks, keyboard help.
  */
 const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; yaw: number }[] = [
+  { icon: "welcome", label: "Arrival plaza", pos: [52, 5.3, 388], yaw: 0 },
   { icon: "lounge", label: "Lounge", pos: [-657, 3.3, 278], yaw: 0 },
   { icon: "travel", label: "Travel", pos: [648, 3.3, 276], yaw: 0 },
   { icon: "welcome", label: "Welcome", pos: [670, 3.3, -281], yaw: 0 },
@@ -32,8 +33,19 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
   if (!o.map) $("map-btn").style.display = "none";
   $("map-image").setAttribute("src", ui("map.png"));
   $("map-stops").innerHTML = MAP_STOPS.map(
-    (s, i) => `<button data-i="${i}" title="${s.label}"><img src="${ui(`map_icons/${s.icon}_icon.png`)}" alt="${s.label}"></button>`,
+    (s, i) => `<button data-i="${i}" title="Go to ${s.label}"><img src="${ui(`map_icons/${s.icon}_icon.png`)}" alt=""><span>${s.label}</span></button>`,
   ).join("");
+  /** Name the nearest landmark and mark it, each time the map opens. */
+  const markNear = () => {
+    let best = -1;
+    let bestD = Infinity;
+    MAP_STOPS.forEach((s, i) => {
+      const d = Math.hypot(camera.position.x - s.pos[0], camera.position.z - s.pos[2]);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    document.querySelectorAll("#map-stops button").forEach((b, i) => b.classList.toggle("near", i === best));
+    $("map-near").textContent = best >= 0 ? (bestD < 60 ? `You're at ${MAP_STOPS[best]!.label}.` : `You're ${Math.round(bestD)} m from ${MAP_STOPS[best]!.label}.`) : "";
+  };
   $("map-stops").onclick = (e) => {
     const b = (e.target as HTMLElement).closest("button");
     if (!b) return;
@@ -43,7 +55,11 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
     o.onTeleport();
     map.style.display = "none";
   };
-  $("map-btn").onclick = () => (map.style.display = map.style.display === "flex" ? "none" : "flex");
+  $("map-btn").onclick = () => {
+    const opening = map.style.display !== "flex";
+    if (opening) markNear();
+    map.style.display = opening ? "flex" : "none";
+  };
   $("map-close").onclick = () => (map.style.display = "none");
 
   // Fly / walk

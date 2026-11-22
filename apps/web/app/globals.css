@@ -74,7 +74,8 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); fon
 .arch-card dl div { display: grid; grid-template-columns: 86px 1fr; gap: 8px; font-size: 13px; }
 .arch-card dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .arch-card footer { display: flex; flex-wrap: wrap; gap: 6px; }
-.arch-dot { width: 12px; height: 12px; background: linear-gradient(135deg, #6ff5c6, #17c38b); clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+.arch-dot { width: 16px; height: 16px; flex: none; object-fit: contain; }
+.arch-dot.mine { width: 12px; height: 12px; background: linear-gradient(135deg, #ff7fc0, #e6007e); clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
 .arch-dot.mine { background: linear-gradient(135deg, #ff7fc0, #e6007e); }
 .arch-btn { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(154,171,207,.3); color: #eaf2ff; background: rgba(255,255,255,.04); font: 700 11.5px Montserrat, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; cursor: pointer; }
 .arch-btn:hover { background: rgba(255,255,255,.1); }
@@ -96,6 +97,6 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); fon
 .arch-anchor { margin: 0; font-size: 13px; color: #6be1fb; }
 .arch-err { margin: 0; color: #ff7fc0; font-size: 13px; }
 .arch-gem { display: flex; align-items: center; gap: 6px; border: 0; background: none; cursor: pointer; padding: 0; }
-.arch-gem span { width: 22px; height: 22px; background: linear-gradient(135deg, #7dffd2, #17c38b 55%, #064d36); clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); filter: drop-shadow(0 0 8px #17c38b); }
+.arch-gem img { width: 26px; height: 26px; filter: drop-shadow(0 0 8px #00a58f); }
 .arch-gem b { font: 700 12px Montserrat, system-ui, sans-serif; color: #fff; text-shadow: 0 1px 4px #000, 0 0 10px #040a1c; white-space: nowrap; }
 @media (max-width: 860px) { .arch { grid-template-columns: 1fr; grid-template-rows: 46vh 1fr; } .arch-panel { border-left: 0; border-top: 1px solid rgba(154,171,207,.16); } }

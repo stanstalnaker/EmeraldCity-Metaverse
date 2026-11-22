@@ -67,7 +67,7 @@ export default function ArchipelagoMap(props: {
       const el = document.createElement("button");
       el.className = "arch-gem";
       el.title = l.island.name;
-      el.innerHTML = `<span></span><b>${l.island.name}</b>`;
+      el.innerHTML = `<img src="/emerald.png" alt=""><b>${l.island.name}</b>`;
       el.onclick = (ev) => { ev.stopPropagation(); setTab("islands"); setSelected(l.island.slug); };
       markers.current.push(new maplibregl.Marker({ element: el }).setLngLat([l.island.geolink.lng, l.island.geolink.lat]).addTo(m));
     }
@@ -129,7 +129,7 @@ export default function ArchipelagoMap(props: {
           <div className="arch-list">
             {props.islands.map((l) => (
               <article key={l.island.slug} className={`arch-card${selected === l.island.slug ? " sel" : ""}`} onClick={() => setSelected(l.island.slug)}>
-                <header><span className="arch-dot" /><b>{l.island.name}</b><small>{l.island.kind === "ready-built" ? "Ready-built" : "Generated"}</small></header>
+                <header><img className="arch-dot" src="/emerald.png" alt="" /><b>{l.island.name}</b><small>{l.island.kind === "ready-built" ? "Ready-built" : "Generated"}</small></header>
                 <p>{l.island.summary}</p>
                 <dl>
                   <div><dt>Gaia cell</dt><dd title={l.island.geolink?.gaiaAddress}>{l.island.geolink?.h3 ?? "—"}</dd></div>

@@ -13,7 +13,7 @@
       :root {
         --night: #050b1f; --navy: #0a1736; --glass: rgba(8, 18, 44, .72); --glass-strong: rgba(8, 18, 44, .9);
         --line: rgba(147, 164, 200, .18); --ink: #e8f0ff; --muted: #93a4c8;
-        --emerald: #17c38b; --emerald-hi: #5ff2c0; --magenta: #e6007e; --indigo: #5a4fd6; --cyan: #009ee3;
+        --emerald: #00a58f; --emerald-hi: #4fe3cc; --ven: #60bf93; --magenta: #e6007e; --indigo: #5a4fd6; --cyan: #009ee3;
         --ring: linear-gradient(90deg, var(--magenta), var(--indigo) 50%, var(--cyan));
         --r: 14px; --gut: max(14px, env(safe-area-inset-left));
       }
@@ -30,7 +30,7 @@
       .btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.04); font-weight: 600; font-size: 13px; transition: background .15s, border-color .15s, transform .1s; white-space: nowrap; }
       .btn:hover { background: rgba(255,255,255,.09); border-color: rgba(147,164,200,.35); }
       .btn:active { transform: translateY(1px); }
-      .btn.on { background: rgba(23,195,139,.16); border-color: rgba(23,195,139,.6); color: var(--emerald-hi); }
+      .btn.on { background: rgba(0,165,143,.16); border-color: rgba(0,165,143,.6); color: var(--emerald-hi); }
       .btn.primary { background: linear-gradient(90deg, #0f9e70, var(--emerald)); border: 0; color: #fff; }
       .btn svg { width: 17px; height: 17px; flex: none; }
       .icon { width: 38px; padding: 0; justify-content: center; }
@@ -68,7 +68,7 @@
       #chat-log { max-height: 28vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 13px; scrollbar-width: none; -webkit-mask: linear-gradient(transparent, #000 24px); mask: linear-gradient(transparent, #000 24px); }
       #chat-log .line { background: var(--glass); backdrop-filter: blur(10px); padding: 6px 11px; border-radius: 11px; align-self: flex-start; max-width: 100%; border: 1px solid var(--line); }
       #chat-log .system { color: var(--muted); font-size: 12px; background: transparent; border-color: transparent; backdrop-filter: none; padding: 2px 4px; }
-      #chat-log .zeke { border-color: rgba(23,195,139,.5); background: rgba(11,93,59,.55); }
+      #chat-log .zeke { border-color: rgba(0,165,143,.5); background: rgba(11,93,59,.55); }
       #chat-form { display: flex; gap: 6px; padding: 6px; border-radius: 13px; }
       #chat-form input { flex: 1; min-width: 0; padding: 0 10px; height: 36px; border-radius: 9px; border: 0; background: transparent; outline: none; }
       #chat-form input::placeholder { color: var(--muted); }
@@ -89,7 +89,7 @@
       #worlds { top: 72px; right: var(--gut); width: min(420px, calc(100vw - 28px)); }
       .world { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 10px; border-radius: 12px; border: 1px solid transparent; background: rgba(255,255,255,.03); margin-bottom: 8px; width: 100%; text-align: left; }
       .world:hover { border-color: var(--line); background: rgba(255,255,255,.06); }
-      .world.here { border-color: rgba(23,195,139,.5); }
+      .world.here { border-color: rgba(0,165,143,.5); }
       .world .thumb { width: 54px; height: 54px; border-radius: 10px; }
       .world b { font: 700 14px Montserrat, sans-serif; letter-spacing: .04em; display: block; }
       .world small { color: var(--muted); font-size: 12px; }
@@ -105,7 +105,7 @@
       .row:first-of-type { border-top: 0; }
       .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
       .seg button { border: 0; background: transparent; padding: 6px 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
-      .seg button.on { background: rgba(23,195,139,.18); color: var(--emerald-hi); }
+      .seg button.on { background: rgba(0,165,143,.18); color: var(--emerald-hi); }
       #stats { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; }
 
       /* Overlays */
@@ -131,7 +131,7 @@
           radial-gradient(1100px 700px at 75% -10%, rgba(18,58,107,.55), transparent 60%), radial-gradient(900px 600px at -10% 110%, rgba(11,93,59,.5), transparent 60%), var(--night);
         transition: opacity .8s ease, visibility .8s; text-align: center; padding: 24px; }
       #splash.gone { opacity: 0; visibility: hidden; }
-      #splash .gem { width: 76px; height: 76px; animation: float 3.2s ease-in-out infinite; filter: drop-shadow(0 10px 30px rgba(23,195,139,.35)); }
+      #splash .gem { width: 76px; height: 76px; animation: float 3.2s ease-in-out infinite; filter: drop-shadow(0 10px 30px rgba(0,165,143,.35)); }
       @keyframes float { 50% { transform: translateY(-6px) rotate(4deg); } }
       #splash h1 { margin: 18px 0 6px; font: 800 clamp(26px, 5vw, 44px)/1.05 Montserrat, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
       #splash p { margin: 0; color: var(--muted); max-width: 440px; }
@@ -141,7 +141,7 @@
       #splash-status { font-size: 12px; color: var(--muted); min-height: 18px; }
 
       #travel { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: none; opacity: 0; transition: opacity .6s ease;
-        background: radial-gradient(circle at 50% 50%, rgba(23,195,139,.35), var(--night) 70%); }
+        background: radial-gradient(circle at 50% 50%, rgba(0,165,143,.35), var(--night) 70%); }
       #travel.on { opacity: 1; }
       #travel b { display: block; font: 800 clamp(30px, 6vw, 48px)/1 Montserrat, sans-serif; letter-spacing: .14em; text-transform: uppercase; margin-top: 12px; }
 
@@ -150,6 +150,57 @@
       #stick { position: fixed; left: max(22px, env(safe-area-inset-left)); bottom: max(96px, calc(env(safe-area-inset-bottom) + 86px)); width: 124px; height: 124px; border-radius: 50%; z-index: 6; touch-action: none;
         background: radial-gradient(circle, rgba(8,18,44,.35), rgba(8,18,44,.6)); border: 1px solid var(--line); backdrop-filter: blur(8px); }
       #stick i { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: linear-gradient(135deg, var(--emerald-hi), var(--emerald)); box-shadow: 0 6px 18px #0008; }
+
+      /* Services: side sheets */
+      .sheet { position: fixed; top: 72px; right: var(--gut); bottom: 84px; width: min(380px, calc(100vw - 28px)); z-index: 15; display: none; flex-direction: column; gap: 12px; padding: 18px; overflow: hidden; }
+      .sheet.open { display: flex; animation: rise .18s ease-out; }
+      .sheet header { display: flex; justify-content: space-between; align-items: flex-start; }
+      .sheet h3 { margin: 4px 0 0; font: 800 18px/1.1 Montserrat, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+      .sheet .close { position: static; }
+      .list { overflow-y: auto; display: grid; gap: 6px; align-content: start; margin: 0 -6px; padding: 0 6px; }
+      .field { height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid #22355f; background: #071230; color: var(--ink); outline: none; width: 100%; }
+      .field:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,158,227,.2); }
+      .seg2 { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; }
+      .seg2 button { flex: 1; border: 0; background: transparent; padding: 8px; border-radius: 8px; font: 600 12.5px Montserrat, sans-serif; color: var(--muted); }
+      .seg2 button.on { background: rgba(0,165,143,.18); color: var(--emerald-hi); }
+      .person { display: grid; grid-template-columns: 38px 1fr auto auto; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; }
+      .person:hover { background: rgba(255,255,255,.05); }
+      .person .who b { display: block; font-weight: 600; font-size: 14px; }
+      .person .who small { color: var(--muted); font-size: 12px; }
+      .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; font: 800 12px Montserrat, sans-serif; color: #fff; background: conic-gradient(var(--magenta), var(--indigo), var(--cyan), var(--emerald), var(--magenta)); }
+      .avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .avatar.agent { background: linear-gradient(135deg, var(--emerald-hi), var(--emerald)); color: #03241a; }
+      .ai { font-style: normal; font: 800 9.5px Montserrat, sans-serif; padding: 2px 5px; border-radius: 5px; background: rgba(0,165,143,.25); color: var(--emerald-hi); }
+      .btn.mini { height: 30px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; }
+      .btn.ven { border-color: rgba(96,191,147,.45); color: var(--ven); }
+      .btn.wide { width: 100%; justify-content: center; }
+      .btn .count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: rgba(0,165,143,.25); color: var(--emerald-hi); font-size: 11px; display: inline-grid; place-items: center; }
+      .ven-glyph { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ven); color: #062a1c; font: 900 16px/1 Montserrat, sans-serif; }
+      .ven-glyph.sm { width: 18px; height: 18px; font-size: 10px; }
+      .ven-big { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 14px; background: rgba(96,191,147,.08); border: 1px solid rgba(96,191,147,.3); font: 900 30px/1 Montserrat, sans-serif; color: var(--ink); }
+      .ven-big small { font: 600 13px Inter, sans-serif; color: var(--ven); margin-left: auto; }
+      .stack { display: grid; gap: 10px; }
+      #send-result { margin: 0; font-size: 13px; color: var(--muted); min-height: 18px; }
+      #send-result.ok { color: var(--ven); } #send-result.err { color: #ff7fc0; }
+      .profile-head { display: flex; gap: 12px; align-items: center; }
+      .profile-head .avatar { width: 52px; height: 52px; font-size: 16px; }
+      .profile-head b { display: block; font: 700 16px Montserrat, sans-serif; } .profile-head small { color: var(--muted); }
+      #profile-body { display: grid; gap: 14px; }
+      .profile-links { display: grid; gap: 4px; }
+      .profile-links a { padding: 10px 12px; border-radius: 10px; color: var(--ink); text-decoration: none; border: 1px solid var(--line); }
+      .profile-links a:hover { background: rgba(255,255,255,.06); }
+      .muted { color: var(--muted); font-size: 13px; } .small { font-size: 12px; }
+      /* Map */
+      #map .box { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(260px, 420px); gap: 22px; width: min(1100px, 96vw); max-height: 90vh; padding: 22px; }
+      .map-left { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+      .map-title { margin: 2px 0 0; font: 800 22px Montserrat, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+      #map-image { width: 100%; max-height: 64vh; object-fit: contain; border-radius: 12px; background: #02060f; }
+      .map-right { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+      #map-stops { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; overflow-y: auto; align-content: start; }
+      #map-stops button { display: flex; align-items: center; gap: 10px; padding: 10px; text-align: left; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; font: 600 13px Inter, sans-serif; }
+      #map-stops button:hover { border-color: rgba(79,227,204,.5); background: rgba(0,165,143,.1); }
+      #map-stops button.near { border-color: var(--emerald); }
+      #map-stops img { height: 26px; width: 26px; object-fit: contain; flex: none; }
 
       /* Phones: compact bar, dock above chat, no keyboard help */
       @media (max-width: 720px) {
@@ -163,6 +214,8 @@
         #help { display: none; }
         #me-name { display: none; }
         #worlds, #settings { top: 64px; }
+        .sheet { top: 64px; bottom: 80px; }
+        #map .box { grid-template-columns: 1fr; overflow-y: auto; }
         #goto { bottom: auto; top: 64px; left: var(--gut); transform: none; }
         #map .box { flex-direction: column; } #map-image { max-width: 88vw; max-height: 50vh; }
       }
@@ -171,15 +224,8 @@
   <body>
     <canvas id="c"></canvas>
 
-    <svg width="0" height="0" style="position:absolute">
-      <defs>
-        <linearGradient id="gem-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ff2c0" /><stop offset=".55" stop-color="#17c38b" /><stop offset="1" stop-color="#0b5d3b" /></linearGradient>
-        <symbol id="gem" viewBox="0 0 64 64"><path d="M20 6h24l14 14v24L44 58H20L6 44V20z" fill="url(#gem-g)" /><path d="M20 6l12 14 12-14M6 20h52M32 20v38M6 44l26-24 26 24" fill="none" stroke="#e8fff6" stroke-opacity=".45" stroke-width="1.2" /></symbol>
-      </defs>
-    </svg>
-
     <div id="splash"><div>
-      <svg class="gem"><use href="#gem" /></svg>
+      <img class="gem" src="/emerald.png" alt="Emerald City" />
       <div class="kicker" style="margin-top:18px">Hub Culture</div>
       <h1 id="splash-world">Emerald City</h1>
       <p id="splash-tag">A city for the Hub Culture community, its members and their agents.</p>
@@ -188,7 +234,7 @@
     </div></div>
 
     <div id="hud">
-      <div id="brand" class="glass hair"><svg class="gem"><use href="#gem" /></svg><div><div class="word">Emerald City</div><div id="title">Emerald City</div></div></div>
+      <div id="brand" class="glass hair"><img class="gem" src="/emerald.png" alt="Emerald City" /><div><div class="word">Emerald City</div><div id="title">Emerald City</div></div></div>
       <div class="spacer"></div>
       <div id="tools" class="glass">
         <button class="btn" id="worlds-btn" title="Travel to another world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" /></svg><span class="label">Worlds</span></button>
@@ -204,6 +250,8 @@
       <button class="btn" id="goto-btn" title="Go to a place in this world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg><span class="label">Go to</span></button>
       <button class="btn" id="fly-btn" title="Fly or walk (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 16l20-8-8 12-2-6-10 2z" /></svg><span class="label">Fly</span></button>
       <div class="sep"></div>
+      <button class="btn" id="people-btn" title="People here and your friends (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2" /><path d="M3 20c.6-3.4 3-5.4 6-5.4s5.4 2 6 5.4" /><circle cx="17" cy="9" r="2.4" /><path d="M16 14.4c2.5.2 4.3 1.9 5 4.6" /></svg><span class="label">People</span><span class="count" id="people-count">0</span></button>
+      <button class="btn" id="wallet-btn" title="Your Ven: balance and send (V)"><span class="ven-glyph sm">V</span><span class="label">Wallet</span></button>
       <button class="btn" id="voice-btn" title="Talk with people nearby (spatial voice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg><span class="label">Voice</span></button>
       <button class="btn icon" id="help-btn" title="Controls (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01" /></svg></button>
     </div>
@@ -224,7 +272,30 @@
       <div class="row"><span>Sign out of beta</span><a class="btn" id="signout" href="#">Sign out</a></div>
     </div>
 
-    <div class="overlay" id="map"><div class="box glass hair"><img id="map-image" alt="Emerald City map" /><div id="map-stops"></div>
+    <aside class="sheet glass hair" id="people-panel" aria-label="People">
+      <header><div><div class="kicker">In this world</div><h3>People</h3></div><button class="btn icon close" aria-label="Close">✕</button></header>
+      <nav class="seg2" id="people-tabs"><button data-tab="here" class="on">Here now</button><button data-tab="friends">Friends</button></nav>
+      <input class="field" id="people-search" placeholder="Search by name" autocomplete="off" />
+      <div id="people-list" class="list"></div>
+    </aside>
+    <aside class="sheet glass hair" id="wallet-panel" aria-label="Wallet">
+      <header><div><div class="kicker">Your Ven</div><h3>Wallet</h3></div><button class="btn icon close" aria-label="Close">✕</button></header>
+      <div class="ven-big"><span class="ven-glyph">V</span><span id="wallet-balance">—</span><small>Ven</small></div>
+      <form id="send-form" class="stack">
+        <div class="kicker">Send Ven</div>
+        <input class="field" id="send-to" placeholder="To: a person from People, or a HubID number" autocomplete="off" />
+        <input class="field" id="send-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Amount of Ven" />
+        <input class="field" id="send-note" maxlength="140" placeholder="Note (optional)" autocomplete="off" />
+        <button class="btn primary wide" id="send-btn">Send Ven</button>
+        <p id="send-result" aria-live="polite"></p>
+      </form>
+    </aside>
+    <aside class="sheet glass hair" id="profile-panel" aria-label="Your HubID">
+      <header><div><div class="kicker">Your HubID</div><h3>Profile</h3></div><button class="btn icon close" aria-label="Close">✕</button></header>
+      <div id="profile-body"><p class="muted">Loading…</p></div>
+    </aside>
+
+    <div class="overlay" id="map"><div class="box glass hair"><div class="map-left"><div class="kicker">Emerald City</div><h3 class="map-title">Map</h3><p id="map-near" class="muted"></p><img id="map-image" alt="Emerald City map" /></div><div class="map-right"><div class="kicker">Go to</div><div id="map-stops"></div></div>
       <button class="btn icon close" id="map-close" aria-label="Close">✕</button></div></div>
     <div class="overlay" id="screen"><div class="box glass hair"><header><span id="screen-title"></span>
       <a id="screen-open" target="_blank" rel="noopener">Open in new tab ↗</a><button class="btn" id="screen-close">Close</button></header>

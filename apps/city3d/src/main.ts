@@ -23,6 +23,7 @@ import { setupLegacyLook, setupRealism } from "./realism";
 import { WorldStreamer } from "./streaming";
 import { crossesPortal, setupMovement } from "./movement";
 import { setButton, setMember, setupUi, splash } from "./ui";
+import { MemberApi, setupServices } from "./services";
 
 const params = new URLSearchParams(location.search);
 const WORLDS: Record<string, { load: () => Promise<{ default: unknown }>; heights?: string }> = {
@@ -226,6 +227,23 @@ async function main() {
     mover.sync();
     streamer.update(camera.position);
   };
+  // Services: People, Wallet (Ven), Profile, through the beta gate's member API.
+  const gateUrl = (import.meta.env.VITE_GATE_URL as string | undefined) ?? null;
+  setupServices({
+    api: new MemberApi(gateUrl),
+    here: () => people?.here() ?? [],
+    goTo: (hubId) => {
+      const spot = people?.spotNear(hubId);
+      if (!spot) return false;
+      camera.position.copyFrom(spot.position);
+      camera.rotation.y = spot.yaw;
+      mover.sync();
+      streamer.update(camera.position);
+      return true;
+    },
+    siteUrl: (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://beta.hubculture.city",
+    gateUrl,
+  });
   setupUi({
     worldSlug,
     travel: travelTo,

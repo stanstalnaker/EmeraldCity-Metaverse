@@ -71,6 +71,25 @@ export class People {
     return this.avatars.size;
   }
 
+  /** Everyone else in this world right now, nearest first (agents marked, so people can tell). */
+  here(): { hubId: number; name: string; kind: "human" | "agent"; distance: number }[] {
+    const me = this.o.camera.position;
+    return [...this.avatars.values()]
+      .filter((a) => a.actor.hubId > 0)
+      .map((a) => ({ hubId: a.actor.hubId, name: a.actor.displayName, kind: a.actor.kind, distance: Vector3.Distance(me, a.root.position) }))
+      .sort((x, y) => x.distance - y.distance);
+  }
+
+  /** A spot a couple of metres in front of someone, facing them, to stand at after "Go to". */
+  spotNear(hubId: number): { position: Vector3; yaw: number } | null {
+    const a = this.avatars.get(hubId);
+    if (!a) return null;
+    const p = a.root.position;
+    const ahead = new Vector3(Math.sin(a.heading), 0, Math.cos(a.heading)).scale(2.2);
+    const spot = p.add(ahead);
+    return { position: new Vector3(spot.x, p.y + 1.7, spot.z), yaw: Math.atan2(p.x - spot.x, p.z - spot.z) };
+  }
+
   private connect() {
     // Browsers can't set headers on WebSockets: the token travels as the "token" query parameter.
     const ws = new WebSocket(`${this.o.url}?token=${encodeURIComponent(this.o.token)}`);

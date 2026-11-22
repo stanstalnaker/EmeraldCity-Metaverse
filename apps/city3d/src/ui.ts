@@ -122,7 +122,8 @@ export function setMember(m: { name: string } | null, gateUrl: string | null) {
     $("me-name").textContent = m.name;
     $("me-dot").textContent = initials(m.name);
     a.title = `Signed in with HubID as ${m.name}`;
-    a.removeAttribute("href");
+    a.setAttribute("data-signed-in", "1");
+    a.setAttribute("href", "#");
   } else {
     $("me-name").textContent = gateUrl ? "Sign in" : "Guest";
     $("me-dot").textContent = "·";
