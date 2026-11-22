@@ -71,6 +71,12 @@ Environment:
 - **Which HubID people sign in with:** access should come from members' real HubID levels (admins, Beta Testers), but beta runs on staging HubID, where people's normal logins and levels may not exist. Point the gate alone at the real HubID with `GATE_HUBID_API_URL=https://id.hubculture.com`, `GATE_HUBID_PUBLIC_KEY` and `GATE_HUBID_PRIVATE_KEY` (an app key pair for the gate). It only signs people in and reads their profile and levels. The rest of beta stays on staging. Without them, the gate uses `HUBID_*`.
 - **Presence, with the real HubID:** people behind the gate carry real-HubID tokens, so presence must check them there too. Set `PRESENCE_HUBID_API_URL=https://id.hubculture.com` (with `PRESENCE_HUBID_PUBLIC_KEY` / `_PRIVATE_KEY`; the gate's key pair works) and `PRESENCE_VERIFY=hubid`. Presence then asks HubID who each token belongs to, so HubID's JWT signing secret never leaves HubID.
 - **The rule, the same on every beta site:** HubID super admins (`sadmin`), General Administrators, and members with the Beta Testers level (level 8) get in. Membership comes from HubID `GET /user` (`memberships`, by level name). Every `*.beta.hubculture.city` site sits behind this one gate.
+- **Member services for beta sites:** the gate also serves the 3D city's wallet, friends and profile panels: `GET /_gate/api/me` (profile and Ven balance), `GET /_gate/api/friends`, and `POST /_gate/api/ven/send`. They use the member's own session; HubID's keys stay on the server. Sending Ven requires:
+  - a beta-site origin;
+  - a JSON body and the `X-Hub-Action: send-ven` header;
+  - no sending to yourself;
+  - at most `GATE_MAX_SEND_VEN` (default 1000) per send, and 10 sends per 10 minutes.
+  HubID still checks funds and email confirmation.
 - **If sign-in fails:** the gate's log says why. "HubID refused a sign-in (401 …)" means a wrong password, or an account that doesn't exist on that HubID. "HubID sign-in failed" means HubID was unreachable or the keys are wrong. "has no beta level" lists the member's levels.
 - **3D city build:** `VITE_GATE_URL=https://beta.hubculture.city`.
 - **Land app:** `CITY3D_ORIGIN=https://city.beta.hubculture.city`, so the screens' requests carry the session cookie.

@@ -34,6 +34,14 @@ export class HubIdError extends Error {
   }
 }
 
+/** A friend as HubID lists them (GET /friends). */
+export interface HubFriend {
+  id: number;
+  name: string;
+  picture?: { thumbnail?: string } | string | null;
+  [k: string]: unknown;
+}
+
 export interface ListPropertiesParams {
   territory?: string;
   title?: string;
@@ -289,6 +297,29 @@ export class HubIdClient {
   }
 
   // ---- Emerald City (HubID feature/emerald-city-parcels) ----
+
+  /** GET /friends: the member's friends, up to 250 a page, optionally filtered by name. */
+  async friends(params: { name?: string; offset?: number; limit?: number } = {}): Promise<{ count: number; items: HubFriend[] }> {
+    const q = new URLSearchParams({ offset: String(params.offset ?? 0), limit: String(Math.min(params.limit ?? 250, 250)) });
+    if (params.name && params.name.trim().length >= 2) q.set("name", params.name.trim().slice(0, 250));
+    const d = await this.request<{ count?: number; items?: HubFriend[] }>("GET", `/friends?${q}`, { key: "private", auth: true });
+    return { count: Number(d?.count ?? d?.items?.length ?? 0), items: d?.items ?? [] };
+  }
+
+  /** GET /balance: the member's Ven balance. */
+  async venBalance(): Promise<number> {
+    const d = await this.request<unknown>("GET", "/balance", { key: "private", auth: true });
+    const v = typeof d === "object" && d !== null ? ((d as Record<string, unknown>).balance ?? (d as Record<string, unknown>).ven ?? (d as Record<string, unknown>).amount) : d;
+    return Number(v ?? 0);
+  }
+
+  /**
+   * POST /transactions: send Ven from the signed-in member to another HubID. HubID checks funds,
+   * the sender's confirmed email and the amount's format.
+   */
+  async sendVen(to: number, amount: number, message?: string): Promise<{ message?: string }> {
+    return this.request("POST", "/transactions", { key: "private", auth: true, body: { to, amount, ...(message ? { message } : {}) } });
+  }
 
   async listCities(): Promise<HubCity[]> {
     return (await this.request<{ items: HubCity[] }>("GET", "/cities")).items;

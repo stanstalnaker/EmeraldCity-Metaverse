@@ -20,6 +20,8 @@ export interface GateOptions {
   loginOrigin: string;
   extraLevels?: string[];
   ttlSeconds?: number;
+  /** Most Ven one send may move from the 3D city (HubID still checks funds). */
+  maxSendVen?: number;
   /** For tests: plain-http cookies. */
   insecureCookies?: boolean;
 }
@@ -68,6 +70,52 @@ export function startGate(o: GateOptions) {
     attempts.set(ip, list);
     return list.length > 10;
   };
+
+  /** CORS for beta sites only (https *.{domain}), with credentials; nothing for anyone else. */
+  const betaOrigin = (req: IncomingMessage) => {
+    const origin = String(req.headers.origin ?? "");
+    try {
+      const u = new URL(origin);
+      return u.protocol === "https:" && (u.hostname === o.domain || u.hostname.endsWith(`.${o.domain}`)) ? origin : null;
+    } catch {
+      return null;
+    }
+  };
+  const corsFor = (req: IncomingMessage): Record<string, string> => {
+    const origin = betaOrigin(req);
+    return origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Credentials": "true", Vary: "Origin" } : {};
+  };
+  const json = (res: ServerResponse, req: IncomingMessage, status: number, body: unknown) =>
+    send(res, status, JSON.stringify(body), { "Content-Type": "application/json", ...corsFor(req) });
+  const readJson = (req: IncomingMessage) =>
+    new Promise<Record<string, unknown>>((resolve, reject) => {
+      let body = "";
+      req.on("data", (c) => {
+        body += c;
+        if (body.length > 2048) {
+          reject(new Error("too large"));
+          req.destroy();
+        }
+      });
+      req.on("end", () => {
+        try {
+          const v = JSON.parse(body || "{}");
+          resolve(v && typeof v === "object" ? v : {});
+        } catch {
+          reject(new Error("bad json"));
+        }
+      });
+      req.on("error", reject);
+    });
+  const sends = new Map<number, number[]>();
+  const sendLimited = (hubId: number) => {
+    const now = Date.now();
+    const list = (sends.get(hubId) ?? []).filter((t) => now - t < 10 * 60_000);
+    list.push(now);
+    sends.set(hubId, list);
+    return list.length > 10;
+  };
+  const maxSend = o.maxSendVen ?? 1000;
 
   const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://gate");
@@ -140,21 +188,66 @@ export function startGate(o: GateOptions) {
 
       if (url.pathname === "/_gate/token") {
         // The 3D city (another beta subdomain) reads the member's HubID token to join presence.
-        const origin = String(req.headers.origin ?? "");
-        const host = (() => {
-          try {
-            return new URL(origin).hostname;
-          } catch {
-            return "";
-          }
-        })();
-        const cors: Record<string, string> = host && (host === o.domain || host.endsWith(`.${o.domain}`)) && origin.startsWith("https://")
-          ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Credentials": "true", Vary: "Origin" }
-          : {};
-        if (req.method === "OPTIONS") return send(res, 204, "", { ...cors, "Access-Control-Allow-Methods": "GET" });
+        if (req.method === "OPTIONS") return send(res, 204, "", { ...corsFor(req), "Access-Control-Allow-Methods": "GET" });
         const s = await openSession(cookies[COOKIE], o.secret);
-        if (!s) return send(res, 401, JSON.stringify({ error: "signed_out" }), { "Content-Type": "application/json", ...cors });
-        return send(res, 200, JSON.stringify({ hubId: s.hubId, name: s.name, token: s.token }), { "Content-Type": "application/json", ...cors });
+        if (!s) return json(res, req, 401, { error: "signed_out" });
+        return json(res, req, 200, { hubId: s.hubId, name: s.name, token: s.token });
+      }
+
+      // ---- Member services for beta sites (the 3D city's wallet, friends and profile panels).
+      // HubID's app keys stay here; the browser only ever holds its own session cookie.
+      if (url.pathname.startsWith("/_gate/api/")) {
+        if (req.method === "OPTIONS") {
+          return send(res, 204, "", { ...corsFor(req), "Access-Control-Allow-Methods": "GET, POST", "Access-Control-Allow-Headers": "Content-Type, X-Hub-Action", "Access-Control-Max-Age": "600" });
+        }
+        const s = await openSession(cookies[COOKIE], o.secret);
+        if (!s) return json(res, req, 401, { error: "signed_out" });
+        const member = o.hubid.withToken(s.token);
+        try {
+          if (url.pathname === "/_gate/api/me" && req.method === "GET") {
+            const balance = await member.venBalance().catch(() => null);
+            return json(res, req, 200, { hubId: s.hubId, name: s.name, picture: s.picture, venBalance: balance });
+          }
+          if (url.pathname === "/_gate/api/friends" && req.method === "GET") {
+            const f = await member.friends({ name: url.searchParams.get("name") ?? undefined });
+            return json(res, req, 200, {
+              count: f.count,
+              items: f.items.map((x) => ({
+                id: Number(x.id),
+                name: String(x.name ?? ""),
+                picture: typeof x.picture === "string" ? x.picture : (x.picture as { thumbnail?: string } | null)?.thumbnail ?? null,
+              })),
+            });
+          }
+          if (url.pathname === "/_gate/api/ven/send" && req.method === "POST") {
+            // Only beta sites, only deliberate JSON calls (a custom header forces a CORS preflight).
+            if (!betaOrigin(req)) return json(res, req, 403, { error: "origin" });
+            if (req.headers["x-hub-action"] !== "send-ven" || !String(req.headers["content-type"] ?? "").startsWith("application/json")) {
+              return json(res, req, 400, { error: "bad_request" });
+            }
+            const body = await readJson(req);
+            const to = Number(body.to);
+            const amount = Number(body.amount);
+            const message = typeof body.message === "string" ? body.message.slice(0, 140) : undefined;
+            if (!Number.isInteger(to) || to <= 0) return json(res, req, 400, { error: "Choose who to send Ven to." });
+            if (to === s.hubId) return json(res, req, 400, { error: "You can't send Ven to yourself." });
+            if (!Number.isFinite(amount) || amount <= 0) return json(res, req, 400, { error: "Enter an amount of Ven." });
+            if (Math.round(amount * 100) !== amount * 100) return json(res, req, 400, { error: "Ven has at most two decimals." });
+            if (amount > maxSend) return json(res, req, 400, { error: `You can send up to ${maxSend} Ven at a time from here.` });
+            if (sendLimited(s.hubId)) return json(res, req, 429, { error: "That's a lot of sends. Please wait a few minutes." });
+            const r = await member.sendVen(to, amount, message);
+            console.info(`beta-gate: HubID ${s.hubId} sent ${amount} Ven to ${to}`);
+            return json(res, req, 200, { ok: true, message: r?.message ?? `Sent ${amount} Ven.` });
+          }
+          return json(res, req, 404, { error: "not_found" });
+        } catch (err) {
+          const status = err instanceof HubIdError ? err.status : 0;
+          const detail = err instanceof HubIdError ? JSON.stringify(err.body)?.slice(0, 200) : String(err);
+          console.error(`beta-gate: member API ${url.pathname} failed (${status || "no response"}): ${detail}`);
+          // HubID's own refusals (insufficient funds, unconfirmed email) are worth showing as they are.
+          const said = err instanceof HubIdError && typeof err.body === "object" && err.body !== null ? (Object.values(err.body as Record<string, unknown>).flat().find((v) => typeof v === "string") as string | undefined) : undefined;
+          return json(res, req, status >= 400 && status < 500 ? status : 502, { error: said ?? "HubID couldn't do that just now." });
+        }
       }
 
       if (url.pathname === "/healthz") return send(res, 200, "ok");

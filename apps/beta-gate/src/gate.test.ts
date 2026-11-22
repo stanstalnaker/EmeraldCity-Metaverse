@@ -5,6 +5,7 @@ import { COOKIE, startGate } from "./server";
 import { loginPage } from "./page";
 
 const SECRET = "x".repeat(40);
+const sent: { from: number; to: number; amount: number }[] = [];
 const users: Record<string, { pw: string; self: Record<string, unknown> }> = {
   "tester@hub.test": { pw: "pw", self: { id: 11, name: "Tess Tester", memberships: ["Beta Testers", "Personal Basic"] } },
   "member@hub.test": { pw: "pw", self: { id: 12, name: "Max Member", memberships: ["Personal Basic"] } },
@@ -18,7 +19,17 @@ const fakeHubId = {
     return { token: `tok-${email}`, userId: Number(u.self.id) };
   },
   withToken(token: string) {
-    return { getSelf: async () => users[token.replace("tok-", "")]!.self };
+    const me = users[token.replace("tok-", "")]!.self;
+    return {
+      getSelf: async () => me,
+      venBalance: async () => 250,
+      friends: async () => ({ count: 2, items: [{ id: 12, name: "Max Member", picture: { thumbnail: "https://x/m.png" } }, { id: 3, name: "Ada Admin" }] }),
+      sendVen: async (to: number, amount: number) => {
+        if (amount > 250) throw new HubIdError("insufficient", 405, { error: "Error: Sender has insufficient funds" });
+        sent.push({ from: Number(me.id), to, amount });
+        return { message: `Sent ${amount} Ven` };
+      },
+    };
   },
 } as unknown as HubIdClient;
 
@@ -116,5 +127,45 @@ describe("sign-in page", () => {
     const html = loginPage({ next: "https://beta.hubculture.city/", csrf: "x" });
     const rule = html.match(/\.card:before\{[^}]*\}/)?.[0] ?? "";
     expect(rule).toContain("pointer-events:none");
+  });
+});
+
+describe("member services for beta sites", () => {
+  const city = "https://city.beta.hubculture.city";
+  const sendVen = (cookie: string, body: unknown, headers: Record<string, string> = {}) =>
+    fetch(`${base}/_gate/api/ven/send`, {
+      method: "POST",
+      headers: { Cookie: cookie, Origin: city, "Content-Type": "application/json", "X-Hub-Action": "send-ven", ...headers },
+      body: JSON.stringify(body),
+    });
+
+  it("needs a beta session", async () => {
+    expect((await fetch(`${base}/_gate/api/me`, { headers: { Origin: city } })).status).toBe(401);
+  });
+
+  it("gives the 3D city the member's profile, Ven balance and friends", async () => {
+    const cookie = sessionCookie(await signIn("tester@hub.test"));
+    const me = await fetch(`${base}/_gate/api/me`, { headers: { Cookie: cookie, Origin: city } });
+    expect(me.headers.get("access-control-allow-origin")).toBe(city);
+    expect(await me.json()).toMatchObject({ hubId: 11, name: "Tess Tester", venBalance: 250 });
+    const f = (await (await fetch(`${base}/_gate/api/friends`, { headers: { Cookie: cookie, Origin: city } })).json()) as { items: { id: number; picture: string | null }[] };
+    expect(f.items.map((x) => x.id)).toEqual([12, 3]);
+    expect(f.items[0]!.picture).toBe("https://x/m.png");
+  });
+
+  it("sends Ven only from beta sites, deliberately, within limits", async () => {
+    const cookie = sessionCookie(await signIn("tester@hub.test"));
+    expect((await sendVen(cookie, { to: 12, amount: 5 }, { Origin: "https://evil.example" })).status).toBe(403);
+    expect((await sendVen(cookie, { to: 12, amount: 5 }, { "X-Hub-Action": "" })).status).toBe(400);
+    expect((await sendVen(cookie, { to: 11, amount: 5 })).status).toBe(400); // to yourself
+    expect((await sendVen(cookie, { to: 12, amount: -1 })).status).toBe(400);
+    expect((await sendVen(cookie, { to: 12, amount: 1.234 })).status).toBe(400);
+    expect((await sendVen(cookie, { to: 12, amount: 5000 })).status).toBe(400); // over the per-send cap
+    const ok = await sendVen(cookie, { to: 12, amount: 5, message: "for the reef data" });
+    expect(ok.status).toBe(200);
+    expect(sent).toContainEqual({ from: 11, to: 12, amount: 5 });
+    const broke = await sendVen(cookie, { to: 12, amount: 300 });
+    expect(broke.status).toBe(405);
+    expect(((await broke.json()) as { error: string }).error).toMatch(/insufficient funds/);
   });
 });

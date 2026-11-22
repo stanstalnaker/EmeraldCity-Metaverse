@@ -25,5 +25,6 @@ startGate({
   loginOrigin: process.env.GATE_LOGIN_ORIGIN ?? `https://${domain}`,
   extraLevels: (process.env.GATE_LEVELS ?? "").split(",").filter(Boolean),
   ttlSeconds: Number(process.env.GATE_SESSION_HOURS ?? 12) * 3600,
+  maxSendVen: Number(process.env.GATE_MAX_SEND_VEN ?? 1000),
 });
 console.log(`beta gate on :${process.env.GATE_PORT ?? 8790} for *.${domain}, signing in with ${process.env.GATE_HUBID_API_URL ?? process.env.HUBID_API_URL ?? "https://id.hubculture.com"}`);
