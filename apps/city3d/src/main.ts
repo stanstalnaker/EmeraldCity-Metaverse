@@ -69,9 +69,7 @@ async function main() {
   camera.maxZ = world.terrain ? 24000 : 9000;
   camera.angularSensibility = 2200;
   camera.inertia = 0.5; // mouse look settles quickly; movement easing lives in movement.ts
-  camera.ellipsoid = new Vector3(0.6, 0.9, 0.6);
-  camera.checkCollisions = true;
-  camera.applyGravity = !params.has("fly");
+  // Collisions, gravity and steps belong to the player body in movement.ts.
   camera.attachControl(canvas, true);
   if (params.has("yaw")) camera.rotation.y = Number(params.get("yaw"));
   if (params.has("pitch")) camera.rotation.x = Number(params.get("pitch"));
@@ -158,7 +156,6 @@ async function main() {
   }, 1.3, useGlb);
 
   // Load what's around the spawn before showing the first frame (avoids falling through terrain).
-  camera.applyGravity = false;
   await streamer.preload(camera.position);
   if (landscape) terrainMeshes.push(...landscape.meshes.filter((m) => m.name === "terrain"));
   // City portals stand on the real floor under them (the city's ground is its models, known only now).
@@ -168,7 +165,6 @@ async function main() {
       const root = scene.getTransformNodeByName(`portal-${p.to}`);
       if (hit?.pickedPoint && root) root.position.y = p.position[1] = hit.pickedPoint.y;
     }
-  camera.applyGravity = !params.has("fly");
   setInterval(() => {
     streamer.update(camera.position);
     // Safety net: if you ever fall out of the world, return to the spawn point.
@@ -213,12 +209,21 @@ async function main() {
   mover.onMove((from, to) => {
     for (const p of landscape?.portals ?? []) if (crossesPortal(from, to, p)) return travel(p);
   });
-  setupHud({ camera, assetBase, onTeleport: () => streamer.update(camera.position), fly: params.has("fly"), onFly: (on) => mover.setFlying(on), map: worldSlug === "emerald-city" });
+  setupHud({ camera, assetBase, onTeleport: () => { mover.sync(); streamer.update(camera.position); }, fly: params.has("fly"), onFly: (on) => mover.setFlying(on), onStick: (x, y) => mover.setStick(x, y), map: worldSlug === "emerald-city" });
+  // Double-click the floor to walk there.
+  canvas.addEventListener("dblclick", (e) => {
+    const hit = scene.pick(e.offsetX * (engine.getRenderWidth() / canvas.clientWidth), e.offsetY * (engine.getRenderHeight() / canvas.clientHeight), (m) => m.isPickable && m.isEnabled() && m.isVisible);
+    const n = hit?.getNormal(true);
+    if (!hit?.pickedPoint || !n || n.y < 0.6 || Vector3.Distance(hit.pickedPoint, camera.position) > 300) return;
+    mover.goTo(hit.pickedPoint);
+    showRipple(e.clientX, e.clientY);
+  });
 
   // Places to go in this world: arrival kiosk destinations and property entrances.
   const goTo = (pos: Vector3, yaw?: number) => {
     camera.position.copyFrom(pos.add(new Vector3(0, 1.7, 0)));
     if (yaw !== undefined) camera.rotation.y = yaw;
+    mover.sync();
     streamer.update(camera.position);
   };
   setupUi({
@@ -276,7 +281,7 @@ async function main() {
     const sample = startPerfOverlay(engine, scene, kind, q, () => readyAt);
     if (params.has("bench")) runBenchmark(scene, camera, sample, { world: worldSlug, quality: q.quality, renderer: kind, assets: useGlb ? "glb" : "legacy", readyMs: Math.round(readyAt) });
   }
-  if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions, people } });
+  if (params.has("debug")) Object.assign(window, { __city: { scene, camera, interactions, people, streamer, mover } });
   (window as unknown as { __ready: boolean }).__ready = true;
 }
 
@@ -405,3 +410,13 @@ main().catch((err) => {
   $("splash-status").textContent = msg;
   $("loading").textContent = msg;
 });
+
+/** A soft emerald ring where you double-clicked, so walk-to feels answered. */
+function showRipple(x: number, y: number) {
+  const r = document.createElement("span");
+  r.className = "ripple";
+  r.style.left = `${x}px`;
+  r.style.top = `${y}px`;
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}

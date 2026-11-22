@@ -1,4 +1,4 @@
-import { FreeCameraVirtualJoystickInput, Vector3, type UniversalCamera } from "@babylonjs/core";
+import { Vector3, type UniversalCamera } from "@babylonjs/core";
 import { setButton } from "./ui";
 
 /**
@@ -22,7 +22,7 @@ const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; y
   { icon: "childrens", label: "Children's House", pos: [-835, 11.3, -1360], yaw: 0 },
 ];
 
-export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; onFly?: (on: boolean) => void; map: boolean }) {
+export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; onFly?: (on: boolean) => void; onStick?: (x: number, y: number) => void; map: boolean }) {
   const { camera, assetBase } = o;
   const $ = (id: string) => document.getElementById(id)!;
   const ui = (f: string) => `${assetBase}models/ui/${f}`;
@@ -48,14 +48,14 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
 
   // Fly / walk
   const flyBtn = $("fly-btn");
+  let flying = o.fly;
   const setFly = (fly: boolean) => {
-    camera.applyGravity = !fly;
-    camera.checkCollisions = !fly;
+    flying = fly;
     o.onFly?.(fly);
     setButton("fly-btn", fly ? "Flying" : "Fly", fly);
   };
   setFly(o.fly);
-  flyBtn.onclick = () => setFly(camera.applyGravity);
+  flyBtn.onclick = () => setFly(!flying);
 
   // Compass: a strip of headings every 15° (3 turns long, so it can wrap), slid under a fixed pointer.
   const strip = $("compass-strip");
@@ -77,7 +77,28 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
 
   // Touch devices: virtual joysticks (the live site used VirtualJoysticksCamera).
   if ("ontouchstart" in window) {
-    camera.inputs.add(new FreeCameraVirtualJoystickInput());
+    // A thumb stick for moving; dragging anywhere else turns the view (Babylon's touch input).
+    const pad = document.createElement("div");
+    pad.id = "stick";
+    pad.innerHTML = "<i></i>";
+    document.body.appendChild(pad);
+    const knob = pad.firstElementChild as HTMLElement;
+    let id: number | null = null;
+    const R = 46;
+    const move = (e: PointerEvent) => {
+      const r = pad.getBoundingClientRect();
+      let x = e.clientX - (r.left + r.width / 2);
+      let y = e.clientY - (r.top + r.height / 2);
+      const d = Math.hypot(x, y);
+      if (d > R) { x = (x / d) * R; y = (y / d) * R; }
+      knob.style.transform = `translate(${x}px, ${y}px)`;
+      o.onStick?.(x / R, -y / R);
+    };
+    pad.addEventListener("pointerdown", (e) => { id = e.pointerId; pad.setPointerCapture(id); move(e); e.preventDefault(); });
+    pad.addEventListener("pointermove", (e) => { if (e.pointerId === id) move(e); });
+    const end = (e: PointerEvent) => { if (e.pointerId !== id) return; id = null; knob.style.transform = ""; o.onStick?.(0, 0); };
+    pad.addEventListener("pointerup", end);
+    pad.addEventListener("pointercancel", end);
     $("help").innerHTML = "<span>Left stick moves</span><span>right stick looks</span><span>tap screens, portals and buttons</span>";
   }
 
