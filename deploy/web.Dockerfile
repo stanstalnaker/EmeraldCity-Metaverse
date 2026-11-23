@@ -14,6 +14,8 @@ ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 # Standalone output: a traced, self-contained server (apps/web/server.js) plus static assets.
 COPY --from=build /app/apps/web/.next/standalone ./
 COPY --from=build /app/apps/web/.next/static ./apps/web/.next/static
+# Next.js standalone output leaves public/ out, so copy it (emerald.png and other static files).
+COPY --from=build /app/apps/web/public ./apps/web/public
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s CMD node -e "fetch('http://127.0.0.1:3000/cities').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
