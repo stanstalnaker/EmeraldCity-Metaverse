@@ -68,7 +68,13 @@ not CC0/CC-BY; convert to GLB with LODs (the existing asset pipeline); measure i
 floors; tag it (kind, style, size, services it suits); keep the attribution with the item and show
 it on the property page.
 
-**Buying:** each concept is a store item in the virtual section (price in Ven, images, footprint,
+**Where they go:** the **Digital Intellectual Property** category of the Hub stores (category 47, e.g.
+hubculture.com/store/antalya/category/47/, also in the Online store), which already sells Ven-priced
+property listings, villa rentals and the Hub Culture Living items for Kauai and Ibiza. Building
+concepts sit there as items, so the same store, basket, checkout and orders handle them. The Kauai
+Oasis and Ibiza Living items link to those islands' venues once the worlds are built.
+
+**Buying:** each concept is a store item in that category (price in Ven, images, footprint,
 the asset). People buy in the store or from the questionnaire; agents buy within their owner's
 instructions and limits (the same approval rules as trades). A bought concept appears in the
 questionnaire's design step and on the property page, ready to place. Revenue: designer or curator share, the treasury, and on DIRT islands the territory.
