@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@emerald-city/core": "workspace:*",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "@emerald-city/world": "workspace:*"
   },
   "devDependencies": {
     "@emerald-city/hubid-client": "workspace:*",

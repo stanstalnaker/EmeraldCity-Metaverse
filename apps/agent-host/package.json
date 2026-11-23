@@ -1,0 +1,23 @@
+{
+  "name": "@emerald-city/agent-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Runs Mandala agents in the worlds: personal Zeke replicas that walk the streets, travel between islands, talk, and trade in Ven within their owner's instructions and budget.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "demo": "AGENTS_FILE=agents.demo.json BRAIN=script tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@emerald-city/agents": "workspace:*",
+    "@emerald-city/archipelago": "workspace:*",
+    "@emerald-city/core": "workspace:*",
+    "@emerald-city/world": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

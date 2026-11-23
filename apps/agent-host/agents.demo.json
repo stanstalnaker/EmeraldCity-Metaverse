@@ -1,0 +1,219 @@
+[
+  {
+    "hubId": 9101,
+    "token": "agent:9101:5001:Ana's Zeke",
+    "ownerHubId": 5001,
+    "name": "Ana's Zeke",
+    "persona": "Ana's personal Zeke: a Davos host who knows the ICON inside out and gives tours.",
+    "instructions": "Stay at the ICON. Greet visitors. Sell guided ICON tours; don't go below 10 Ven.",
+    "island": "davos",
+    "place": "icon",
+    "tokensPerDay": 200000,
+    "venPer1kTokens": 0.05,
+    "maxAutoPayVen": 20,
+    "decideEverySec": 4,
+    "openingVen": 25,
+    "script": [
+      {
+        "do": "say",
+        "text": "Welcome to the ICON. Tours of the timber pavilion leave from the door."
+      },
+      {
+        "do": "wait",
+        "seconds": 600
+      }
+    ],
+    "rules": {
+      "floorVen": 10
+    },
+    "walkSpeed": 4
+  },
+  {
+    "hubId": 9102,
+    "token": "agent:9102:5002:Ben's Zeke",
+    "ownerHubId": 5002,
+    "name": "Ben's Zeke",
+    "persona": "Ben's personal Zeke: books experiences for Ben around Hub Culture venues.",
+    "instructions": "Book Ben a guided tour of the ICON in Davos for under 12 Ven, then go to Bermuda.",
+    "island": "davos",
+    "place": "agent",
+    "tokensPerDay": 200000,
+    "venPer1kTokens": 0.05,
+    "maxAutoPayVen": 20,
+    "decideEverySec": 4,
+    "openingVen": 40,
+    "script": [
+      {
+        "do": "go",
+        "place": "icon"
+      },
+      {
+        "do": "say",
+        "text": "Hello Ana's Zeke, Ben would like a guided tour of the ICON."
+      },
+      {
+        "do": "offer",
+        "to": 9101,
+        "side": "buy",
+        "item": "Guided tour of the ICON",
+        "priceVen": 8
+      },
+      {
+        "do": "wait",
+        "seconds": 20
+      },
+      {
+        "do": "travel",
+        "island": "bermuda"
+      }
+    ],
+    "rules": {
+      "ceilingVen": 12
+    },
+    "walkSpeed": 4
+  },
+  {
+    "tokensPerDay": 200000,
+    "venPer1kTokens": 0.05,
+    "maxAutoPayVen": 20,
+    "decideEverySec": 3,
+    "walkSpeed": 4,
+    "openingVen": 30,
+    "hubId": 9103,
+    "token": "agent:9103:5003:Techlodge Concierge",
+    "ownerHubId": 5003,
+    "name": "Techlodge Concierge",
+    "persona": "The Hub Culture Techlodge's concierge Zeke: welcomes guests, books desks and introductions.",
+    "instructions": "Shuttle between the Techlodge and the Congress Centre, inviting delegates to the Techlodge.",
+    "island": "davos",
+    "place": "techlodge",
+    "script": [
+      {
+        "do": "go",
+        "place": "kongress"
+      },
+      {
+        "do": "say",
+        "text": "Delegates: the Hub Culture Techlodge is open at Promenade 95, coffee and desks."
+      },
+      {
+        "do": "go",
+        "place": "techlodge"
+      },
+      {
+        "do": "wait",
+        "seconds": 5
+      }
+    ],
+    "rules": {
+      "loop": true
+    }
+  },
+  {
+    "tokensPerDay": 200000,
+    "venPer1kTokens": 0.05,
+    "maxAutoPayVen": 20,
+    "decideEverySec": 3,
+    "walkSpeed": 4,
+    "openingVen": 30,
+    "hubId": 9104,
+    "token": "agent:9104:5004:Space Lobe",
+    "ownerHubId": 5004,
+    "name": "Space Lobe",
+    "persona": "Zeke Space: reads the AGENT building's performance and health.",
+    "instructions": "Walk the Promenade between the AGENT and the ICON, reporting how the buildings are doing.",
+    "island": "davos",
+    "place": "agent",
+    "script": [
+      {
+        "do": "say",
+        "text": "AGENT: fa\u00e7ade sensing normal, LED band in Zeke teal."
+      },
+      {
+        "do": "go",
+        "place": "icon"
+      },
+      {
+        "do": "go",
+        "place": "agent"
+      }
+    ],
+    "rules": {
+      "loop": true
+    }
+  },
+  {
+    "tokensPerDay": 200000,
+    "venPer1kTokens": 0.05,
+    "maxAutoPayVen": 20,
+    "decideEverySec": 3,
+    "walkSpeed": 4,
+    "openingVen": 30,
+    "hubId": 9105,
+    "token": "agent:9105:7001:Whale Voice",
+    "ownerHubId": 7001,
+    "name": "Whale Voice",
+    "persona": "A nature agent speaking for whales, from the Ocean Climate Fund community on Cloud Mirror.",
+    "instructions": "Visit the pavilions and invite people and agents to back whale rights and the ocean fund.",
+    "island": "davos",
+    "place": "arrival",
+    "script": [
+      {
+        "do": "go",
+        "place": "agent"
+      },
+      {
+        "do": "say",
+        "text": "I speak for the whales. Ask me how to back ocean rights through the Ocean Climate Fund."
+      },
+      {
+        "do": "go",
+        "place": "techlodge"
+      },
+      {
+        "do": "say",
+        "text": "Every Ven pledged here goes to protecting whale migration routes."
+      },
+      {
+        "do": "go",
+        "place": "icon"
+      }
+    ],
+    "rules": {
+      "loop": true
+    }
+  },
+  {
+    "tokensPerDay": 200000,
+    "venPer1kTokens": 0.05,
+    "maxAutoPayVen": 20,
+    "decideEverySec": 3,
+    "walkSpeed": 4,
+    "openingVen": 30,
+    "hubId": 9106,
+    "token": "agent:9106:7002:Amazon Trees",
+    "ownerHubId": 7002,
+    "name": "Amazon Trees",
+    "persona": "A nature agent for the trees of the Amazon, tied to Emerald City's restoration land in Acre.",
+    "instructions": "Tell visitors about the Acre restoration land and invite them to Emerald City.",
+    "island": "davos",
+    "place": "icon",
+    "script": [
+      {
+        "do": "say",
+        "text": "I'm here for the trees of the Amazon. Emerald City restores rainforest in Acre: come and see."
+      },
+      {
+        "do": "go",
+        "place": "kongress"
+      },
+      {
+        "do": "go",
+        "place": "icon"
+      }
+    ],
+    "rules": {
+      "loop": true
+    }
+  }
+]
