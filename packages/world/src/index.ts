@@ -196,8 +196,8 @@ export interface WorldManifest {
   generated?: GeneratedCity[];
   /** A real town from OpenStreetMap, in this world's frame (file in data/, see OsmTown). */
   osm?: string;
-  /** Hub Culture pavilions in this world, by real address. */
-  pavilions?: { id: string; label: string; address: string; osmWay: number }[];
+  /** Hub Culture pavilions (hubicon.co) standing in this world, by the address they're next to. */
+  pavilions?: Pavilion[];
   models: WorldModel[];
   screens: WorldScreen[];
   zones: WorldZone[];
@@ -275,4 +275,21 @@ export interface OsmBuilding {
   addr?: string;
   /** Set on Hub Culture pavilions (their id). */
   hub?: string;
+}
+
+/**
+ * A Hub Culture pavilion: the ICON (timber, on stilts), its sibling the AGENT (glass, LED band), or
+ * the Techlodge (placeholder lodge until its design is in).
+ */
+export interface Pavilion {
+  id: string;
+  kind: "icon" | "agent" | "techlodge";
+  label: string;
+  address: string;
+  /** Centre of the plan, on the ground. */
+  position: [number, number, number];
+  /** Turns the plan's long axis (local x) to lie along the street. */
+  rotationY: number;
+  /** Plan length (along local x) and width (m). */
+  size: [number, number];
 }

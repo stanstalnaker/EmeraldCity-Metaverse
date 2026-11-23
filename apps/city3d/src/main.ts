@@ -14,6 +14,7 @@ import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
 import davosTown from "@emerald-city/world/data/davos.osm.json?url";
 import type { OsmTown } from "@emerald-city/world";
 import { buildTown } from "./town";
+import { buildPavilions } from "./pavilions";
 import { buildLandscape } from "./landscape";
 import { People } from "./people";
 import { chooseQuality, runBenchmark, startPerfOverlay } from "./perf";
@@ -120,6 +121,13 @@ async function main() {
       const townMeshes = buildTown(scene, town, ground);
       landscape.meshes.push(...townMeshes);
       look.adopt(townMeshes);
+    }
+    // Hub Culture's pavilions (the ICON, the AGENT) on their open ground.
+    if (world.pavilions?.length) {
+      const ground = (x: number, z: number) => landscape.surfaceAt(x, z) ?? landscape.groundAt(x, z) ?? 0;
+      const pav = buildPavilions(scene, world.pavilions, ground);
+      landscape.meshes.push(...pav);
+      look.adopt(pav);
     }
     // Heightmap worlds stand you on the terrain in movement.ts; the city keeps collision gravity.
     if (world.terrain) scene.gravity = Vector3.Zero();

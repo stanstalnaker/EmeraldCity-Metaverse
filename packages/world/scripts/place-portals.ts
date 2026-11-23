@@ -21,6 +21,8 @@ for (const slug of ["davos", "bermuda"]) {
   const g0 = w.terrain ? ground(s.position.x, s.position.z) : s.position.y;
   // Unity walls and shapes: keep portals (and the walk to them) clear of anything solid.
   const solids = (w.primitives ?? []).filter((p) => p.shape !== "plane" && p.shape !== "quad").map((p) => ({ x: p.position[0], z: p.position[2], r: Math.max(Math.abs(p.scale[0]), Math.abs(p.scale[2])) / 2 + 2 }));
+  // Hub Culture pavilions stand where they stand.
+  for (const pv of w.pavilions ?? []) solids.push({ x: pv.position[0], z: pv.position[2], r: Math.hypot(...pv.size) / 2 + 2 });
   // A real town (OpenStreetMap): its buildings are solid too.
   if (w.osm) {
     const town = JSON.parse(readFileSync(resolve(import.meta.dirname, "../data", w.osm), "utf8")) as { buildings: { ring: [number, number][] }[] };

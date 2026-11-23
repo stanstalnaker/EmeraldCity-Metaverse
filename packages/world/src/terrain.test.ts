@@ -40,13 +40,28 @@ describe("Davos from OpenStreetMap", () => {
     expect(world.generated ?? []).toHaveLength(0);
   });
 
-  it("marks both Hub Culture pavilions by address, with a teleport to each", () => {
-    for (const [id, addr] of [["hub-symondsstrasse-7", "Symondsstrasse 7"], ["hub-promenade-95", "Promenade 95"]] as const) {
-      const b = town.buildings.find((x) => x.hub === id);
-      expect(b?.addr).toBe(addr);
-      expect(world.teleports.find((t) => t.id === id)).toBeTruthy();
-      expect(world.pavilions?.find((p) => p.id === id)?.osmWay).toBe(b?.id);
+  it("stands the ICON, the AGENT and the Techlodge on their open ground, with a teleport to each", () => {
+    const kinds = Object.fromEntries((world.pavilions ?? []).map((p) => [p.kind, p]));
+    expect(kinds.icon?.address).toMatch(/^Symondsstrasse 7/);
+    expect(kinds.agent?.address).toMatch(/^Promenade 107/);
+    expect(kinds.techlodge?.address).toMatch(/^Promenade 95/);
+    for (const p of world.pavilions ?? []) {
+      expect(world.teleports.find((t) => t.id === p.id)).toBeTruthy();
+      // no town building stands on the pavilion's centre
+      const [x, , z] = p.position;
+      for (const b of town.buildings) {
+        let inside = false;
+        for (let i = 0, j = b.ring.length - 1; i < b.ring.length; j = i++) {
+          const [xi, zi] = b.ring[i]!, [xj, zj] = b.ring[j]!;
+          if (zi > z !== zj > z && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+        }
+        expect(inside).toBe(false);
+      }
     }
+    // Visitors arrive at the ICON.
+    const icon = kinds.icon!;
+    const s = world.defaultSpawn.position;
+    expect(Math.hypot(s.x - icon.position[0], s.z - icon.position[2])).toBeLessThan(20);
   });
 
   it("stores footprints counter-clockwise seen from above (walls face outward)", () => {

@@ -31,13 +31,20 @@ STEP = 0.01
 M_LAT = 110574.0
 M_LON = 111320.0 * math.cos(math.radians(CENTER[0]))
 
-# The two Hub Culture pavilions (Davos), found by address.
+# Hub Culture's pavilions (hubicon.co), each on the open ground by an address: the ICON at
+# Symondsstrasse 7 and its sibling the AGENT (Davos 2027) at Promenade 107. size = plan length x width (m).
 PAVILIONS = [
-    {"id": "hub-symondsstrasse-7", "label": "Hub Culture Pavilion · Symondsstrasse 7", "street": "Symondsstrasse", "number": "7"},
-    {"id": "hub-promenade-95", "label": "Hub Culture Pavilion · Promenade 95", "street": "Promenade", "number": "95"},
+    # at = plan centre (x east, z north, m); yaw turns the plan's long axis (local x); door = local
+    # side the entrance is on. Placed from Stan's map markings (Google Maps, 23 Nov 2026).
+    {"id": "hub-icon", "kind": "icon", "label": "The ICON · Symondsstrasse 7", "street": "Symondsstrasse", "number": "7",
+     "size": [15, 9], "at": [-327, -81], "yaw": 2.729, "door": "+z", "gap": 7.5},  # lawn below the Icon house, along Symondsstrasse
+    {"id": "hub-agent", "kind": "agent", "label": "The AGENT · Promenade 107", "street": "Promenade", "number": "107",
+     "size": [13, 10], "at": [-231, -122], "yaw": 3.1416, "door": "+z", "gap": 5},  # between Promenade 105 and 107, facing the street
+    {"id": "hub-techlodge", "kind": "techlodge", "label": "Hub Culture Techlodge · Promenade 95", "street": "Promenade", "number": "95",
+     "size": [18, 13], "at": [-507, -133], "yaw": 1.5708, "door": "+x", "gap": 2},  # corner lawn at Scalettastrasse, entrance to the Promenade
 ]
-# Where visitors arrive: the open ground just south of this pavilion, facing it.
-ARRIVAL_SOUTH_OF = "hub-symondsstrasse-7"
+# Where visitors arrive: beside this pavilion, facing it.
+ARRIVAL_AT = "hub-icon"
 # Landmarks for the teleport list: (id, label, OSM way id).
 LANDMARKS = [
     ("kongress", "Congress Centre", "219442526"),
@@ -228,7 +235,6 @@ def build(cache):
         if not b:
             print("pavilion not found:", p["street"], p["number"])
             continue
-        b["hub"] = p["id"]
         pavilions.append({**p, "building": b["id"]})
 
     out = {
@@ -339,7 +345,6 @@ def update_world(buildings, roads, rail, rivers, pavilions, station):
         x, z = cx + ux * min(reach, d), cz + uz * min(reach, d)
         return x, z, math.atan2(cx - x, cz - z)  # facing the building
 
-    # Arrival: the most open spot 15-60 m south of the pavilion (away from walls and off the street).
     def inside(x, z, ring):
         c = False
         for i in range(len(ring)):
@@ -356,33 +361,85 @@ def update_world(buildings, roads, rail, rivers, pavilions, station):
         k = max(0, min(1, ((px - ax) * dx + (pz - az) * dz) / l2))
         return math.hypot(px - ax - k * dx, pz - az - k * dz)
 
-    home = next((b for b in buildings if b.get("hub") == ARRIVAL_SOUTH_OF), None)
-    if home:
-        hx, hz = centroid(home)
-        near_b = [b for b in buildings if math.dist(b["ring"][0], (hx, hz)) < 200]
-        near_r = [r for r in roads if r["c"] not in ("footway", "path", "steps", "track") and any(math.dist(p, (hx, hz)) < 250 for p in r["p"])]
-        best = None
-        for dz in range(-15, -61, -2):
-            for dx in range(-24, 25, 2):
-                x, z = hx + dx, hz + dz
-                if any(inside(x, z, b["ring"]) for b in near_b):
-                    continue
-                db = min(dseg(x, z, b["ring"][i], b["ring"][i - 1]) for b in near_b for i in range(len(b["ring"])))
-                dr = min((dseg(x, z, r["p"][i], r["p"][i + 1]) - r["w"] / 2 for r in near_r for i in range(len(r["p"]) - 1)), default=50)
-                score = min(db, dr * 1.2) - abs(dx) * 0.05  # open, off the street, and roughly due south
-                if best is None or score > best[0]:
-                    best = (score, x, z)
-        if best:
-            _, ax_, az_ = best
-            yaw = math.atan2(hx - ax_, hz - az_)
-            w["defaultSpawn"] = {"position": {"x": round(ax_, 1), "y": round(ground(ax_, az_) + 0.3, 1), "z": round(az_, 1)}, "rotationY": round(yaw, 3)}
-            print(f"arrival: {ax_:.1f}, {az_:.1f} ({math.dist((ax_, az_), (hx, hz)):.0f} m south of {home.get('addr')}), facing it")
+    major = [r for r in roads if r["c"] not in ("footway", "path", "steps", "track", "cycleway")]
 
-    tps = [tp for tp in w["teleports"] if not tp["id"].startswith(("gen:", "osm:", "hub-"))]
+    def clearance(x, z, near_b, near_r, taken):
+        if any(inside(x, z, b["ring"]) for b in near_b):
+            return -1, 0, 0
+        db = min((dseg(x, z, b["ring"][i], b["ring"][i - 1]) for b in near_b for i in range(len(b["ring"]))), default=99)
+        dr, rdir = 99, (1.0, 0.0)
+        for r in near_r:
+            for i in range(len(r["p"]) - 1):
+                d = dseg(x, z, r["p"][i], r["p"][i + 1]) - r["w"] / 2
+                if d < dr:
+                    a, b = r["p"][i], r["p"][i + 1]
+                    l = math.dist(a, b) or 1
+                    dr, rdir = d, ((b[0] - a[0]) / l, (b[1] - a[1]) / l)
+        dt = min((math.dist((x, z), q[:2]) - q[2] for q in taken), default=99)
+        return min(db, dr, dt), rdir, (db, dr)
+
+    # Pavilions: the most open ground within 70 m of each address, long side along the nearest street.
+    placed, taken = [], []
     for p in pavilions:
         b = next(b for b in buildings if b["id"] == p["building"])
-        x, z, yaw = front_of(b)
-        tps.append({"id": p["id"], "label": p["label"], "position": {"x": round(x, 1), "y": round(ground(x, z) + 0.3, 1), "z": round(z, 1)}, "rotationY": round(yaw, 3), "group": "kiosk"})
+        hx, hz = centroid(b)
+        near_b = [q for q in buildings if math.dist(centroid(q), (hx, hz)) < 200]
+        near_r = [r for r in major if any(math.dist(pt, (hx, hz)) < 250 for pt in r["p"])]
+        if p.get("at"):
+            x, z = p["at"]
+            yaw = p["yaw"]
+            # Door direction in the world: local +z -> (sin, cos); local +x -> (cos, -sin).
+            dx_, dz_ = (math.sin(yaw), math.cos(yaw)) if p["door"] == "+z" else (math.cos(yaw), -math.sin(yaw))
+            depth = (p["size"][1] if p["door"] == "+z" else p["size"][0]) / 2
+            fx, fz = x + dx_ * (depth + p.get("gap", 5)), z + dz_ * (depth + p.get("gap", 5))
+            c = clearance(x, z, near_b, near_r, taken)[0]
+            placed.append({"id": p["id"], "kind": p["kind"], "label": p["label"], "address": f"{p['street']} {p['number']}, 7270 Davos Platz",
+                           "position": [round(x, 1), round(ground(x, z), 2), round(z, 1)], "rotationY": round(yaw, 3), "size": p["size"],
+                           "front": [round(fx, 1), round(ground(fx, fz) + 0.3, 1), round(fz, 1)], "faceYaw": round(math.atan2(x - fx, z - fz), 3)})
+            taken.append((x, z, math.hypot(*p["size"]) / 2 + 4))
+            print(f"{p['label']}: {x}, {z} (as marked), {c:.1f} m to the nearest wall or street from the centre")
+            continue
+        best = None
+        for dx in range(-70, 71, 2):
+            for dz in range(-70, 71, 2):
+                if math.hypot(dx, dz) > 70 or (p.get("side") == "south" and dz > -12):
+                    continue
+                c, rdir, _ = clearance(hx + dx, hz + dz, near_b, near_r, taken)
+                score = c - math.hypot(dx, dz) * 0.02  # open first, then close to the address
+                if best is None or score > best[0]:
+                    best = (score, hx + dx, hz + dz, rdir, c)
+        _, x, z, (rx, rz), c = best
+        half = math.hypot(*p["size"]) / 2
+        if c < half:
+            print(f"warning: only {c:.1f} m clear for {p['label']} (needs {half:.1f})")
+        yaw = math.atan2(-rz, rx)  # Babylon: rotation.y turns local +x to (cos, -sin)
+        # Its open side (front): of the two long sides, the one with more room.
+        nx, nz = -rz, rx
+        sides = []
+        for sgn in (1, -1):
+            fx, fz = x + sgn * nx * (p["size"][1] / 2 + 7), z + sgn * nz * (p["size"][1] / 2 + 7)
+            sides.append((clearance(fx, fz, near_b, near_r, [])[0], fx, fz, sgn))
+        _, fx, fz, sgn = max(sides)
+        if sgn < 0:
+            yaw += math.pi  # the door (local +z) faces the open side
+        placed.append({"id": p["id"], "kind": p["kind"], "label": p["label"], "address": f"{p['street']} {p['number']}, 7270 Davos Platz",
+                       "position": [round(x, 1), round(ground(x, z), 2), round(z, 1)], "rotationY": round(yaw, 3), "size": p["size"],
+                       "front": [round(fx, 1), round(ground(fx, fz) + 0.3, 1), round(fz, 1)], "faceYaw": round(math.atan2(x - fx, z - fz), 3)})
+        taken.append((x, z, half + 4))
+        print(f"{p['label']}: {x:.1f}, {z:.1f}, {c:.1f} m clear, {math.dist((x, z), (hx, hz)):.0f} m from the building")
+    # No trees inside the pavilions.
+    w["trees"]["instances"] = [tr for tr in w["trees"]["instances"] if all(math.dist((tr[0], tr[2]), (q["position"][0], q["position"][2])) > math.hypot(*q["size"]) / 2 + 3 for q in placed)]
+
+    arrival = next((q for q in placed if q["id"] == ARRIVAL_AT), None)
+    if arrival:
+        fx, fy, fz = arrival["front"]
+        w["defaultSpawn"] = {"position": {"x": fx, "y": fy, "z": fz}, "rotationY": arrival["faceYaw"]}
+        print(f"arrival: {fx}, {fz}, in front of {arrival['label']}")
+
+    tps = [tp for tp in w["teleports"] if not tp["id"].startswith(("gen:", "osm:", "hub-"))]
+    for q in placed:
+        fx, fy, fz = q["front"]
+        tps.append({"id": q["id"], "label": q["label"], "position": {"x": fx, "y": fy, "z": fz}, "rotationY": q["faceYaw"], "group": "kiosk"})
     for lid, label, way in LANDMARKS:
         if way:
             b = next((b for b in buildings if str(b["id"]) == way), None)
@@ -396,7 +453,7 @@ def update_world(buildings, roads, rail, rivers, pavilions, station):
             continue
         tps.append({"id": f"osm:{lid}", "label": label, "position": {"x": round(x, 1), "y": round(ground(x, z) + 0.3, 1), "z": round(z, 1)}, "rotationY": round(yaw, 3), "group": "kiosk"})
     w["teleports"] = tps
-    w["pavilions"] = [{"id": p["id"], "label": p["label"], "address": f"{p['street']} {p['number']}, 7270 Davos Platz", "osmWay": p["building"]} for p in pavilions]
+    w["pavilions"] = [{k: v for k, v in q.items() if k not in ("front", "faceYaw")} for q in placed]
 
     raw_old = open(wpath).read()
     indent = 1 if raw_old.startswith("{\n ") and not raw_old.startswith("{\n  ") else None
