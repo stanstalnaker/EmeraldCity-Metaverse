@@ -21,6 +21,17 @@ for (const slug of ["davos", "bermuda"]) {
   const g0 = w.terrain ? ground(s.position.x, s.position.z) : s.position.y;
   // Unity walls and shapes: keep portals (and the walk to them) clear of anything solid.
   const solids = (w.primitives ?? []).filter((p) => p.shape !== "plane" && p.shape !== "quad").map((p) => ({ x: p.position[0], z: p.position[2], r: Math.max(Math.abs(p.scale[0]), Math.abs(p.scale[2])) / 2 + 2 }));
+  // A real town (OpenStreetMap): its buildings are solid too.
+  if (w.osm) {
+    const town = JSON.parse(readFileSync(resolve(import.meta.dirname, "../data", w.osm), "utf8")) as { buildings: { ring: [number, number][] }[] };
+    for (const b of town.buildings) {
+      const cx = b.ring.reduce((a, p) => a + p[0], 0) / b.ring.length;
+      const cz = b.ring.reduce((a, p) => a + p[1], 0) / b.ring.length;
+      if (Math.hypot(cx - s.position.x, cz - s.position.z) > 120) continue;
+      const r = Math.max(...b.ring.map((p) => Math.hypot(p[0] - cx, p[1] - cz)));
+      solids.push({ x: cx, z: cz, r: r + 2 });
+    }
+  }
   const blocked = (x: number, z: number) => solids.some((b) => Math.hypot(b.x - x, b.z - z) < b.r);
   // Never in the sea or a lake: keep portals at least half a metre above the water.
   const waterY = Math.max(-Infinity, ...(w.environment?.water ?? []).map((wt) => wt.center[1]));
@@ -40,6 +51,7 @@ for (const slug of ["davos", "bermuda"]) {
       let cost = Math.abs(turn) * 2 + Math.abs(ahead - AHEAD) * 0.1;
       for (const p of spots) {
         cost += Math.abs(ground(p.x, p.z) - g0) * 3;
+        if (blocked(p.x, p.z)) cost += 500;
         if (wet(p.x, p.z)) cost += 1000;
         // the path from the arrival point to the portal
         for (let t = 0.15; t <= 1.0001; t += 0.1) if (blocked(s.position.x + (p.x - s.position.x) * t, s.position.z + (p.z - s.position.z) * t)) cost += 100;

@@ -36,6 +36,8 @@ PAVILIONS = [
     {"id": "hub-symondsstrasse-7", "label": "Hub Culture Pavilion · Symondsstrasse 7", "street": "Symondsstrasse", "number": "7"},
     {"id": "hub-promenade-95", "label": "Hub Culture Pavilion · Promenade 95", "street": "Promenade", "number": "95"},
 ]
+# Where visitors arrive: the open ground just south of this pavilion, facing it.
+ARRIVAL_SOUTH_OF = "hub-symondsstrasse-7"
 # Landmarks for the teleport list: (id, label, OSM way id).
 LANDMARKS = [
     ("kongress", "Congress Centre", "219442526"),
@@ -336,6 +338,45 @@ def update_world(buildings, roads, rail, rivers, pavilions, station):
         reach = max(math.dist((cx, cz), p) for p in b["ring"]) + 3
         x, z = cx + ux * min(reach, d), cz + uz * min(reach, d)
         return x, z, math.atan2(cx - x, cz - z)  # facing the building
+
+    # Arrival: the most open spot 15-60 m south of the pavilion (away from walls and off the street).
+    def inside(x, z, ring):
+        c = False
+        for i in range(len(ring)):
+            (x1, z1), (x2, z2) = ring[i], ring[i - 1]
+            if (z1 > z) != (z2 > z) and x < (x2 - x1) * (z - z1) / (z2 - z1) + x1:
+                c = not c
+        return c
+
+    def dseg(px, pz, a, b):
+        ax, az = a
+        bx, bz = b
+        dx, dz = bx - ax, bz - az
+        l2 = dx * dx + dz * dz or 1
+        k = max(0, min(1, ((px - ax) * dx + (pz - az) * dz) / l2))
+        return math.hypot(px - ax - k * dx, pz - az - k * dz)
+
+    home = next((b for b in buildings if b.get("hub") == ARRIVAL_SOUTH_OF), None)
+    if home:
+        hx, hz = centroid(home)
+        near_b = [b for b in buildings if math.dist(b["ring"][0], (hx, hz)) < 200]
+        near_r = [r for r in roads if r["c"] not in ("footway", "path", "steps", "track") and any(math.dist(p, (hx, hz)) < 250 for p in r["p"])]
+        best = None
+        for dz in range(-15, -61, -2):
+            for dx in range(-24, 25, 2):
+                x, z = hx + dx, hz + dz
+                if any(inside(x, z, b["ring"]) for b in near_b):
+                    continue
+                db = min(dseg(x, z, b["ring"][i], b["ring"][i - 1]) for b in near_b for i in range(len(b["ring"])))
+                dr = min((dseg(x, z, r["p"][i], r["p"][i + 1]) - r["w"] / 2 for r in near_r for i in range(len(r["p"]) - 1)), default=50)
+                score = min(db, dr * 1.2) - abs(dx) * 0.05  # open, off the street, and roughly due south
+                if best is None or score > best[0]:
+                    best = (score, x, z)
+        if best:
+            _, ax_, az_ = best
+            yaw = math.atan2(hx - ax_, hz - az_)
+            w["defaultSpawn"] = {"position": {"x": round(ax_, 1), "y": round(ground(ax_, az_) + 0.3, 1), "z": round(az_, 1)}, "rotationY": round(yaw, 3)}
+            print(f"arrival: {ax_:.1f}, {az_:.1f} ({math.dist((ax_, az_), (hx, hz)):.0f} m south of {home.get('addr')}), facing it")
 
     tps = [tp for tp in w["teleports"] if not tp["id"].startswith(("gen:", "osm:", "hub-"))]
     for p in pavilions:
