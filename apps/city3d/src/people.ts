@@ -55,6 +55,10 @@ export class People {
   private audioCtx: AudioContext | null = null;
   private voice: { disconnect: () => Promise<void> } | null = null;
   private retry = 1000;
+  /** True from a dropped connection until the next welcome (to say "Disconnected" once per outage). */
+  private outage = false;
+  /** Rooms whose "N people here" line was already shown. */
+  private announced = new Set<string>();
 
   constructor(private readonly o: PeopleOptions) {
     this.room = rooms.world(o.worldSlug);
@@ -94,14 +98,19 @@ export class People {
     // Browsers can't set headers on WebSockets: the token travels as the "token" query parameter.
     const ws = new WebSocket(`${this.o.url}?token=${encodeURIComponent(this.o.token)}`);
     this.ws = ws;
+    let openedAt = 0;
     ws.onopen = () => {
-      this.retry = 1000;
+      openedAt = performance.now();
       this.send({ t: "join", room: this.room });
     };
     ws.onmessage = (e) => this.onMessage(JSON.parse(String(e.data)) as ServerMessage);
     ws.onclose = () => {
       for (const id of [...this.avatars.keys()]) this.remove(id);
-      this.o.log("Disconnected from the city. Reconnecting…", "system");
+      // Back off only when connections keep failing; a connection that lasted a while resets it.
+      if (openedAt && performance.now() - openedAt > 60_000) this.retry = 1000;
+      // Say it once per outage, not on every retry.
+      if (!this.outage) this.o.log("Disconnected from the city. Reconnecting…", "system");
+      this.outage = true;
       setTimeout(() => this.connect(), (this.retry = Math.min(this.retry * 2, 30000)));
     };
   }
@@ -113,15 +122,18 @@ export class People {
   private onMessage(m: ServerMessage) {
     switch (m.t) {
       case "welcome":
+        if (this.outage) this.o.log("Reconnected.", "system");
+        else if (!this.self) this.o.log(`Connected as ${m.self.displayName}${m.self.kind === "agent" ? " (agent)" : ""}.`, "system");
         this.self = m.self;
-        this.o.log(`Connected as ${m.self.displayName}${m.self.kind === "agent" ? " (agent)" : ""}.`, "system");
+        this.outage = false;
         break;
       case "roster":
         if (m.room !== this.room) return;
         {
           const others = m.members.filter(({ actor }) => actor.hubId !== this.self?.hubId);
           for (const { actor, pos } of others) this.upsert(actor, pos);
-          this.o.log(others.length ? `${others.length} other ${others.length === 1 ? "person" : "people"} here.` : "Nobody else is here yet.", "system");
+          if (!this.announced.has(m.room)) this.o.log(others.length ? `${others.length} other ${others.length === 1 ? "person" : "people"} here.` : "Nobody else is here yet.", "system");
+          this.announced.add(m.room);
         }
         break;
       case "joined":

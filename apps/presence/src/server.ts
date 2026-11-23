@@ -31,6 +31,11 @@ export interface PresenceServerOptions {
   services?: Record<string, number>;
   /** Max requests per connection per minute. */
   requestsPerMinute?: number;
+  /**
+   * WebSocket ping interval (ms). Keeps proxies (nginx, Caddy, load balancers) from closing a quiet
+   * connection, such as someone standing still, and drops sockets that stopped answering. 0 turns it off.
+   */
+  heartbeatMs?: number;
 }
 
 const ROOM_PATTERN = /^(map|property:\d{1,10}|world:[a-z0-9-]{1,32})$/;
@@ -44,6 +49,22 @@ export function startPresenceServer(opts: PresenceServerOptions): WebSocketServe
   const services = opts.services ?? {};
   const requestsPerMinute = opts.requestsPerMinute ?? 30;
   const wss = new WebSocketServer({ port: opts.port, maxPayload: 16 * 1024 });
+  const heartbeatMs = opts.heartbeatMs ?? 25_000;
+  const alive = new WeakMap<WebSocket, boolean>();
+  if (heartbeatMs > 0) {
+    const timer = setInterval(() => {
+      for (const ws of wss.clients) {
+        if (alive.get(ws) === false) {
+          ws.terminate(); // missed the last ping: gone (closed laptop, lost network)
+          continue;
+        }
+        alive.set(ws, false);
+        ws.ping();
+      }
+    }, heartbeatMs);
+    timer.unref?.();
+    wss.on("close", () => clearInterval(timer));
+  }
 
   const send = (ws: WebSocket, m: ServerMessage) => ws.readyState === ws.OPEN && ws.send(JSON.stringify(m));
   const broadcast = (room: string, m: ServerMessage, except?: Member) => {
@@ -59,6 +80,8 @@ export function startPresenceServer(opts: PresenceServerOptions): WebSocketServe
   };
 
   wss.on("connection", async (socket: WebSocket, req: IncomingMessage) => {
+    alive.set(socket, true);
+    socket.on("pong", () => alive.set(socket, true));
     const token = bearerFrom(req);
     let actor: Actor;
     try {

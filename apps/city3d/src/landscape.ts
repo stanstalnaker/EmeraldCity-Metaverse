@@ -57,7 +57,10 @@ export async function buildLandscape(scene: Scene, world: WorldManifest, heightm
         const k = r * n + c;
         const x = t.origin[0] + (c / (n - 1)) * t.size[0];
         const z = t.origin[2] + (1 - r / (n - 1)) * t.size[1];
-        const y = (heights[r * step * t.resolution + c * step]! / 65535) * t.height + t.origin[1];
+        // Unity's heightmaps run along x (from max x) by row and along z by column.
+        const hr = t.layout === "unity" ? t.resolution - 1 - c * step : r * step;
+        const hc = t.layout === "unity" ? t.resolution - 1 - r * step : c * step;
+        const y = (heights[hr * t.resolution + hc]! / 65535) * t.height + t.origin[1];
         positions.set([x, y, z], k * 3);
         uvs.set([c / (n - 1), r / (n - 1)], k * 2);
       }

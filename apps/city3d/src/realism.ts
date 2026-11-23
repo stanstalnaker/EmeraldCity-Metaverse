@@ -66,9 +66,10 @@ export function setupRealism(scene: Scene, camera: Camera, engineKind: "webgpu" 
   skyMat.backFaceCulling = false;
   skyMat.useSunPosition = true;
   skyMat.sunPosition = SUN.scale(-1000);
-  skyMat.turbidity = 6;
-  skyMat.luminance = 1;
-  skyMat.rayleigh = 1.6;
+  // Babylon's sky tonemaps by log2(2 / luminance^4): 1 gave a dusk-dark zenith, ~0.55 reads as day.
+  skyMat.turbidity = 5;
+  skyMat.luminance = 0.55;
+  skyMat.rayleigh = 2;
   skyMat.mieDirectionalG = 0.82;
   const sky = MeshBuilder.CreateBox("skyBox", { size: opts.skySize ?? 9000 }, scene);
   sky.material = skyMat;

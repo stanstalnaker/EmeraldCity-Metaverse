@@ -107,8 +107,14 @@ export interface PlacedMesh extends Placement {
 }
 
 export interface Terrain {
-  /** Raw little-endian uint16 heightmap, row 0 = north (max z) edge. */
+  /** Raw little-endian uint16 heightmap, row 0 = north (max z) edge (see `layout`). */
   heightmap: string;
+  /**
+   * How rows and columns map to the world. "north-up" (default): row 0 is the max-z edge, columns
+   * run along +x (real elevation data). "unity": Unity's export, where rows run along x from the
+   * max-x edge and columns along +z (the imported Bermuda island).
+   */
+  layout?: "north-up" | "unity";
   resolution: number;
   size: [number, number];
   /** Height in world units of the value 65535. */
@@ -216,10 +222,20 @@ export function screensForProperty(world: WorldManifest, pavilionId: number): Wo
 }
 
 /** Ground height of a terrain at world (x, z), bilinear. `heights` is the decoded heightmap. */
+/** Grid coordinates (row, column, fractional) of world x/z in the heightmap, per the terrain's layout. */
+export function terrainGrid(t: Terrain, x: number, z: number): { row: number; col: number } {
+  const res = t.resolution;
+  const fx = (x - t.origin[0]) / t.size[0];
+  const fz = (z - t.origin[2]) / t.size[1];
+  if (t.layout === "unity") return { row: (1 - fx) * (res - 1), col: fz * (res - 1) };
+  return { row: (1 - fz) * (res - 1), col: fx * (res - 1) };
+}
+
 export function terrainHeight(t: Terrain, heights: Uint16Array, x: number, z: number): number {
   const res = t.resolution;
-  let u = ((x - t.origin[0]) / t.size[0]) * (res - 1);
-  let v = (1 - (z - t.origin[2]) / t.size[1]) * (res - 1);
+  const g = terrainGrid(t, x, z);
+  let u = g.col;
+  let v = g.row;
   u = Math.min(Math.max(u, 0), res - 1.001);
   v = Math.min(Math.max(v, 0), res - 1.001);
   const i = Math.floor(v), j = Math.floor(u), fu = u - j, fv = v - i;
