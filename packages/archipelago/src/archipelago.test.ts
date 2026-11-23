@@ -18,6 +18,7 @@ describe("geolinks and DIRT territories", () => {
   it("Davos and Ibiza islands sit in their DIRT territories; Bermuda in none", () => {
     expect(linksFor(island("davos"), territories).territory?.symbol).toBe("DAVOS");
     expect(linksFor(island("ibiza"), territories).territory?.symbol).toBe("IBIZA"); // covered at res 6
+    expect(linksFor(island("kauai"), territories).territory?.symbol).toBe("KAUAI");
     expect(linksFor(island("bermuda"), territories).territory).toBeNull();
   });
   it("each territory's hub is a HubID Pavilion", () => {

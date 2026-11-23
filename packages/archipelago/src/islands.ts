@@ -46,6 +46,12 @@ export const HUB_ARCHIPELAGO: Island[] = [
       districts: [{ name: "Dalt Vila", use: "civic", share: 0.2 }, { name: "Harbour", use: "commercial", share: 0.3 }, { name: "Beach clubs", use: "plaza", share: 0.2 }, { name: "Homes", use: "residential", share: 0.3 }],
       landmarks: [{ name: "Cathedral", kind: "hall", district: "Dalt Vila" }, { name: "Club pavilion", kind: "pavilion", district: "Beach clubs" }],
       palette: { walls: "#f4f1ea", roofs: "#d9cdb8", accent: "#19c6c0" } }) },
+  { slug: "kauai", name: "Kauai", kind: "generated", archipelago: "hub",
+    summary: "The Garden Isle on a live DIRT territory: the Hub Culture Kauai Oasis, beaches, taro fields and forest.", geolink: geolink({ lat: 22.07, lng: -159.5 }),
+    spec: CitySpecSchema.parse({ name: "Kauai", slug: "kauai", summary: "A low, green island town around the Hub Culture Kauai Oasis, between beach and taro fields.", style: "tropical", sizeMeters: 1200, density: "low", blockMeters: 80,
+      districts: [{ name: "Oasis", use: "plaza", share: 0.25 }, { name: "Beach", use: "commercial", share: 0.2 }, { name: "Taro fields", use: "park", share: 0.25 }, { name: "Homes", use: "residential", share: 0.3 }],
+      landmarks: [{ name: "Hub Culture Kauai Oasis", kind: "pavilion", district: "Oasis" }, { name: "Canoe house", kind: "hall", district: "Beach" }],
+      palette: { walls: "#efe6d6", roofs: "#7b8a5a", accent: "#1295a2" } }) },
 ];
 
 /** What an island connects to, through its geolink. */
