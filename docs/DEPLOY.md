@@ -165,6 +165,16 @@ single sign-on with hubculture.city.
    Leave out `VITE_GATE_URL`; that is for the beta gate.
 3. **Presence** for live checks the real HubID: `PRESENCE_HUBID_API_URL=https://id.hubculture.com`,
    `PRESENCE_VERIFY=hubid`, and the app key pair.
+   **Caching:** send `Cache-Control: no-cache` for `index.html` (and the other un-hashed files:
+   `/brand/*`, `/emerald.png`), and `public, max-age=31536000, immutable` only for `/assets/*`
+   (hashed names). Without it browsers keep the page by heuristic: the old client's page was dated
+   2021 with no cache header, so browsers that visited it may keep showing it for weeks until a
+   hard refresh. Caddy:
+   ```
+   @page not path /assets/*
+   header @page Cache-Control "no-cache"
+   header /assets/* Cache-Control "public, max-age=31536000, immutable"
+   ```
 4. **Serve** the build at vr.hubculture.city, with `/legacy/` and `/unity/` as on city.beta. Keep the
    old client at another address for a while, in case it's needed.
 
