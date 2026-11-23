@@ -182,6 +182,21 @@ Check:
 - signed in on hubculture.city, the 3D city shows your name and you appear in presence;
 - signed out, its chip says "Sign in" and leads to the hubculture.city sign-in.
 
+### Zeke in the city (presence service key)
+
+Zeke joins presence as himself with a server-to-server key, not a member's token (with
+`PRESENCE_VERIFY=hubid` a development token is refused, and Zeke shows as "not online"):
+```
+# presence
+PRESENCE_SERVICE_KEYS=zeke:39:<long random secret, 32+ characters>
+# zeke-host
+ZEKE_PRESENCE_TOKEN=service:zeke:<the same secret>
+ZEKE_API_URL=<zeke-ai-server base URL>
+ZEKE_SYSTEM_TOKEN=<zeke-ai-server system token>
+```
+Generate the secret with `openssl rand -hex 32`. zeke-host exits (and Zeke stays offline) if
+`ZEKE_API_URL` or `ZEKE_SYSTEM_TOKEN` is missing. Check: in the 3D city, "Ask Zeke" answers.
+
 ### People, Wallet and Profile on live
 
 The panels call the same three routes as the beta gate's member API, served by hubculture.city

@@ -74,3 +74,15 @@ describe("landscape worlds", () => {
     expect(w.portals!.map((p) => p.to).sort()).toEqual(["davos", "emerald-city"]);
   });
 });
+
+import { lotAddresses } from "./index";
+
+describe("street addresses for lots", () => {
+  it("gives every Emerald City property a stable street address, numbered out from the plaza", () => {
+    const a = lotAddresses(w);
+    expect(a.get("153")).toBe("001 Radiant Lane");
+    expect([...a.values()].every((s) => /^\d{3} [A-Z][a-z]+ [A-Z][a-z]+$/.test(s))).toBe(true);
+    expect(new Set(a.values()).size).toBe(a.size);
+    expect(lotAddresses(w)).toEqual(a);
+  });
+});

@@ -293,3 +293,29 @@ export interface Pavilion {
   /** Plan length (along local x) and width (m). */
   size: [number, number];
 }
+
+/** Emerald City's streets, one for each sixth of the city around the arrival plaza (from north, clockwise). */
+export const CITY_STREETS = ["Radiant Lane", "Canopy Row", "Lotus Crescent", "Emerald Way", "Orchid Terrace", "Rainforest Walk"] as const;
+
+/**
+ * A street address for every lot in a world, so a property feels like an address ("001 Radiant Lane")
+ * rather than a number. The street is the sixth of the city the lot sits in, seen from the arrival
+ * plaza; numbers run outward from the plaza along it. Stable: the same lots always get the same
+ * addresses, and new lots further out take the next numbers.
+ */
+export function lotAddresses(world: WorldManifest, streets: readonly string[] = CITY_STREETS): Map<string, string> {
+  const c = world.defaultSpawn.position;
+  const lots = Object.entries(world.spawns)
+    .filter(([id]) => /^\d+$/.test(id))
+    .map(([id, sp]) => {
+      const dx = sp.position.x - c.x, dz = sp.position.z - c.z;
+      const bearing = (Math.atan2(dx, dz) + 2 * Math.PI) % (2 * Math.PI); // 0 = north (+z), clockwise
+      return { id, street: Math.floor(bearing / ((2 * Math.PI) / streets.length)) % streets.length, d: Math.hypot(dx, dz) };
+    });
+  const out = new Map<string, string>();
+  streets.forEach((name, s) => {
+    lots.filter((l) => l.street === s).sort((a, b) => a.d - b.d || Number(a.id) - Number(b.id))
+      .forEach((l, i) => out.set(l.id, `${String(i + 1).padStart(3, "0")} ${name}`));
+  });
+  return out;
+}

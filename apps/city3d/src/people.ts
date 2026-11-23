@@ -101,7 +101,6 @@ export class People {
     let openedAt = 0;
     ws.onopen = () => {
       openedAt = performance.now();
-      this.send({ t: "join", room: this.room });
     };
     ws.onmessage = (e) => this.onMessage(JSON.parse(String(e.data)) as ServerMessage);
     ws.onclose = () => {
@@ -122,6 +121,8 @@ export class People {
   private onMessage(m: ServerMessage) {
     switch (m.t) {
       case "welcome":
+        // Join only once the server knows who we are (it may be checking the token with HubID).
+        this.send({ t: "join", room: this.room });
         if (this.outage) this.o.log("Reconnected.", "system");
         else if (!this.self) this.o.log(`Connected as ${m.self.displayName}${m.self.kind === "agent" ? " (agent)" : ""}.`, "system");
         this.self = m.self;
@@ -173,8 +174,12 @@ export class People {
         break;
       case "error":
         if (m.id && this.pending.has(m.id)) {
-          this.pending.get(m.id)!(m.code === "unknown_target" ? "Zeke is offline right now." : `(${m.message || m.code})`);
+          const away = m.code === "unavailable" || m.code === "unknown_service" || m.code === "unknown_target";
+          this.pending.get(m.id)!(away ? "I'm away from the city just now. Try again in a little while, or message me on Telegram (@ZekeSI_bot)." : `(${m.message || m.code})`);
           this.pending.delete(m.id);
+        } else if (m.code === "not_in_room") {
+          // Lost our room (e.g. after a reconnect): join again rather than show a cryptic error.
+          this.send({ t: "join", room: this.room });
         } else if (m.code !== "rate_limited") this.o.log(`Server: ${m.message || m.code}`, "system");
         break;
     }

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { decodeJwt, jwtVerify } from "jose";
 import type { Actor, AgentScope } from "@emerald-city/core";
 import type { HubIdClient } from "@emerald-city/hubid-client";
@@ -115,4 +116,58 @@ export function devResolver(): IdentityResolver {
       };
     throw new Error("bad dev token");
   };
+}
+
+export interface ServiceKey {
+  /** Name agents and people address it by, e.g. "zeke". */
+  name: string;
+  /** The service's own HubID (Zeke is 39). */
+  hubId: number;
+  displayName: string;
+  /** The accountable owner (Hub Culture's account). */
+  ownerHubId: number;
+  secret: string;
+}
+
+/**
+ * Hub Culture's own house agents (Zeke, concierges) sign in to presence with a server-to-server key
+ * instead of a member's HubID token: `service:<name>:<secret>`. Keys come from PRESENCE_SERVICE_KEYS
+ * ("zeke:39:<secret>,…"); each key is a long random secret held only by presence and that service.
+ * Anything else goes to the normal resolver.
+ */
+export function withServiceKeys(keys: ServiceKey[], next: IdentityResolver): IdentityResolver {
+  const byName = new Map(keys.filter((k) => k.secret.length >= 24).map((k) => [k.name, k]));
+  return async (token) => {
+    if (token.startsWith("service:")) {
+      const [, name, secret] = token.split(":");
+      const k = byName.get(name ?? "");
+      const a = Buffer.from(secret ?? ""), b = Buffer.from(k?.secret ?? "");
+      if (!k || a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("bad service key");
+      return {
+        kind: "agent",
+        hubId: k.hubId,
+        ownerHubId: k.ownerHubId,
+        displayName: k.displayName,
+        avatarUrl: null,
+        sigil: { type: "user", value: String(k.hubId) },
+        variant: "ai__ai",
+        scopes: [...DEFAULT_AGENT_SCOPES],
+      };
+    }
+    return next(token);
+  };
+}
+
+/** "zeke:39:<secret>,concierge:9103:<secret>" → keys (owner from PRESENCE_SERVICE_OWNER, default 1). */
+export function parseServiceKeys(raw: string | undefined, owner = 1): ServiceKey[] {
+  return (raw ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => {
+      const [name, id, ...rest] = s.split(":");
+      const secret = rest.join(":");
+      return { name: name!, hubId: Number(id), displayName: name!.charAt(0).toUpperCase() + name!.slice(1), ownerHubId: owner, secret };
+    })
+    .filter((k) => /^[a-z][a-z0-9-]{0,31}$/.test(k.name) && k.hubId > 0 && k.secret.length >= 24);
 }

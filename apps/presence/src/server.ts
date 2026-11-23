@@ -82,6 +82,11 @@ export function startPresenceServer(opts: PresenceServerOptions): WebSocketServe
   wss.on("connection", async (socket: WebSocket, req: IncomingMessage) => {
     alive.set(socket, true);
     socket.on("pong", () => alive.set(socket, true));
+    // Checking the token can take a round trip to HubID; keep what the client sends meanwhile
+    // (browsers send "join" as soon as the socket opens) and replay it once we know who it is.
+    const early: Buffer[] = [];
+    const hold = (d: Buffer) => early.length < 20 && early.push(d);
+    socket.on("message", hold);
     const token = bearerFrom(req);
     let actor: Actor;
     try {
@@ -97,7 +102,7 @@ export function startPresenceServer(opts: PresenceServerOptions): WebSocketServe
     online.set(actor.hubId, member);
     send(socket, { t: "welcome", self: actor });
 
-    socket.on("message", (data) => {
+    const onMessage = (data: Buffer) => {
       const msg = parseClientMessage(data.toString());
       if (!msg) return send(socket, { t: "error", code: "bad_message", message: "unrecognised message" });
       if (msg.t === "request" || msg.t === "reply") return direct(member, msg);
@@ -150,7 +155,10 @@ export function startPresenceServer(opts: PresenceServerOptions): WebSocketServe
           return;
         }
       }
-    });
+    };
+    socket.off("message", hold);
+    socket.on("message", onMessage);
+    for (const d of early.splice(0)) onMessage(d);
 
     socket.on("close", () => {
       for (const room of [...member.rooms.keys()]) leave(member, room);

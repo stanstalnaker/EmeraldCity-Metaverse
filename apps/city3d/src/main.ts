@@ -12,7 +12,7 @@ import { spawnFor } from "@emerald-city/world";
 import davosHeights from "@emerald-city/world/data/davos.r16?url";
 import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
 import davosTown from "@emerald-city/world/data/davos.osm.json?url";
-import type { OsmTown } from "@emerald-city/world";
+import { lotAddresses, type OsmTown } from "@emerald-city/world";
 import { buildTown } from "./town";
 import { buildPavilions } from "./pavilions";
 import { buildLandscape } from "./landscape";
@@ -269,13 +269,26 @@ async function main() {
     signOutUrl: gateUrl ? `${gateUrl}/_gate/logout` : memberApi ? `${siteUrl}/logout` : null,
     signInLinked: !!(gateUrl || import.meta.env.VITE_SIGNIN_URL),
   });
+  // Properties go by name and street address ("Zeke Terrace · 001 Radiant Lane"), not by number.
+  const addresses = lotAddresses(world);
+  const names = new Map<string, string>(world.zones.map((z) => [String(z.pavilionId), z.pavilionName]));
+  try {
+    const feed = (await (await fetch(`${siteUrl}/city/api/property-designs`, { signal: AbortSignal.timeout(2500) })).json()) as {
+      items?: { pavilionId: number; name?: string }[];
+      names?: { pavilionId: number; name: string }[];
+    };
+    for (const it of [...(feed.names ?? []), ...(feed.items ?? [])]) if (it.name) names.set(String(it.pavilionId), it.name);
+  } catch {
+    // the site's feed is optional; names from the world data still show
+  }
+  const propertyLabel = (id: string) => [names.get(id) ?? `Property ${id}`, addresses.get(id)].filter(Boolean).join(" · ");
   setupUi({
     worldSlug,
     travel: travelTo,
     gateUrl: (import.meta.env.VITE_GATE_URL as string | undefined) ?? null,
     places: [
       ...world.teleports.filter((t) => t.group === "kiosk").map((t) => ({ label: t.label, group: t.id.startsWith("hub-") ? "Hub Culture" : "Landmark", go: () => goTo(new Vector3(t.position.x, t.position.y, t.position.z), t.rotationY) })),
-      ...Object.entries(world.spawns).map(([id, sp]) => ({ label: id ? (/^\d+$/.test(id) ? `Property ${id}` : id[0]!.toUpperCase() + id.slice(1)) : "Lotus", group: /^\d+$/.test(id) ? "Property" : "Place", go: () => goTo(new Vector3(sp.position.x, sp.position.y, sp.position.z), sp.rotationY) })),
+      ...Object.entries(world.spawns).map(([id, sp]) => ({ label: id ? (/^\d+$/.test(id) ? propertyLabel(id) : id[0]!.toUpperCase() + id.slice(1)) : "Lotus", group: /^\d+$/.test(id) ? "Property" : "Place", go: () => goTo(new Vector3(sp.position.x, sp.position.y, sp.position.z), sp.rotationY) })),
     ],
   });
 

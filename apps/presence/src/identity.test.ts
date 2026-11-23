@@ -36,3 +36,23 @@ describe("presence verifying tokens with HubID itself", () => {
     await expect(resolve("not-a-token")).rejects.toThrow();
   });
 });
+
+import { parseServiceKeys, withServiceKeys } from "./identity";
+
+describe("presence service keys (house agents like Zeke)", () => {
+  const secret = "s".repeat(32);
+  const keys = parseServiceKeys(`zeke:39:${secret},bad:0:x,short:5:abc`);
+  const resolve = withServiceKeys(keys, async () => { throw new Error("member path"); });
+
+  it("parses only well-formed keys with long secrets", () => {
+    expect(keys.map((k) => k.name)).toEqual(["zeke"]);
+  });
+
+  it("signs Zeke in as his own agent with the right key, and refuses a wrong one", async () => {
+    const a = await resolve(`service:zeke:${secret}`);
+    expect(a).toMatchObject({ kind: "agent", hubId: 39, displayName: "Zeke" });
+    await expect(resolve(`service:zeke:${"x".repeat(32)}`)).rejects.toThrow("bad service key");
+    await expect(resolve("service:nobody:whatever")).rejects.toThrow("bad service key");
+    await expect(resolve("human:1:Stan")).rejects.toThrow("member path");
+  });
+});
