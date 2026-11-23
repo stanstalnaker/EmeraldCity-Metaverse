@@ -73,6 +73,8 @@ export interface TeleportDestination {
   position: Vec3;
   /** "kiosk" = arrival kiosk, "lift" = lift floor buttons, "other". */
   group: "kiosk" | "lift" | "other";
+  /** Direction to face on arrival (radians), when it matters (e.g. facing a building). */
+  rotationY?: number;
 }
 
 export interface WorldMaterial {
@@ -192,6 +194,10 @@ export interface WorldManifest {
   splats?: { url: string; label?: string; position: [number, number, number]; rotationY?: number; scale?: number }[];
   /** Generated cities (packages/worldgen), drawn as instanced batches. */
   generated?: GeneratedCity[];
+  /** A real town from OpenStreetMap, in this world's frame (file in data/, see OsmTown). */
+  osm?: string;
+  /** Hub Culture pavilions in this world, by real address. */
+  pavilions?: { id: string; label: string; address: string; osmWay: number }[];
   models: WorldModel[];
   screens: WorldScreen[];
   zones: WorldZone[];
@@ -242,4 +248,31 @@ export function terrainHeight(t: Terrain, heights: Uint16Array, x: number, z: nu
   const h = (r: number, c: number) => heights[r * res + c]!;
   const raw = h(i, j) * (1 - fu) * (1 - fv) + h(i, j + 1) * fu * (1 - fv) + h(i + 1, j) * (1 - fu) * fv + h(i + 1, j + 1) * fu * fv;
   return (raw / 65535) * t.height + t.origin[1];
+}
+
+/**
+ * A real town from OpenStreetMap (packages/world/scripts/build-osm-town.py), in the world's metric
+ * frame: x east, z north. Map data © OpenStreetMap contributors, ODbL.
+ */
+export interface OsmTown {
+  attribution: string;
+  center: [number, number];
+  buildings: OsmBuilding[];
+  roads: { c: string; w: number; p: [number, number][]; bridge?: 1 }[];
+  rail: [number, number][][];
+  rivers: { w: number; p: [number, number][] }[];
+}
+
+export interface OsmBuilding {
+  id: number;
+  /** Footprint, counter-clockwise seen from above, not closed. */
+  ring: [number, number][];
+  /** Height to the eaves (m), from OSM or estimated. */
+  h: number;
+  roof: "flat" | "pitched";
+  kind?: "church";
+  name?: string;
+  addr?: string;
+  /** Set on Hub Culture pavilions (their id). */
+  hub?: string;
 }

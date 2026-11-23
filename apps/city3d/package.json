@@ -16,6 +16,7 @@
     "@babylonjs/materials": "^9.36.0",
     "@emerald-city/core": "workspace:*",
     "@emerald-city/world": "workspace:*",
+    "earcut": "3.2.4",
     "livekit-client": "^2.23.0"
   },
   "devDependencies": {

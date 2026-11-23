@@ -54,6 +54,9 @@ importers:
       '@emerald-city/world':
         specifier: workspace:*
         version: link:../../packages/world
+      earcut:
+        specifier: 3.2.4
+        version: 3.2.4
       livekit-client:
         specifier: ^2.23.0
         version: 2.23.0(@types/dom-mediacapture-record@1.0.22)

@@ -11,6 +11,9 @@ import type { Portal, ScreenContent, WorldManifest } from "@emerald-city/world";
 import { spawnFor } from "@emerald-city/world";
 import davosHeights from "@emerald-city/world/data/davos.r16?url";
 import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
+import davosTown from "@emerald-city/world/data/davos.osm.json?url";
+import type { OsmTown } from "@emerald-city/world";
+import { buildTown } from "./town";
 import { buildLandscape } from "./landscape";
 import { People } from "./people";
 import { chooseQuality, runBenchmark, startPerfOverlay } from "./perf";
@@ -26,9 +29,9 @@ import { setButton, setMember, setupUi, splash } from "./ui";
 import { MemberApi, setupServices } from "./services";
 
 const params = new URLSearchParams(location.search);
-const WORLDS: Record<string, { load: () => Promise<{ default: unknown }>; heights?: string }> = {
+const WORLDS: Record<string, { load: () => Promise<{ default: unknown }>; heights?: string; town?: string }> = {
   "emerald-city": { load: () => import("@emerald-city/world/data/emerald-city.world.json") },
-  davos: { load: () => import("@emerald-city/world/data/davos.world.json"), heights: davosHeights },
+  davos: { load: () => import("@emerald-city/world/data/davos.world.json"), heights: davosHeights, town: davosTown },
   bermuda: { load: () => import("@emerald-city/world/data/bermuda.world.json"), heights: bermudaHeights },
 };
 const worldSlug = WORLDS[params.get("world") ?? ""] ? params.get("world")! : "emerald-city";
@@ -109,6 +112,15 @@ async function main() {
     : null;
   if (landscape) {
     look.adopt(landscape.meshes);
+    // A real town from OpenStreetMap (Davos): buildings, streets, railway and river on the terrain.
+    const townUrl = WORLDS[worldSlug]!.town;
+    if (world.osm && townUrl && !params.has("notown")) {
+      const town = (await (await fetch(townUrl)).json()) as OsmTown;
+      const ground = (x: number, z: number) => landscape.surfaceAt(x, z) ?? landscape.groundAt(x, z) ?? 0;
+      const townMeshes = buildTown(scene, town, ground);
+      landscape.meshes.push(...townMeshes);
+      look.adopt(townMeshes);
+    }
     // Heightmap worlds stand you on the terrain in movement.ts; the city keeps collision gravity.
     if (world.terrain) scene.gravity = Vector3.Zero();
   }
@@ -192,7 +204,7 @@ async function main() {
   };
   scene.onBeforeRenderObservable.add(() => interactions.tick());
   // Walk, run, jump, fly; terrain worlds stand on the heightmap (cheaper than 260k-vertex collisions).
-  const mover = setupMovement(scene, camera, { groundAt: landscape?.groundAt ?? null, flying: params.has("fly") });
+  const mover = setupMovement(scene, camera, { groundAt: landscape ? (x: number, z: number) => landscape.surfaceAt(x, z) ?? landscape.groundAt(x, z) : null, flying: params.has("fly") });
   // Portals: walk (or fly) through one, or click it, to travel to that world.
   let travelling = false;
   const travelTo = (slug: string, label: string) => {
@@ -254,7 +266,7 @@ async function main() {
     travel: travelTo,
     gateUrl: (import.meta.env.VITE_GATE_URL as string | undefined) ?? null,
     places: [
-      ...world.teleports.filter((t) => t.group === "kiosk").map((t) => ({ label: t.label, group: "Landmark", go: () => goTo(new Vector3(t.position.x, t.position.y, t.position.z)) })),
+      ...world.teleports.filter((t) => t.group === "kiosk").map((t) => ({ label: t.label, group: t.id.startsWith("hub-") ? "Hub Culture" : "Landmark", go: () => goTo(new Vector3(t.position.x, t.position.y, t.position.z), t.rotationY) })),
       ...Object.entries(world.spawns).map(([id, sp]) => ({ label: id ? (/^\d+$/.test(id) ? `Property ${id}` : id[0]!.toUpperCase() + id.slice(1)) : "Lotus", group: /^\d+$/.test(id) ? "Property" : "Place", go: () => goTo(new Vector3(sp.position.x, sp.position.y, sp.position.z), sp.rotationY) })),
     ],
   });

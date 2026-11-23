@@ -18,7 +18,7 @@ import {
   type AbstractMesh,
 } from "@babylonjs/core";
 import "@babylonjs/loaders/glTF";
-import { portalFacing, terrainHeight, type GeneratedCity, type InstanceBatch, type Placement, type Portal, type WorldManifest, type WorldMaterial } from "@emerald-city/world";
+import { portalFacing, terrainGrid, terrainHeight, type GeneratedCity, type InstanceBatch, type Placement, type Portal, type WorldManifest, type WorldMaterial } from "@emerald-city/world";
 
 /**
  * Builds the landscape for worlds that have one (Davos, Bermuda, partner islands): terrain from a
@@ -30,6 +30,8 @@ export interface Landscape {
   meshes: AbstractMesh[];
   /** Ground height at (x, z), or null outside the terrain. */
   groundAt(x: number, z: number): number | null;
+  /** Height of the terrain mesh itself (it uses every other heightmap sample), for things laid on it. */
+  surfaceAt(x: number, z: number): number | null;
   portals: Portal[];
 }
 
@@ -209,7 +211,22 @@ export async function buildLandscape(scene: Scene, world: WorldManifest, heightm
   const portals = (world.portals ?? []).map((p) => ({ ...p, rotationY: portalFacing(p, world.defaultSpawn.position) }));
   for (const p of portals) out.push(...portal(scene, p));
 
-  return { meshes: out, groundAt, portals };
+  const surfaceAt = (x: number, z: number) => {
+    if (!t || !heights) return null;
+    const res = t.resolution;
+    const step = res > 600 ? 2 : 1;
+    const g = terrainGrid(t, x, z);
+    const n = Math.floor((res - 1) / step);
+    const cr = Math.min(Math.max(g.row / step, 0), n - 0.001), cc = Math.min(Math.max(g.col / step, 0), n - 0.001);
+    const i = Math.floor(cr), j = Math.floor(cc), fr = cr - i, fc = cc - j;
+    const h = (r: number, c: number) => heights![r * step * res + c * step]!;
+    // The mesh splits each grid cell into two triangles; follow the same split.
+    const raw = fr + fc <= 1
+      ? h(i, j) + (h(i, j + 1) - h(i, j)) * fc + (h(i + 1, j) - h(i, j)) * fr
+      : h(i + 1, j + 1) + (h(i + 1, j) - h(i + 1, j + 1)) * (1 - fc) + (h(i, j + 1) - h(i + 1, j + 1)) * (1 - fr);
+    return (raw / 65535) * t.height + t.origin[1];
+  };
+  return { meshes: out, groundAt, surfaceAt, portals };
 }
 
 /** Unit shapes with their bottom at y = 0, matching InstanceBatch transforms. */
