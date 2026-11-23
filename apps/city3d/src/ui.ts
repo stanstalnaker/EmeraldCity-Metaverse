@@ -116,7 +116,7 @@ export function setupUi(o: {
 }
 
 /** The member chip: who you are in the city (from the beta gate), or a way to sign in. */
-export function setMember(m: { name: string } | null, gateUrl: string | null) {
+export function setMember(m: { name: string } | null, gateUrl: string | null, signInUrl?: string) {
   const a = $<HTMLAnchorElement>("me");
   if (m) {
     $("me-name").textContent = m.name;
@@ -125,9 +125,10 @@ export function setMember(m: { name: string } | null, gateUrl: string | null) {
     a.setAttribute("data-signed-in", "1");
     a.setAttribute("href", "#");
   } else {
-    $("me-name").textContent = gateUrl ? "Sign in" : "Guest";
+    $("me-name").textContent = gateUrl || signInUrl ? "Sign in" : "Guest";
     $("me-dot").textContent = "·";
     if (gateUrl) a.href = `${gateUrl}/_gate/login?next=${encodeURIComponent(location.href)}`;
+    else if (signInUrl) a.href = signInUrl; // e.g. https://hubculture.city/hub-login?confred=/account
     else a.removeAttribute("href");
   }
 }

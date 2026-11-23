@@ -144,3 +144,33 @@ HubID itself needs (in `config/emeraldcity.php` / its `.env`):
    - HubID's committed TLS/JWT keys.
 
    After rotating, remove the old values from the legacy repos' code.
+
+## Moving vr.hubculture.city to the new 3D city
+
+vr.hubculture.city still runs the 2017 client. It never knew who was signed in on hubculture.city:
+it only receives a sign-in when another page embeds it and sends a message. The new client does
+single sign-on with hubculture.city.
+
+1. **hubculture.city** (Laravel, from `beta` at `ec013e0` or later) serves `GET /city/session`. It
+   answers only `CITY3D_ORIGINS` (default: vr.hubculture.city, city.hubculture.city,
+   city.beta.hubculture.city), with the member's session cookie.
+2. **Build the 3D city** with:
+   ```
+   VITE_SESSION_URL=https://hubculture.city/city/session
+   VITE_SIGNIN_URL=https://hubculture.city/hub-login?confred=/account
+   VITE_PRESENCE_URL=wss://presence.hubculture.city
+   VITE_SITE_URL=https://hubculture.city
+   ```
+   Leave out `VITE_GATE_URL`; that is for the beta gate.
+3. **Presence** for live checks the real HubID: `PRESENCE_HUBID_API_URL=https://id.hubculture.com`,
+   `PRESENCE_VERIFY=hubid`, and the app key pair.
+4. **Serve** the build at vr.hubculture.city, with `/legacy/` and `/unity/` as on city.beta. Keep the
+   old client at another address for a while, in case it's needed.
+
+Check:
+- signed in on hubculture.city, the 3D city shows your name and you appear in presence;
+- signed out, its chip says "Sign in" and leads to the hubculture.city sign-in.
+
+The People, Wallet and Profile panels use the beta gate's member API. On live they need the same
+three routes on hubculture.city (`/city/api/me`, `/friends`, `/ven/send`); that is the next step.
+

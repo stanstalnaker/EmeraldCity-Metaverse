@@ -309,6 +309,22 @@ async function main() {
  * *.beta.hubculture.city). Locally the dev presence server accepts test identities.
  */
 async function presenceToken(): Promise<string | null> {
+  // Live: single sign-on with hubculture.city (VITE_SESSION_URL, e.g. https://hubculture.city/city/session).
+  const session = import.meta.env.VITE_SESSION_URL as string | undefined;
+  if (session) {
+    try {
+      const r = await fetch(session, { credentials: "include" });
+      if (r.ok) {
+        const me = (await r.json()) as { token: string; name: string };
+        setMember({ name: me.name }, null, import.meta.env.VITE_SIGNIN_URL as string | undefined);
+        return me.token;
+      }
+    } catch {
+      /* fall through: signed out */
+    }
+    setMember(null, null, import.meta.env.VITE_SIGNIN_URL as string | undefined);
+    return null;
+  }
   const gate = import.meta.env.VITE_GATE_URL as string | undefined;
   if (gate) {
     try {
