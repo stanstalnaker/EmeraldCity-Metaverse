@@ -368,7 +368,10 @@ async function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManife
     return null;
   }
   const spawn = w.defaultSpawn.position;
+  // Zeke stands on whatever floor is under his spot (the arrival point's height can be a platform above it).
   const host = new Vector3(spawn.x + 3, spawn.y, spawn.z + 3);
+  const floor = scene.pickWithRay(new Ray(host.add(new Vector3(0, 8, 0)), Vector3.Down(), 40), (m) => m.checkCollisions && m.isEnabled());
+  if (floor?.pickedPoint) host.y = floor.pickedPoint.y;
   people = new People({ scene, camera, worldSlug: slug, url, token, hostPosition: host, log });
   const form = $<HTMLFormElement>("chat-form");
   const input = $<HTMLInputElement>("chat-input");
@@ -402,6 +405,7 @@ function openChat(mode: "everyone" | "zeke") {
   chatMode = mode;
   $("chat").classList.add("open");
   $("chat-mode").textContent = mode === "zeke" ? "Asking Zeke" : "Everyone here";
+  $("chat-mode").classList.toggle("zeke", mode === "zeke"); // Zeke's teal and soul icon
   $<HTMLInputElement>("chat-input").placeholder = mode === "zeke" ? "Ask Zeke anything about the city…" : "Say something to everyone here…";
   $<HTMLInputElement>("chat-input").focus();
 }

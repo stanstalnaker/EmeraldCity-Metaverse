@@ -259,8 +259,29 @@ export class People {
 
   /** Zeke, the host: always visible by the arrival point; click to ask him something. */
   private spawnHost() {
-    const zeke: Actor = { kind: "agent", hubId: -1, ownerHubId: 1, displayName: "Zeke", avatarUrl: null, variant: "ai__ai", scopes: [], sigil: { type: "agent", value: "zeke" } };
-    const root = makeAvatar(this.o.scene, zeke, new Color3(0.12, 0.64, 0.48));
+    // Zeke appears as himself: his face where he speaks, his soul icon (the Hub chakra's band around
+    // a field of light) above him, in Zeke teal (brand guide, sections 05 and 12).
+    const zeke: Actor = { kind: "agent", hubId: -1, ownerHubId: 1, displayName: "Zeke", avatarUrl: "/brand/zeke-face.png", variant: "ai__ai", scopes: [], sigil: { type: "agent", value: "zeke" } };
+    const root = makeAvatar(this.o.scene, zeke, new Color3(0.071, 0.584, 0.635));
+    const soul = MeshBuilder.CreateDisc("zeke-soul", { radius: 0.3, tessellation: 48 }, this.o.scene);
+    soul.parent = root;
+    soul.position.y = 2.9;
+    soul.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    const sm = new StandardMaterial("zeke-soul-mat", this.o.scene);
+    const st = new Texture("/brand/zeke-soul.png", this.o.scene, false, true);
+    st.hasAlpha = true;
+    sm.diffuseTexture = st;
+    sm.useAlphaFromDiffuseTexture = true;
+    sm.emissiveColor = Color3.White();
+    sm.disableLighting = true;
+    sm.backFaceCulling = false;
+    soul.material = sm;
+    soul.isPickable = true;
+    let t = 0;
+    this.o.scene.onBeforeRenderObservable.add(() => {
+      t += this.o.scene.getEngine().getDeltaTime() / 1000;
+      soul.position.y = 2.9 + Math.sin(t * 1.6) * 0.06;
+    });
     root.position.copyFrom(this.o.hostPosition);
     root.getChildMeshes().forEach((m) => (m.metadata = { zekeHost: true }));
     this.o.scene.onBeforeRenderObservable.add(() => {
@@ -312,7 +333,8 @@ function makeAvatar(scene: Scene, actor: Actor, tint?: Color3): TransformNode {
   body.parent = root;
   body.position.y = 0.72;
   const bm = new StandardMaterial(`avatar-${actor.hubId}-body-mat`, scene);
-  bm.diffuseColor = tint ?? (isAgent ? new Color3(0.1, 0.45, 0.36) : colourFor(actor.hubId));
+  // Agents in Zeke teal (#1295A2, the brand guide's colour for Zeke and agents); people in their own colour.
+  bm.diffuseColor = tint ?? (isAgent ? new Color3(0.071, 0.584, 0.635) : colourFor(actor.hubId));
   bm.specularColor = new Color3(0.15, 0.15, 0.15);
   body.material = bm;
 
@@ -337,11 +359,11 @@ function makeAvatar(scene: Scene, actor: Actor, tint?: Color3): TransformNode {
     ring.parent = root;
     ring.position.y = 0.05;
     const rm = new StandardMaterial(`avatar-${actor.hubId}-ring-mat`, scene);
-    rm.emissiveColor = new Color3(0.2, 1, 0.7);
+    rm.emissiveColor = new Color3(0.1, 0.78, 0.86); // Zeke teal, lit
     rm.disableLighting = true;
     ring.material = rm;
   }
-  const label = textPlane(scene, `${isAgent ? "AI · " : ""}${actor.displayName}`, isAgent ? "#0b5d3bdd" : "#000000aa", "#ffffff", 2.4);
+  const label = textPlane(scene, `${isAgent ? "AI · " : ""}${actor.displayName}`, isAgent ? "#0e6f7add" : "#000000aa", "#ffffff", 2.4);
   label.parent = root;
   label.position.y = 2.2;
   for (const m of root.getChildMeshes()) m.isPickable = true;
@@ -355,6 +377,24 @@ function makeAvatar(scene: Scene, actor: Actor, tint?: Color3): TransformNode {
  * behind the head. Body colour comes from the sigil, so avatar and mandala belong together.
  */
 async function dressWithMandala(scene: Scene, root: TransformNode, actor: Actor, head: Mesh, body: StandardMaterial, hasPhoto: boolean, recolour: boolean) {
+  // Zeke appears as himself (his face, his soul icon above him), not as a generic agent mandala.
+  if (actor.hubId === -1 && actor.sigil?.value === "zeke") {
+    const hm = head.material as StandardMaterial;
+    hm.diffuseTexture?.dispose();
+    hm.diffuseTexture = null;
+    hm.diffuseColor = new Color3(0.043, 0.416, 0.671); // Zeke blue behind the face
+    const face = MeshBuilder.CreateDisc("zeke-face", { radius: 0.215, tessellation: 48 }, scene);
+    face.parent = root;
+    face.position.set(0, 1.68, 0.255);
+    face.rotation.y = Math.PI;
+    const fm = new StandardMaterial("zeke-face-mat", scene);
+    fm.diffuseTexture = new Texture("/brand/zeke-face.png", scene, false, true);
+    fm.emissiveColor = Color3.White();
+    fm.disableLighting = true;
+    face.material = fm;
+    face.metadata = { zekeHost: true };
+    return;
+  }
   const params = await deriveSigil(actor.sigil ?? { type: "user", value: String(actor.hubId) });
   if (root.isDisposed()) return;
   const tex = mandalaTexture(scene, params);

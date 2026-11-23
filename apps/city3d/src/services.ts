@@ -6,7 +6,8 @@
  */
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const esc = (t: string) => t.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-const fmtVen = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+/** Ven amounts: two decimals (brand guide, section 04); the Ven lion sits before them. */
+const fmtVen = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export interface Me {
   hubId: number;
@@ -134,7 +135,7 @@ export function setupServices(o: {
     $("profile-body").innerHTML = `
       <div class="profile-head"><span class="avatar">${me.picture ? `<img src="${esc(me.picture)}" alt="">` : esc(initials(me.name))}</span>
         <div><b>${esc(me.name)}</b><small>HubID ${me.hubId}</small></div></div>
-      <div class="ven-big"><span class="ven-glyph">V</span>${me.venBalance === null ? "—" : fmtVen(me.venBalance)}<small>Ven</small></div>
+      <div class="ven-big"><span class="ven-glyph" aria-hidden="true"></span>${me.venBalance === null ? "—" : fmtVen(me.venBalance)}<small>Ven</small></div>
       <nav class="profile-links">
         <a href="${o.siteUrl}/my-properties" target="_blank" rel="noopener">My properties ↗</a>
         <a href="${o.siteUrl}/investment" target="_blank" rel="noopener">My bonds ↗</a>

@@ -14,7 +14,9 @@
         --night: #050b1f; --navy: #0a1736; --glass: rgba(8, 18, 44, .72); --glass-strong: rgba(8, 18, 44, .9);
         --line: rgba(147, 164, 200, .18); --ink: #e8f0ff; --muted: #93a4c8;
         --emerald: #00a58f; --emerald-hi: #4fe3cc; --ven: #60bf93; --magenta: #e6007e; --indigo: #5a4fd6; --cyan: #009ee3;
-        --ring: linear-gradient(90deg, var(--magenta), var(--indigo) 50%, var(--cyan));
+        --line: linear-gradient(120deg, rgba(79,227,204,.75), rgba(79,227,204,.08) 60%);
+        /* Reference colours (brand guide, section 12): each service keeps its own, only where it appears. */
+        --hub-blue: #1668BD; --zeke: #1295A2; --zeke-blue: #0B6AAB; --zeke-night: #0E1011; --zeke-panel: #161819;
         --r: 14px; --gut: max(14px, env(safe-area-inset-left));
       }
       * { box-sizing: border-box; }
@@ -24,7 +26,7 @@
       button { cursor: pointer; }
       .glass { background: var(--glass); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 10px 40px #0006; }
       .hair { position: relative; }
-      .hair::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--ring); opacity: .7;
+      .hair::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--line); opacity: .7;
         -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
       .kicker { font: 600 10.5px/1 Montserrat, sans-serif; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
       .btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.04); font-weight: 600; font-size: 13px; transition: background .15s, border-color .15s, transform .1s; white-space: nowrap; }
@@ -46,7 +48,7 @@
       #hud .spacer { flex: 1; }
       #tools { display: flex; gap: 6px; padding: 6px; }
       #me { display: flex; align-items: center; gap: 9px; padding: 6px 12px 6px 6px; text-decoration: none; color: inherit; }
-      #me .dot { width: 26px; height: 26px; border-radius: 50%; background: conic-gradient(var(--magenta), var(--indigo), var(--cyan), var(--emerald), var(--magenta)); display: grid; place-items: center; font: 800 11px Montserrat, sans-serif; color: #fff; }
+      #me .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--hub-blue); display: grid; place-items: center; font: 800 11px Montserrat, sans-serif; color: #fff; }
       #me-name { font-weight: 600; font-size: 13px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
       /* Compass */
@@ -68,7 +70,10 @@
       #chat-log { max-height: 28vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 13px; scrollbar-width: none; -webkit-mask: linear-gradient(transparent, #000 24px); mask: linear-gradient(transparent, #000 24px); }
       #chat-log .line { background: var(--glass); backdrop-filter: blur(10px); padding: 6px 11px; border-radius: 11px; align-self: flex-start; max-width: 100%; border: 1px solid var(--line); }
       #chat-log .system { color: var(--muted); font-size: 12px; background: transparent; border-color: transparent; backdrop-filter: none; padding: 2px 4px; }
-      #chat-log .zeke { border-color: rgba(0,165,143,.5); background: rgba(11,93,59,.55); }
+      #chat-log .zeke { position: relative; padding-left: 36px; border-color: rgba(18,149,162,.6); background: rgba(22,24,25,.92); }
+      #chat-log .zeke::before { content: ""; position: absolute; left: 8px; top: 50%; width: 20px; height: 20px; margin-top: -10px; border-radius: 50%; background: url(/brand/zeke-face.png) center / cover; }
+      #chat-mode.zeke { background: linear-gradient(135deg, var(--zeke), var(--zeke-blue)); border-color: transparent; color: #fff; padding-left: 8px; }
+      #chat-mode.zeke::before { content: ""; width: 20px; height: 20px; border-radius: 50%; background: url(/brand/zeke-soul.png) center / cover; }
       #chat-form { display: flex; gap: 6px; padding: 6px; border-radius: 13px; }
       #chat-form input { flex: 1; min-width: 0; padding: 0 10px; height: 36px; border-radius: 9px; border: 0; background: transparent; outline: none; }
       #chat-form input::placeholder { color: var(--muted); }
@@ -136,7 +141,7 @@
       #splash h1 { margin: 18px 0 6px; font: 800 clamp(26px, 5vw, 44px)/1.05 Montserrat, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
       #splash p { margin: 0; color: var(--muted); max-width: 440px; }
       #splash .bar { width: min(280px, 70vw); height: 3px; border-radius: 3px; background: rgba(255,255,255,.08); margin: 26px auto 12px; overflow: hidden; }
-      #splash .bar i { display: block; height: 100%; width: 40%; background: var(--ring); border-radius: 3px; animation: slide 1.4s ease-in-out infinite; }
+      #splash .bar i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, transparent, var(--emerald-hi), transparent); border-radius: 3px; animation: slide 1.4s ease-in-out infinite; }
       @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
       #splash-status { font-size: 12px; color: var(--muted); min-height: 18px; }
 
@@ -167,16 +172,16 @@
       .person:hover { background: rgba(255,255,255,.05); }
       .person .who b { display: block; font-weight: 600; font-size: 14px; }
       .person .who small { color: var(--muted); font-size: 12px; }
-      .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; font: 800 12px Montserrat, sans-serif; color: #fff; background: conic-gradient(var(--magenta), var(--indigo), var(--cyan), var(--emerald), var(--magenta)); }
+      .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; font: 800 12px Montserrat, sans-serif; color: #fff; background: var(--hub-blue); }
       .avatar img { width: 100%; height: 100%; object-fit: cover; }
-      .avatar.agent { background: linear-gradient(135deg, var(--emerald-hi), var(--emerald)); color: #03241a; }
-      .ai { font-style: normal; font: 800 9.5px Montserrat, sans-serif; padding: 2px 5px; border-radius: 5px; background: rgba(0,165,143,.25); color: var(--emerald-hi); }
+      .avatar.agent { background: linear-gradient(135deg, var(--zeke), var(--zeke-blue)); color: #fff; }
+      .ai { font-style: normal; font: 800 9.5px Montserrat, sans-serif; padding: 2px 5px; border-radius: 5px; background: rgba(18,149,162,.28); color: #8fe3ea; }
       .btn.mini { height: 30px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; }
       .btn.ven { border-color: rgba(96,191,147,.45); color: var(--ven); }
       .btn.wide { width: 100%; justify-content: center; }
       .btn .count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: rgba(0,165,143,.25); color: var(--emerald-hi); font-size: 11px; display: inline-grid; place-items: center; }
-      .ven-glyph { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ven); color: #062a1c; font: 900 16px/1 Montserrat, sans-serif; }
-      .ven-glyph.sm { width: 18px; height: 18px; font-size: 10px; }
+      .ven-glyph { display: inline-block; width: 34px; height: 34px; background: url(/brand/ven.png) center / contain no-repeat; font-size: 0; color: transparent; }
+      .ven-glyph.sm { width: 18px; height: 18px; }
       .ven-big { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 14px; background: rgba(96,191,147,.08); border: 1px solid rgba(96,191,147,.3); font: 900 30px/1 Montserrat, sans-serif; color: var(--ink); }
       .ven-big small { font: 600 13px Inter, sans-serif; color: var(--ven); margin-left: auto; }
       .stack { display: grid; gap: 10px; }
@@ -251,7 +256,7 @@
       <button class="btn" id="fly-btn" title="Fly or walk (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 16l20-8-8 12-2-6-10 2z" /></svg><span class="label">Fly</span></button>
       <div class="sep"></div>
       <button class="btn" id="people-btn" title="People here and your friends (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2" /><path d="M3 20c.6-3.4 3-5.4 6-5.4s5.4 2 6 5.4" /><circle cx="17" cy="9" r="2.4" /><path d="M16 14.4c2.5.2 4.3 1.9 5 4.6" /></svg><span class="label">People</span><span class="count" id="people-count">0</span></button>
-      <button class="btn" id="wallet-btn" title="Your Ven: balance and send (V)"><span class="ven-glyph sm">V</span><span class="label">Wallet</span></button>
+      <button class="btn" id="wallet-btn" title="Your Ven: balance and send (V)"><span class="ven-glyph sm" aria-hidden="true"></span><span class="label">Wallet</span></button>
       <button class="btn" id="voice-btn" title="Talk with people nearby (spatial voice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg><span class="label">Voice</span></button>
       <button class="btn icon" id="help-btn" title="Controls (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01" /></svg></button>
     </div>
@@ -280,7 +285,7 @@
     </aside>
     <aside class="sheet glass hair" id="wallet-panel" aria-label="Wallet">
       <header><div><div class="kicker">Your Ven</div><h3>Wallet</h3></div><button class="btn icon close" aria-label="Close">✕</button></header>
-      <div class="ven-big"><span class="ven-glyph">V</span><span id="wallet-balance">—</span><small>Ven</small></div>
+      <div class="ven-big"><span class="ven-glyph" aria-hidden="true"></span><span id="wallet-balance">—</span><small>Ven</small></div>
       <form id="send-form" class="stack">
         <div class="kicker">Send Ven</div>
         <input class="field" id="send-to" placeholder="To: a person from People, or a HubID number" autocomplete="off" />
