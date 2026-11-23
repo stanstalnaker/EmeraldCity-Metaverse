@@ -17,8 +17,19 @@ export type AnchorKind = "virtual-property" | "artifact";
 
 export type AnchorStatus = "visible" | "pending" | "hidden";
 
+/**
+ * How a world or property meets a real place:
+ *  - "placement": it stands on the place: a Gaia plot (land or ocean) its owner holds, or the
+ *    anchor parcel of a world that belongs there (Emerald City in Acre).
+ *  - "echo": it is reflected at the place without owning it: discoverable there in AR and on the
+ *    map, subject to the land owner's policy (open, curated, rent).
+ */
+export type AnchorMode = "placement" | "echo";
+
 export interface RealWorldAnchor {
   kind: AnchorKind;
+  /** Placement (stands on land its owner holds) or echo (reflected there). Defaults to echo. */
+  mode?: AnchorMode;
   /** Visibility under the land owner's policy. Only "visible" anchors show in AR. Defaults to visible. */
   status?: AnchorStatus;
   /** Gaia parcel the anchor sits on, if known. */

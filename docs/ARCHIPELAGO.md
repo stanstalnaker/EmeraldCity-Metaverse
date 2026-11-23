@@ -22,6 +22,31 @@ closed loop (below) keeps it circulating inside the ecosystem while those flows 
 **Measuring it:** Ven in use is tracked at oai.io; nothing here needs its own counter. The agent
 summaries total Ven earned and spent for each owner.
 
+## Andromeda: the universe
+
+**Andromeda is the universe of archipelagos and artifacts** that spin up metaverse worlds, cities,
+places and locations. Hub Culture's archipelago (Emerald City, Davos, Bermuda, Ibiza, Kauai) is one
+archipelago in it; members, communities and partners spin up their own.
+
+- **Anything geolocated can anchor a world.** Emerald City is anchored in the Amazon (Acre) and
+  spins up a whole city from there. A property opened and geolocated anywhere can do the same:
+  start as one place, grow into an island, then an archipelago (holonic: every place can hold
+  places).
+- **Real-world cities exist alongside.** Davos, Ibiza and Kauai are real places with real streets
+  (OpenStreetMap), Gaia land and DIRT territories; virtual worlds sit next to them, never instead.
+- **Two ways to meet a real place** (`AnchorMode` in `packages/core/src/anchors.ts`):
+  - **Placement:** the world or property stands on the place: a Gaia plot (land or ocean) its owner
+    holds. It is that land in the metaverse.
+  - **Echo:** it is reflected at the place without owning it, discoverable there in AR and on the
+    map. Many echoes can share one place; the land owner can leave echoes open, curate them or
+    charge rent.
+- **Artifacts** are the discoverable things anchored the same way (memories, media, objects), so
+  the anchor model carries both.
+- **Communities apply for jurisdiction.** Cloud Mirror communities, real-world commons and
+  communities can apply to link their own cities into the archipelago and govern them: a
+  jurisdiction over their island (and, with consent, their real place), with their Hub and Propel.
+  Indigenous and community lands are never released without the community's consent.
+
 ## The idea in one line
 
 > **island** (a metaverse world) → **geolink** (lat/long) → **Gaia cell** (`MIP1|GAIA|CELL|{h3}`)
@@ -153,6 +178,17 @@ The same loop covers many other journeys: an agent brokering properties to other
 1. **Geolinks on DIRT land:** may anyone's archipelago geolink inside a DIRT territory, or does the territory's Hub curate links? The default here follows PARCELS.md: links are open unless the land owner curates or charges rent. This is simple to change per territory.
 2. **Reward rates:** the reward rate per cell and the per-contribution cap (default 25 DIRT per cell, capped at 25,000). They're paid from the territory's 25% Gaia bucket, so each territory's council could set its own.
 ## Decided
+
+- **Andromeda and anchoring (23 November 2026, Stan):** Andromeda is the universe of archipelagos
+  and artifacts; any geolocated place can anchor a world; real cities exist alongside virtual ones;
+  worlds and properties meet a place by placement or echo; Cloud Mirror communities and commons can
+  apply for jurisdiction over their own cities. gaia.beta (`apps/web`) retires into gaia.club.
+- **Gaia land in drops (23 November 2026, Stan),** all six proposals of `gaiaclub/docs/api/gaia-land-waves.md`
+  accepted: drops with on-demand cutting as preview; every two weeks, three to five sections; each
+  plot carries its share of the territory's 25% Gaia bucket in DIRT; DIRT holders get early access;
+  first-sale Ven inside a territory shares with its Hub; the ocean released by bioregion, and ocean
+  plots can spin up properties, which grows the Ocean Climate Fund. Agents may add nature-based
+  characteristics to places over time.
 
 - **Closed loop for agents, for now (20 November 2026):** agents hold Ven, DIRT and bonds in Ultra custodial wallets and trade on Ultra; they don't hold Solana keys or move value out. This is a policy we observe while the flows between worlds, Gaia, DIRT and Ultra prove themselves, not a permanent rule. It's one platform switch (`EconomyPolicy.closedLoop`, on by default) that Hub Culture controls. Switched off, agents may withdraw within their mandate's limits (`ven:send`), always with their owner's approval. People can always withdraw from their own Ultra wallets.
 - **Emerald City's place (placeholder):** the Brazilian Amazon in Acre, on the Rio Amônia near Marechal Thaumaturgo, close to (not on) the Asháninka lands of Kampa do Rio Amônia. It moves to the restoration land once that is mapped.
