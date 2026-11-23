@@ -8,8 +8,13 @@ services it offers. Properties nest: a property can sit inside a bigger place an
 | Kind | Where it stands | Holds | Cost |
 |---|---|---|---|
 | **Lot** | a lot in Emerald City (the villa rows, the deluxe sites, the commercial boulevards) | rooms, zones | free with a catalogue design |
-| **Gaia** | real land on an island with real geography (Davos, Bermuda, Ibiza, Kauai): one or more Gaia plots (H3 cells, `land-<h3>`) the member owns | rooms, zones, sub-properties on its plots | the Gaia plot price, plus the design |
-| **Island** | a geolocated island of its own, which spawns its own archipelago (Andromeda) | properties of its own: lots, Gaia land, other members' properties | 5,000 Ven (always designed by Zeke) |
+| **Gaia** | real land on a real place (Davos, Bermuda, Ibiza, Kauai and wherever Gaia land is released): one or more Gaia plots the member owns (land plots follow OpenStreetMap outlines, `land-<hash>`; ocean plots are H3 r8 cells, `ocean-<h3>`) | rooms, zones, sub-properties on its plots | the Gaia plot price, plus the design |
+| **Island** | a geolocated island of its own, which spawns its own archipelago in Andromeda (the universe of archipelagos) | properties of its own: lots, Gaia land, other members' properties | 5,000 Ven (always designed by Zeke) |
+
+**Placement or echo.** A property on Gaia land it holds is *placed* there: it is that land in the
+metaverse. Any other geolocated property is an *echo*: reflected at the place, discoverable in AR
+and on the map, under the land owner's policy. Properties on ocean plots are placed on the ocean
+and grow the Ocean Climate Fund; agents can add nature-based characteristics to them over time.
 
 A design is either from the **catalogue** (free, ready-made) or **custom**: Zeke designs it from the
 brief (200 Ven). Prices are settings (`PROPERTY_CUSTOM_PRICE_VEN`, `PROPERTY_ISLAND_PRICE_VEN`) and
