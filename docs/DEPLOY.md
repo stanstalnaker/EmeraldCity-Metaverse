@@ -160,6 +160,7 @@ single sign-on with hubculture.city.
    VITE_SIGNIN_URL=https://hubculture.city/hub-login?confred=/account
    VITE_PRESENCE_URL=wss://presence.hubculture.city
    VITE_SITE_URL=https://hubculture.city
+   VITE_MEMBER_API=https://hubculture.city/city/api
    ```
    Leave out `VITE_GATE_URL`; that is for the beta gate.
 3. **Presence** for live checks the real HubID: `PRESENCE_HUBID_API_URL=https://id.hubculture.com`,
@@ -171,6 +172,25 @@ Check:
 - signed in on hubculture.city, the 3D city shows your name and you appear in presence;
 - signed out, its chip says "Sign in" and leads to the hubculture.city sign-in.
 
-The People, Wallet and Profile panels use the beta gate's member API. On live they need the same
-three routes on hubculture.city (`/city/api/me`, `/friends`, `/ven/send`); that is the next step.
+### People, Wallet and Profile on live
 
+The panels call the same three routes as the beta gate's member API, served by hubculture.city
+(Laravel `CityApiController`, `beta` branch) under `VITE_MEMBER_API`:
+
+| Route | Answers |
+|---|---|
+| `GET /city/api/me` | `{hubId, name, picture, venBalance}` (balance `null` if HubID didn't answer) |
+| `GET /city/api/friends?name=` | `{count, items: [{id, name, picture}]}`, up to 250 |
+| `POST /city/api/ven/send` | `{to, amount, message?}` → `{ok, message}` |
+
+They use the member's hubculture.city session cookie; the HubID token stays on the server. Guards:
+only `CITY3D_ORIGINS` (any other Origin gets 403); sending Ven needs JSON plus
+`X-Hub-Action: send-ven`, which forces a CORS preflight, so the routes are left out of Laravel's CSRF
+check; at most `MAX_SEND_VEN` a send, 10 sends in 10 minutes per member (Laravel cache), never to
+yourself. HubID still checks funds and the sender's confirmed email.
+
+Check, signed in on hubculture.city and in the 3D city at vr.hubculture.city:
+- Profile shows your name, picture and Ven balance; "Sign out" goes to hubculture.city/logout;
+- People → Friends lists your HubID friends;
+- Wallet sends 0.01 Ven to a test friend, and the balance updates on both sites;
+- from another origin, `curl -H 'Origin: https://example.com' https://hubculture.city/city/api/me` gives 403.

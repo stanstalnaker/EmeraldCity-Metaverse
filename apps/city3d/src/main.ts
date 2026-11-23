@@ -228,9 +228,12 @@ async function main() {
     streamer.update(camera.position);
   };
   // Services: People, Wallet (Ven), Profile, through the beta gate's member API.
+  // On the live site (vr.hubculture.city) they come from hubculture.city/city/api instead (VITE_MEMBER_API).
   const gateUrl = (import.meta.env.VITE_GATE_URL as string | undefined) ?? null;
+  const memberApi = (import.meta.env.VITE_MEMBER_API as string | undefined) ?? null;
+  const siteUrl = (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://beta.hubculture.city";
   setupServices({
-    api: new MemberApi(gateUrl),
+    api: MemberApi.from(memberApi, gateUrl),
     here: () => people?.here() ?? [],
     goTo: (hubId) => {
       const spot = people?.spotNear(hubId);
@@ -241,8 +244,10 @@ async function main() {
       streamer.update(camera.position);
       return true;
     },
-    siteUrl: (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://beta.hubculture.city",
+    siteUrl,
     gateUrl,
+    signOutUrl: gateUrl ? `${gateUrl}/_gate/logout` : memberApi ? `${siteUrl}/logout` : null,
+    signInLinked: !!(gateUrl || import.meta.env.VITE_SIGNIN_URL),
   });
   setupUi({
     worldSlug,

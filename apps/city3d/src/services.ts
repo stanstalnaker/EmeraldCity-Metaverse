@@ -29,15 +29,25 @@ export interface PersonHere {
 
 /** The member API on the beta gate. */
 export class MemberApi {
-  constructor(private readonly gate: string | null) {}
+  /**
+   * `base` is the member API root: the beta gate's `${gate}/_gate/api`, or on the live site
+   * hubculture.city's `/city/api` (VITE_MEMBER_API). Both speak the same routes and take the
+   * member's session cookie. Null means local development with a sample member.
+   */
+  constructor(private readonly base: string | null) {}
+
+  static from(memberApi: string | undefined | null, gate: string | undefined | null) {
+    if (memberApi) return new MemberApi(memberApi.replace(/\/$/, ""));
+    return new MemberApi(gate ? `${gate.replace(/\/$/, "")}/_gate/api` : null);
+  }
 
   get live() {
-    return !!this.gate;
+    return !!this.base;
   }
 
   private async call<T>(path: string, init: RequestInit = {}): Promise<T> {
-    if (!this.gate) return sample<T>(path, init);
-    const r = await fetch(`${this.gate}/_gate/api/${path}`, { credentials: "include", ...init });
+    if (!this.base) return sample<T>(path, init);
+    const r = await fetch(`${this.base}/${path}`, { credentials: "include", ...init });
     const body = (await r.json().catch(() => ({}))) as T & { error?: string };
     if (!r.ok) throw new Error(body.error === "signed_out" ? "Sign in with your HubID to use this." : body.error ?? "Something went wrong.");
     return body;
@@ -81,6 +91,10 @@ export function setupServices(o: {
   /** Where member pages live (hubculture.city on beta). */
   siteUrl: string;
   gateUrl: string | null;
+  /** Where "Sign out" goes: the gate's logout on beta, hubculture.city/logout on the live site. */
+  signOutUrl: string | null;
+  /** When signed out, the "Sign in" chip is a link (gate or hubculture.city sign-in). */
+  signInLinked: boolean;
 }) {
   let me: Me | null = null;
   let friends: Friend[] = [];
@@ -106,7 +120,7 @@ export function setupServices(o: {
   $("people-btn").onclick = (e) => (e.stopPropagation(), show("people"));
   $("wallet-btn").onclick = (e) => (e.stopPropagation(), show("wallet"));
   $("me").addEventListener("click", (e) => {
-    if (o.gateUrl && !me && !$("me").getAttribute("data-signed-in")) return; // the chip links to sign-in
+    if (o.signInLinked && !me && !$("me").getAttribute("data-signed-in")) return; // the chip links to sign-in
     e.preventDefault();
     e.stopPropagation();
     show("profile");
@@ -140,7 +154,7 @@ export function setupServices(o: {
         <a href="${o.siteUrl}/my-properties" target="_blank" rel="noopener">My properties ↗</a>
         <a href="${o.siteUrl}/investment" target="_blank" rel="noopener">My bonds ↗</a>
         <a href="https://hubculture.com" target="_blank" rel="noopener">Manage HubID ↗</a>
-        ${o.gateUrl ? `<a href="${o.gateUrl}/_gate/logout">Sign out</a>` : ""}
+        ${o.signOutUrl ? `<a href="${esc(o.signOutUrl)}">Sign out</a>` : ""}
       </nav>
       ${o.api.live ? "" : `<p class="muted small">Sample member: local development has no beta gate.</p>`}`;
   }
