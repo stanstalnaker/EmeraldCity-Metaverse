@@ -15,6 +15,7 @@ import davosTown from "@emerald-city/world/data/davos.osm.json?url";
 import { lotAddresses, type OsmTown } from "@emerald-city/world";
 import { buildTown } from "./town";
 import { buildPavilions } from "./pavilions";
+import { buildVillas } from "./villas";
 import { buildLandscape } from "./landscape";
 import { People } from "./people";
 import { chooseQuality, runBenchmark, startPerfOverlay } from "./perf";
@@ -108,6 +109,8 @@ async function main() {
   }
   if (world.environment?.style === "alpine") scene.fogColor.set(0.7, 0.8, 0.92);
 
+  // Emerald City's deluxe glass villas (in place of the 2017 type-4 houses).
+  if (world.villas?.length) look.adopt(buildVillas(scene, world.villas));
   let mapTown: OsmTown | null = null;
   // Landscape worlds (Davos, Bermuda): terrain, forest, water, imported shapes and models, portals.
   const landscape = world.terrain || world.primitives?.length || world.portals?.length || world.generated?.length

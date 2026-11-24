@@ -196,6 +196,8 @@ export interface WorldManifest {
   generated?: GeneratedCity[];
   /** A real town from OpenStreetMap, in this world's frame (file in data/, see OsmTown). */
   osm?: string;
+  /** Glass villas built in code (Emerald City's deluxe lots), replacing the 2017 type-4 houses. */
+  villas?: { id: string; position: [number, number, number]; rotationY: number; pool: [number, number] }[];
   /** Hub Culture pavilions (hubicon.co) standing in this world, by the address they're next to. */
   pavilions?: Pavilion[];
   models: WorldModel[];

@@ -6,7 +6,10 @@ const w = world as unknown as WorldManifest;
 
 describe("Emerald City manifest (imported from the legacy scene)", () => {
   it("has the city's models, screens, zones, spawns and teleports", () => {
-    expect(w.models.length).toBeGreaterThanOrEqual(19);
+    expect(w.models.length).toBeGreaterThanOrEqual(18);
+    // The 2017 type-4 houses are replaced by glass villas built in code, on the same eight lots.
+    expect(w.models.find((m) => m.id === "house-4")).toBeUndefined();
+    expect(w.villas).toHaveLength(8);
     expect(w.models.find((m) => m.id === "terrain")?.anchor).toBeNull(); // always loaded
     expect(w.screens.length).toBeGreaterThanOrEqual(150);
     expect(w.zones.length).toBeGreaterThanOrEqual(50);
