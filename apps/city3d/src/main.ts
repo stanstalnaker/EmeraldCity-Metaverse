@@ -487,7 +487,7 @@ async function startPeople(scene: Scene, camera: UniversalCamera, w: WorldManife
   const host = new Vector3(spawn.x + 3, spawn.y, spawn.z + 3);
   const floor = scene.pickWithRay(new Ray(host.add(new Vector3(0, 8, 0)), Vector3.Down(), 40), (m) => m.checkCollisions && m.isEnabled());
   if (floor?.pickedPoint) host.y = floor.pickedPoint.y;
-  people = new People({ scene, camera, worldSlug: slug, url, token, hostPosition: host, log });
+  people = new People({ scene, camera, worldSlug: slug, url, token, hostPosition: host, log, onVoiceOff: () => setButton("voice-btn", "Voice", false) });
   const form = $<HTMLFormElement>("chat-form");
   const input = $<HTMLInputElement>("chat-input");
   form.onsubmit = async (e) => {
@@ -535,11 +535,23 @@ function embedUrl(url: string): string {
   return m ? `https://www.youtube.com/embed/${m[1]}?rel=0&autoplay=1&modestbranding=1` : url;
 }
 
+/** Hub Culture Radio's public Icecast stream (hubculture.com RadioShelf::globalStreamUrl). */
+const RADIO_STREAM = (import.meta.env.VITE_RADIO_STREAM as string | undefined) ?? "https://radio.hubculture.com/gmt";
+
 function showScreen(mesh: string, c: ScreenContent) {
   const panel = $("screen");
   const body = $("screen-body");
   $("screen-title").textContent = c.kind === "zone" ? `${c.pavilionName} · ${c.zoneName}` : mesh.replace(/_/g, " ");
-  if (c.kind === "link") {
+  if (c.kind === "link" && /hubculture\.com\/radio/.test(c.url)) {
+    // hubculture.com/radio can't be framed (X-Frame-Options), so play Hub Culture Radio's stream directly.
+    body.innerHTML =
+      `<div class="empty"><p><b>Hub Culture Radio</b></p><audio controls autoplay preload="none" src="${esc(RADIO_STREAM)}"></audio>` +
+      `<p class="radio-note"></p></div>`;
+    const audio = body.querySelector("audio")!;
+    audio.onerror = () => (body.querySelector(".radio-note")!.textContent = "Hub Culture Radio is off air just now. Try again later, or open it on hubculture.com.");
+    void audio.play().catch(() => {});
+    $("screen-open").setAttribute("href", c.url);
+  } else if (c.kind === "link") {
     const url = embedUrl(c.url);
     if (/\.(jpe?g|png|gif|webp)$/i.test(url)) body.innerHTML = `<img src="${esc(url)}" alt="">`;
     else body.innerHTML = `<iframe src="${esc(url)}" allow="autoplay; fullscreen; camera; microphone" referrerpolicy="no-referrer"></iframe>`;
@@ -548,7 +560,7 @@ function showScreen(mesh: string, c: ScreenContent) {
     const page = `https://hubculture.city/c/${encodeURIComponent(c.pavilionName.replace(/\s+/g, "-"))}`;
     body.innerHTML =
       `<div class="empty"><p>This screen shows ${c.slot === "media" ? "media" : "file"} ${c.index + 1} from the zone <b>${esc(c.zoneName)}</b> of <b>${esc(c.pavilionName)}</b>.</p>` +
-      `<p>Property owners upload content on their property page. Live zone content appears here once this beta is connected to HubID (staging).</p></div>`;
+      `<p>Nothing is showing here yet. The property's owners add images, video and files on the property page.</p></div>`;
     $("screen-open").setAttribute("href", c.fallbackUrl ?? page);
   } else {
     body.innerHTML = `<div class="empty">${esc(c.html)}</div>`;

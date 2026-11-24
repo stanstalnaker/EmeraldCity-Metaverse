@@ -32,6 +32,8 @@ export interface PeopleOptions {
   /** Where Zeke stands (the arrival point). */
   hostPosition: Vector3;
   log: (line: string, kind?: "chat" | "system" | "zeke") => void;
+  /** Voice couldn't start (e.g. the server has no voice set up): reset the Voice button. */
+  onVoiceOff?: () => void;
 }
 
 interface Avatar {
@@ -185,6 +187,9 @@ export class People {
         } else if (m.code === "not_in_room") {
           // Lost our room (e.g. after a reconnect): join again rather than show a cryptic error.
           this.send({ t: "join", room: this.room });
+        } else if (m.code === "media_unavailable") {
+          this.o.log("Voice isn't switched on in the city yet. Text chat works: say something below.", "system");
+          this.o.onVoiceOff?.();
         } else if (m.code !== "rate_limited") this.o.log(`Server: ${m.message || m.code}`, "system");
         break;
     }

@@ -88,6 +88,8 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
   // Screen panel
   $("screen-close").onclick = () => {
     $("screen").style.display = "none";
+    // Stop any radio or video first: a removed media element can keep playing.
+    $("screen-body").querySelectorAll("audio,video").forEach((m) => (m as HTMLMediaElement).pause());
     $("screen-body").innerHTML = "";
   };
   window.addEventListener("keydown", (e) => {
