@@ -116,7 +116,6 @@
       /* Overlays */
       .overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(3,7,20,.78); backdrop-filter: blur(6px); z-index: 20; padding: 16px; }
       #map .box { position: relative; display: flex; gap: 16px; max-width: 96vw; max-height: 90vh; padding: 16px; }
-      #map-image { max-height: 82vh; max-width: 60vw; border-radius: 10px; }
       #map-stops { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: center; }
       #map-stops button { background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 10px; padding: 7px; }
       #map-stops img { height: 26px; display: block; }
@@ -199,7 +198,11 @@
       #map .box { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(260px, 420px); gap: 22px; width: min(1100px, 96vw); max-height: 90vh; padding: 22px; }
       .map-left { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
       .map-title { margin: 2px 0 0; font: 800 22px Montserrat, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
-      #map-image { width: 100%; max-height: 64vh; object-fit: contain; border-radius: 12px; background: #02060f; }
+      #map-canvas { width: min(100%, 64vh); height: auto; aspect-ratio: 1 / 1; flex: none; border-radius: 12px; background: #02060f; align-self: center; }
+      .map-dot { width: 14px; height: 14px; border-radius: 50%; flex: none; margin: 6px; background: #eaf2ff; }
+      .map-dot.portal { background: none; border: 2px solid #4fe3cc; box-shadow: inset 0 0 0 3px #02060f, inset 0 0 0 7px #4fe3cc; }
+      .map-dot.pavilion { border-radius: 3px; background: #00a58f; }
+      .map-dot.property { background: #1668bd; }
       .map-right { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
       #map-stops { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; overflow-y: auto; align-content: start; }
       #map-stops button { display: flex; align-items: center; gap: 10px; padding: 10px; text-align: left; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; font: 600 13px Inter, sans-serif; }
@@ -222,7 +225,7 @@
         .sheet { top: 64px; bottom: 80px; }
         #map .box { grid-template-columns: 1fr; overflow-y: auto; }
         #goto { bottom: auto; top: 64px; left: var(--gut); transform: none; }
-        #map .box { flex-direction: column; } #map-image { max-width: 88vw; max-height: 50vh; }
+        #map .box { flex-direction: column; } #map-canvas { width: min(88vw, 50vh); }
       }
     </style>
   </head>
@@ -300,7 +303,7 @@
       <div id="profile-body"><p class="muted">Loading…</p></div>
     </aside>
 
-    <div class="overlay" id="map"><div class="box glass hair"><div class="map-left"><div class="kicker">Emerald City</div><h3 class="map-title">Map</h3><p id="map-near" class="muted"></p><img id="map-image" alt="Emerald City map" /></div><div class="map-right"><div class="kicker">Go to</div><div id="map-stops"></div></div>
+    <div class="overlay" id="map"><div class="box glass hair"><div class="map-left"><div class="kicker" id="map-world">Emerald City</div><h3 class="map-title">Map</h3><p id="map-near" class="muted"></p><canvas id="map-canvas" aria-label="Map of this world: click a marker to go there"></canvas></div><div class="map-right"><div class="kicker">Go to</div><div id="map-stops"></div></div>
       <button class="btn icon close" id="map-close" aria-label="Close">✕</button></div></div>
     <div class="overlay" id="screen"><div class="box glass hair"><header><span id="screen-title"></span>
       <a id="screen-open" target="_blank" rel="noopener">Open in new tab ↗</a><button class="btn" id="screen-close">Close</button></header>

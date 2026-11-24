@@ -75,6 +75,11 @@ export class People {
     return this.avatars.size;
   }
 
+  /** Where everyone else in this world is now (for the map). */
+  positions(): { x: number; z: number; kind: "human" | "agent" }[] {
+    return [...this.avatars.values()].filter((a) => a.actor.hubId > 0).map((a) => ({ x: a.root.position.x, z: a.root.position.z, kind: a.actor.kind }));
+  }
+
   /** Everyone else in this world right now, nearest first (agents marked, so people can tell). */
   here(): { hubId: number; name: string; kind: "human" | "agent"; distance: number }[] {
     const me = this.o.camera.position;

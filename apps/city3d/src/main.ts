@@ -21,7 +21,8 @@ import { chooseQuality, runBenchmark, startPerfOverlay } from "./perf";
 import { Screens } from "./screens";
 import { loadSplats } from "./splats";
 import { setupInteractions } from "./interactions";
-import { setupHud } from "./hud";
+import { MAP_STOPS, setupHud } from "./hud";
+import { setupMap, type MapMarker } from "./map";
 import { createEngine } from "./engine";
 import { setupLegacyLook, setupRealism } from "./realism";
 import { WorldStreamer } from "./streaming";
@@ -107,6 +108,7 @@ async function main() {
   }
   if (world.environment?.style === "alpine") scene.fogColor.set(0.7, 0.8, 0.92);
 
+  let mapTown: OsmTown | null = null;
   // Landscape worlds (Davos, Bermuda): terrain, forest, water, imported shapes and models, portals.
   const landscape = world.terrain || world.primitives?.length || world.portals?.length || world.generated?.length
     ? await buildLandscape(scene, params.has("lite") ? { ...world, trees: undefined, meshes: [] } : world, WORLDS[worldSlug]!.heights ?? null, unityBase)
@@ -117,6 +119,7 @@ async function main() {
     const townUrl = WORLDS[worldSlug]!.town;
     if (world.osm && townUrl && !params.has("notown")) {
       const town = (await (await fetch(townUrl)).json()) as OsmTown;
+      mapTown = town;
       const ground = (x: number, z: number) => landscape.surfaceAt(x, z) ?? landscape.groundAt(x, z) ?? 0;
       const townMeshes = buildTown(scene, town, ground);
       landscape.meshes.push(...townMeshes);
@@ -230,7 +233,7 @@ async function main() {
   mover.onMove((from, to) => {
     for (const p of landscape?.portals ?? []) if (crossesPortal(from, to, p)) return travel(p);
   });
-  setupHud({ camera, assetBase, onTeleport: () => { mover.sync(); streamer.update(camera.position); }, fly: params.has("fly"), onFly: (on) => mover.setFlying(on), onStick: (x, y) => mover.setStick(x, y), map: worldSlug === "emerald-city" });
+  setupHud({ camera, assetBase, onTeleport: () => { mover.sync(); streamer.update(camera.position); }, fly: params.has("fly"), onFly: (on) => mover.setFlying(on), onStick: (x, y) => mover.setStick(x, y) });
   // Double-click the floor to walk there.
   canvas.addEventListener("dblclick", (e) => {
     const hit = scene.pick(e.offsetX * (engine.getRenderWidth() / canvas.clientWidth), e.offsetY * (engine.getRenderHeight() / canvas.clientHeight), (m) => m.isPickable && m.isEnabled() && m.isVisible);
@@ -282,6 +285,63 @@ async function main() {
     // the site's feed is optional; names from the world data still show
   }
   const propertyLabel = (id: string) => [names.get(id) ?? `Property ${id}`, addresses.get(id)].filter(Boolean).join(" · ");
+  // The map (M), for every world: streets, portals, pavilions, landmarks, properties, people, you.
+  {
+    const ui = (f: string) => `${assetBase}models/ui/${f}`;
+    const stand = (x: number, y: number, z: number, yaw?: number) => () => goTo(new Vector3(x, y, z), yaw);
+    const toPortal = (p: Portal) => () => {
+      // Stand a few metres in front of it, facing it, so one step forward goes through.
+      const a = world.defaultSpawn.position;
+      const dx = a.x - p.position[0], dz = a.z - p.position[2], d = Math.hypot(dx, dz) || 1;
+      const x = p.position[0] + (dx / d) * 5, z = p.position[2] + (dz / d) * 5;
+      goTo(new Vector3(x, p.position[1], z), Math.atan2(p.position[0] - x, p.position[2] - z));
+    };
+    const markers: MapMarker[] = [
+      ...(world.portals ?? []).map((p) => ({ label: `Portal to ${p.label}`, x: p.position[0], z: p.position[2], kind: "portal" as const, go: toPortal(p) })),
+    ];
+    if (worldSlug === "emerald-city") {
+      markers.push(...MAP_STOPS.map((st) => ({ label: st.label, x: st.pos[0], z: st.pos[2], kind: "stop" as const, icon: ui(`map_icons/${st.icon}_icon.png`), go: () => {
+        camera.position.set(...st.pos);
+        camera.rotation.y = st.yaw;
+        mover.sync();
+        streamer.update(camera.position);
+      } })));
+      for (const [id, sp] of Object.entries(world.spawns)) {
+        if (/^\d+$/.test(id)) markers.push({ label: propertyLabel(id), x: sp.position.x, z: sp.position.z, kind: "property", go: stand(sp.position.x, sp.position.y, sp.position.z, sp.rotationY) });
+      }
+    } else {
+      for (const t of world.teleports.filter((t) => t.group === "kiosk"))
+        markers.push({ label: t.label, x: t.position.x, z: t.position.z, kind: t.id.startsWith("hub-") ? "pavilion" : "landmark", go: stand(t.position.x, t.position.y, t.position.z, t.rotationY) });
+    }
+    const t = world.terrain;
+    const a = world.defaultSpawn.position;
+    const bounds = worldSlug === "emerald-city"
+      ? { minX: -1810, maxX: 1810, minZ: -1810, maxZ: 1810 } // the legacy map covers the terrain's square
+      : mapTown
+        ? { minX: a.x - 900, maxX: a.x + 900, minZ: a.z - 900, maxZ: a.z + 900 }
+        : t
+          ? { minX: t.origin[0], maxX: t.origin[0] + t.size[0], minZ: t.origin[2], maxZ: t.origin[2] + t.size[1] }
+          : { minX: a.x - 500, maxX: a.x + 500, minZ: a.z - 500, maxZ: a.z + 500 };
+    const ocean = world.environment?.water?.find((w) => w.kind === "ocean");
+    setupMap({
+      camera,
+      worldName: world.name,
+      bounds,
+      baseImage: worldSlug === "emerald-city" ? ui("map.png") : undefined,
+      ground: landscape ? (x, z) => landscape.surfaceAt(x, z) ?? landscape.groundAt(x, z) : null,
+      waterY: ocean ? ocean.center[1] : null,
+      style: world.terrain?.style ?? world.environment?.style as "alpine" | "tropical" | "temperate" | undefined,
+      town: mapTown,
+      markers,
+      others: () => {
+        try {
+          return people?.positions() ?? [];
+        } catch {
+          return []; // presence not started yet
+        }
+      },
+    });
+  }
   setupUi({
     worldSlug,
     travel: travelTo,

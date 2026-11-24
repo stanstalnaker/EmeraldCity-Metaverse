@@ -2,10 +2,11 @@ import { Vector3, type UniversalCamera } from "@babylonjs/core";
 import { setButton } from "./ui";
 
 /**
- * HUD controls ported from the live client (helpers/ui.js): full-screen map with the 14 teleport
+ * HUD controls ported from the live client (helpers/ui.js): the map's Emerald City stops (the map
+ * itself is map.ts),
  * destinations, compass bar, fly/walk toggle, mobile joysticks, keyboard help.
  */
-const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; yaw: number }[] = [
+export const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; yaw: number }[] = [
   { icon: "welcome", label: "Arrival plaza", pos: [52, 5.3, 388], yaw: 0 },
   { icon: "lounge", label: "Lounge", pos: [-657, 3.3, 278], yaw: 0 },
   { icon: "travel", label: "Travel", pos: [648, 3.3, 276], yaw: 0 },
@@ -23,44 +24,10 @@ const MAP_STOPS: { icon: string; label: string; pos: [number, number, number]; y
   { icon: "childrens", label: "Children's House", pos: [-835, 11.3, -1360], yaw: 0 },
 ];
 
-export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; onFly?: (on: boolean) => void; onStick?: (x: number, y: number) => void; map: boolean }) {
+export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTeleport: () => void; fly: boolean; onFly?: (on: boolean) => void; onStick?: (x: number, y: number) => void }) {
   const { camera, assetBase } = o;
   const $ = (id: string) => document.getElementById(id)!;
   const ui = (f: string) => `${assetBase}models/ui/${f}`;
-
-  // Map (Emerald City only for now)
-  const map = $("map");
-  if (!o.map) $("map-btn").style.display = "none";
-  $("map-image").setAttribute("src", ui("map.png"));
-  $("map-stops").innerHTML = MAP_STOPS.map(
-    (s, i) => `<button data-i="${i}" title="Go to ${s.label}"><img src="${ui(`map_icons/${s.icon}_icon.png`)}" alt=""><span>${s.label}</span></button>`,
-  ).join("");
-  /** Name the nearest landmark and mark it, each time the map opens. */
-  const markNear = () => {
-    let best = -1;
-    let bestD = Infinity;
-    MAP_STOPS.forEach((s, i) => {
-      const d = Math.hypot(camera.position.x - s.pos[0], camera.position.z - s.pos[2]);
-      if (d < bestD) { bestD = d; best = i; }
-    });
-    document.querySelectorAll("#map-stops button").forEach((b, i) => b.classList.toggle("near", i === best));
-    $("map-near").textContent = best >= 0 ? (bestD < 60 ? `You're at ${MAP_STOPS[best]!.label}.` : `You're ${Math.round(bestD)} m from ${MAP_STOPS[best]!.label}.`) : "";
-  };
-  $("map-stops").onclick = (e) => {
-    const b = (e.target as HTMLElement).closest("button");
-    if (!b) return;
-    const s = MAP_STOPS[Number(b.dataset.i)]!;
-    camera.position.copyFrom(new Vector3(...s.pos));
-    camera.rotation.y = s.yaw;
-    o.onTeleport();
-    map.style.display = "none";
-  };
-  $("map-btn").onclick = () => {
-    const opening = map.style.display !== "flex";
-    if (opening) markNear();
-    map.style.display = opening ? "flex" : "none";
-  };
-  $("map-close").onclick = () => (map.style.display = "none");
 
   // Fly / walk
   const flyBtn = $("fly-btn");
@@ -126,10 +93,9 @@ export function setupHud(o: { camera: UniversalCamera; assetBase: string; onTele
   window.addEventListener("keydown", (e) => {
     const t = e.target as HTMLElement | null;
     if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
-    if ((e.key === "m" || e.key === "M") && o.map) $("map-btn").click();
     if (e.key === "f" || e.key === "F") flyBtn.click();
     if (e.key === "Escape") {
-      map.style.display = "none";
+      $("map").style.display = "none";
       $("screen-close").click();
     }
   });
