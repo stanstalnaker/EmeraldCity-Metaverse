@@ -12,7 +12,7 @@ import { spawnFor } from "@emerald-city/world";
 import davosHeights from "@emerald-city/world/data/davos.r16?url";
 import bermudaHeights from "@emerald-city/world/data/bermuda.r16?url";
 import davosTown from "@emerald-city/world/data/davos.osm.json?url";
-import { lotAddresses, type OsmTown } from "@emerald-city/world";
+import { lotAddresses, villaAddresses, type OsmTown } from "@emerald-city/world";
 import { buildTown } from "./town";
 import { buildPavilions } from "./pavilions";
 import { buildVillas } from "./villas";
@@ -278,16 +278,20 @@ async function main() {
   // Properties go by name and street address ("Zeke Terrace · 001 Radiant Lane"), not by number.
   const addresses = lotAddresses(world);
   const names = new Map<string, string>(world.zones.map((z) => [String(z.pavilionId), z.pavilionName]));
+  const villaOwners = new Map<string, string>(); // villa lot → the property standing there
   try {
     const feed = (await (await fetch(`${siteUrl}/city/api/property-designs`, { signal: AbortSignal.timeout(2500) })).json()) as {
-      items?: { pavilionId: number; name?: string }[];
+      items?: { pavilionId: number; name?: string; lot?: string | null }[];
       names?: { pavilionId: number; name: string }[];
     };
     for (const it of [...(feed.names ?? []), ...(feed.items ?? [])]) if (it.name) names.set(String(it.pavilionId), it.name);
+    for (const it of feed.items ?? []) if (it.lot && it.name) villaOwners.set(it.lot, it.name);
   } catch {
     // the site's feed is optional; names from the world data still show
   }
   const propertyLabel = (id: string) => [names.get(id) ?? `Property ${id}`, addresses.get(id)].filter(Boolean).join(" · ");
+  const villaStreet = villaAddresses(world);
+  const villaLabel = (id: string) => `${villaOwners.get(id) ?? "Glass villa (available)"} · ${villaStreet.get(id)}`;
   // The map (M), for every world: streets, portals, pavilions, landmarks, properties, people, you.
   {
     const ui = (f: string) => `${assetBase}models/ui/${f}`;
@@ -311,6 +315,12 @@ async function main() {
       } })));
       for (const [id, sp] of Object.entries(world.spawns)) {
         if (/^\d+$/.test(id)) markers.push({ label: propertyLabel(id), x: sp.position.x, z: sp.position.z, kind: "property", go: stand(sp.position.x, sp.position.y, sp.position.z, sp.rotationY) });
+      }
+      for (const v of world.villas ?? []) {
+        // Stand on the terrace by the pool, facing the door.
+        const yaw = v.rotationY, fx = Math.sin(yaw), fz = Math.cos(yaw);
+        const x = v.position[0] + fx * 16, z = v.position[2] + fz * 16;
+        markers.push({ label: villaLabel(v.id), x: v.position[0], z: v.position[2], kind: "property", go: stand(x, v.position[1], z, yaw + Math.PI) });
       }
     } else {
       for (const t of world.teleports.filter((t) => t.group === "kiosk"))
@@ -352,6 +362,7 @@ async function main() {
     places: [
       ...world.teleports.filter((t) => t.group === "kiosk").map((t) => ({ label: t.label, group: t.id.startsWith("hub-") ? "Hub Culture" : "Landmark", go: () => goTo(new Vector3(t.position.x, t.position.y, t.position.z), t.rotationY) })),
       ...Object.entries(world.spawns).map(([id, sp]) => ({ label: id ? (/^\d+$/.test(id) ? propertyLabel(id) : id[0]!.toUpperCase() + id.slice(1)) : "Lotus", group: /^\d+$/.test(id) ? "Property" : "Place", go: () => goTo(new Vector3(sp.position.x, sp.position.y, sp.position.z), sp.rotationY) })),
+      ...(world.villas ?? []).map((v) => ({ label: villaLabel(v.id), group: "Property", go: () => goTo(new Vector3(v.position[0] + Math.sin(v.rotationY) * 16, v.position[1], v.position[2] + Math.cos(v.rotationY) * 16), v.rotationY + Math.PI) })),
     ],
   });
 

@@ -89,3 +89,13 @@ describe("street addresses for lots", () => {
     expect(lotAddresses(w)).toEqual(a);
   });
 });
+
+import { villaAddresses } from "./index";
+
+describe("glass villa addresses", () => {
+  it("numbers the eight villas along Villa Way", () => {
+    const a = villaAddresses(w);
+    expect(a.get("villa-1")).toBe("001 Villa Way");
+    expect(a.get("villa-8")).toBe("008 Villa Way");
+  });
+});

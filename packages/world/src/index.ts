@@ -321,3 +321,15 @@ export function lotAddresses(world: WorldManifest, streets: readonly string[] = 
   });
   return out;
 }
+
+/** The street of Emerald City's glass villas (their own, so other properties' numbers never shift). */
+export const VILLA_STREET = "Villa Way";
+
+/** "001 Villa Way" … for each glass villa, in the order of the rows (stable: by id). */
+export function villaAddresses(world: WorldManifest): Map<string, string> {
+  const out = new Map<string, string>();
+  [...(world.villas ?? [])]
+    .sort((a, b) => Number(a.id.replace(/\D/g, "")) - Number(b.id.replace(/\D/g, "")))
+    .forEach((v, i) => out.set(v.id, `${String(i + 1).padStart(3, "0")} ${VILLA_STREET}`));
+  return out;
+}
