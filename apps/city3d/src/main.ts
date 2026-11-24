@@ -47,8 +47,11 @@ const assetBase = (import.meta.env.VITE_ASSET_BASE as string | undefined) ?? "/l
  * smaller). On with VITE_ASSET_FORMAT=glb or ?assets=glb; images (magazines, map, slideshow) still
  * come from assetBase.
  */
-const useGlb = params.get("assets") === "glb" || (import.meta.env.VITE_ASSET_FORMAT as string | undefined) === "glb";
-const modelBase = useGlb ? ((import.meta.env.VITE_MODEL_BASE as string | undefined) ?? "/unity/legacy/") : assetBase;
+const glbFormat: "auto" | "all" | "off" =
+  params.get("assets") === "glb" || import.meta.env.VITE_ASSET_FORMAT === "glb" ? "all" : params.get("assets") === "legacy" || import.meta.env.VITE_ASSET_FORMAT === "legacy" ? "off" : "auto";
+const glbBase = (import.meta.env.VITE_MODEL_BASE as string | undefined) ?? "/unity/legacy/";
+const useGlb = glbFormat === "all";
+const modelBase = assetBase;
 const legacyLook = params.get("look") === "legacy";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -180,7 +183,7 @@ async function main() {
       $("loading").textContent = text;
       $("loading").style.display = text ? "" : "none";
     },
-  }, 1.3, useGlb);
+  }, 1.3, glbFormat, glbBase);
 
   // Load what's around the spawn before showing the first frame (avoids falling through terrain).
   await streamer.preload(camera.position);

@@ -23,6 +23,8 @@ export interface WorldModel {
   radius: number | null;
   /** Placement applied to the whole model after loading (position, uniform scale, yaw in radians). */
   transform?: { position: Vec3; scale: number; rotationY: number };
+  /** Load the compressed GLB conversion by default (it is clearly smaller for this model). */
+  glb?: boolean;
 }
 
 /** What an in-world screen shows. */
